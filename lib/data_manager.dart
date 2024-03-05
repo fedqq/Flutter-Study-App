@@ -1,4 +1,5 @@
 import "package:flutter_application_1/subject.dart";
+import 'package:flutter_application_1/task.dart';
 import 'package:flutter_application_1/topic.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:developer' as developer;
@@ -34,6 +35,8 @@ class DataManager {
     names.add(subject);
     prefs.setStringList('subject_names', names);
   }
+
+  static void saveTasks(List<Task> tasks) {}
 
   static Future<SavedData> loadData() async {
     final prefs = await SharedPreferences.getInstance();

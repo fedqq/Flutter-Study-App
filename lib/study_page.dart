@@ -51,7 +51,7 @@ class _StudyPageState extends State<StudyPage> {
             });
             DataManager.addTopic(widget.subject, topic);
           },
-          tooltip: 'New Subject',
+          tooltip: 'New Topic',
           backgroundColor: Theme.of(context).indicatorColor,
           child: const Icon(Icons.add),
         ),
@@ -82,7 +82,7 @@ class _StudyPageState extends State<StudyPage> {
   Future<Topic?> newSubjectDialog() => showDialog<Topic?>(
       context: context,
       builder: (context) => AlertDialog(
-          title: const Text('New Subject Name'),
+          title: const Text('New Topic Name'),
           content: TextField(
             controller: newTopicNameController,
             autofocus: true,

@@ -4,6 +4,8 @@ import 'package:flutter_application_1/study_page.dart';
 import 'package:flutter_application_1/subject.dart';
 import 'dart:developer' as developer;
 
+import 'package:flutter_application_1/task.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -34,6 +36,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   List<Subject> _subjects = [Subject('Math'), Subject('Physics', colour: const Color.fromARGB(255, 193, 193, 0))];
+  List<Task> tasks = [];
   int _selectedDestination = 0;
 
   late TextEditingController newSubjectNameController;
@@ -254,6 +257,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   void submitNewSubject(context) {
+    List<String> names = List.generate(_subjects.length, (index) => _subjects[index].name);
+    if (names.contains(newSubjectNameController.text)) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Subject called ${newSubjectNameController.text} already exists')));
+      return;
+    }
     Navigator.of(context).pop(Subject(newSubjectNameController.text));
     newSubjectNameController.clear();
   }
