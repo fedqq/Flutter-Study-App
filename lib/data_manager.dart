@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:developer' as developer;
 
 class DataManager {
-  static void saveData(List<Subject> subjects) async {
+  static void saveSubjects(List<Subject> subjects) async {
     final prefs = await SharedPreferences.getInstance();
     List<String> subjectNames = [];
     for (Subject subject in subjects) {
@@ -36,12 +36,35 @@ class DataManager {
     prefs.setStringList('subject_names', names);
   }
 
-  static void saveTasks(List<Task> tasks) {}
+  static void saveTasks(List<Task> tasks) async {
+    List<String> taskInfos = [];
+    final prefs = await SharedPreferences.getInstance();
+    for (Task task in tasks) {
+      String data = '${task.task}, ';
+      data += '${task.type.toString()}, ';
+      data += task.dueDate.millisecondsSinceEpoch.toString();
+      taskInfos.add(data);
+    }
+    prefs.setStringList('tasks_info', taskInfos);
+  }
 
-  static Future<SavedData> loadData() async {
+  static Future<List<Task>> loadTasks() async {
+    List<Task> tasks = [];
+    final prefs = await SharedPreferences.getInstance();
+    List<String> taskNames = prefs.getStringList('tasks_info') ?? [];
+    for (String task in taskNames) {
+      List<String> split = task.split(', ');
+      String name = split[0];
+      TaskType type = taskFromString(split[1]);
+      DateTime date = DateTime.fromMillisecondsSinceEpoch(int.parse(split[2]));
+      tasks.add(Task(type, name, date));
+    }
+    return tasks;
+  }
+
+  static Future<List<Subject>> loadSubjects() async {
     final prefs = await SharedPreferences.getInstance();
     List<Subject> subjects = [];
-    List<Topic> topics = [];
 
     List<String>? subjectNames = prefs.getStringList('subject_names');
     if (subjectNames != null) {
@@ -56,16 +79,6 @@ class DataManager {
         subjects.add(subject);
       }
     }
-    return SavedData(subjects, topics);
-  }
-}
-
-class SavedData {
-  List<Subject> subjects = [];
-  List<Topic> topics = [];
-
-  SavedData(List<Subject> subjectsP, List<Topic> topicsP) {
-    subjects = subjectsP;
-    topics = topicsP;
+    return subjects;
   }
 }

@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data_manager.dart';
 import 'package:flutter_application_1/study_page.dart';
@@ -36,7 +39,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   List<Subject> _subjects = [Subject('Math'), Subject('Physics', colour: const Color.fromARGB(255, 193, 193, 0))];
-  List<Task> tasks = [];
+  List<Task> _tasks = [];
   int _selectedDestination = 0;
 
   late TextEditingController newSubjectNameController;
@@ -46,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     developer.log('dispose');
     newSubjectNameController.dispose();
     WidgetsBinding.instance.removeObserver(this);
-    DataManager.saveData(_subjects);
+    DataManager.saveSubjects(_subjects);
     super.dispose();
   }
 
@@ -61,19 +64,21 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   void saveData() {
     developer.log('saving');
-    DataManager.saveData(_subjects);
+    DataManager.saveSubjects(_subjects);
     developer.log('Saved');
   }
 
   void loadData() async {
-    var data = await DataManager.loadData();
+    var subjectData = await DataManager.loadSubjects();
+    var taskData = await DataManager.loadTasks();
     setState(() {
-      _subjects = data.subjects;
+      _subjects = subjectData;
       int i = 0;
       for (Subject subject in _subjects) {
-        subject.topics = data.subjects[i].topics;
+        subject.topics = subjectData[i].topics;
         i++;
       }
+      _tasks = taskData;
     });
   }
 
@@ -81,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     developer.log('anything');
     if (state == AppLifecycleState.paused) {
-      DataManager.saveData(_subjects);
+      DataManager.saveSubjects(_subjects);
     }
     super.didChangeAppLifecycleState(state);
   }
@@ -105,7 +110,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       });
     }
 
-    BoxDecoration gradDeco = BoxDecoration(
+    BoxDecoration gradientDeco = BoxDecoration(
         gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -143,19 +148,29 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           decoration: transparent,
           padding: const EdgeInsets.all(15),
           child: Container(
-              decoration: gradDeco,
+              decoration: gradientDeco,
               padding: const EdgeInsets.all(padding),
               child: Container(decoration: innerDeco, child: child)));
     }
 
     LinearGradient makeDarker(Color color) {
       HSLColor hsl = HSLColor.fromColor(color);
-      hsl = hsl.withLightness(hsl.lightness - 0.2);
+      hsl = hsl.withLightness(max(hsl.lightness - 0.2, 0));
       return LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [color, hsl.toColor()]);
     }
 
     void study(Subject subject) {
       Navigator.push(context, MaterialPageRoute(builder: (_) => StudyPage(subject: subject)));
+    }
+
+    void deleteSubject(Subject subject) async {
+      if (_subjects.length == 1) {
+        return;
+      }
+      if (await confirm(context, title: Text('Delete ${subject.name}'))) {
+        setState(() => _subjects.remove(subject));
+        DataManager.saveSubjects(_subjects);
+      }
     }
 
     List<Widget> childs = [
@@ -193,6 +208,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             itemBuilder: (context, index) => grayOutline(Container(
                 margin: const EdgeInsets.all(10),
                 child: GestureDetector(
+                    onDoubleTap: () => deleteSubject(_subjects[index]),
                     onTap: () => study(_subjects[index]),
                     child: Card(
                         semanticContainer: true,
@@ -229,17 +245,27 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                           ],
                         ))))))),
       ),
-      const Scaffold(
-        body: SizedBox.expand(
-          child: Center(
-            child: Text(
-              'Tasks Page',
-            ),
+      Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              setState(() {
+                _tasks.add(Task(TaskType.assignment, 'Test Assignment', DateTime.now()));
+                DataManager.saveTasks(_tasks);
+              });
+            },
+            tooltip: 'New Subject',
+            backgroundColor: Theme.of(context).indicatorColor,
+            child: const Icon(Icons.add),
           ),
-        ),
-      ),
+          body: ListView.builder(
+            padding: const EdgeInsets.all(10),
+            itemCount: _tasks.length,
+            itemBuilder: (context, index) =>
+                CheckboxListTile(title: const Text('test'), value: true, onChanged: (_) {}),
+          )),
     ];
     return Scaffold(
+        appBar: AppBar(),
         bottomNavigationBar: gradientOutline(NavigationBar(
           surfaceTintColor: Colors.transparent,
           shadowColor: Colors.transparent,
