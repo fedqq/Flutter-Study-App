@@ -1,13 +1,16 @@
-import 'dart:math';
+import 'dart:convert';
 
 import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data_manager.dart';
 import 'package:flutter_application_1/study_page.dart';
 import 'package:flutter_application_1/subject.dart';
+import 'package:icon_picker/icon_picker.dart';
 import 'dart:developer' as developer;
 
 import 'package:flutter_application_1/task.dart';
+import 'package:flutter_application_1/utils.dart';
+import 'package:prompt_dialog/prompt_dialog.dart';
 
 void main() {
   runApp(const MyApp());
@@ -40,14 +43,13 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   List<Subject> _subjects = [Subject('Math'), Subject('Physics', colour: const Color.fromARGB(255, 193, 193, 0))];
   List<Task> _tasks = [];
+  List<Task> _completedTasks = [];
   int _selectedDestination = 0;
 
   late TextEditingController newSubjectNameController;
 
   @override
   void dispose() {
-    developer.log('dispose');
-    newSubjectNameController.dispose();
     WidgetsBinding.instance.removeObserver(this);
     DataManager.saveSubjects(_subjects);
     super.dispose();
@@ -55,17 +57,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   @override
   void initState() {
-    developer.log('initState');
-    newSubjectNameController = TextEditingController();
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     loadData();
-  }
-
-  void saveData() {
-    developer.log('saving');
-    DataManager.saveSubjects(_subjects);
-    developer.log('Saved');
   }
 
   void loadData() async {
@@ -84,9 +78,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    developer.log('anything');
-    if (state == AppLifecycleState.paused) {
+    if (state == AppLifecycleState.inactive) {
       DataManager.saveSubjects(_subjects);
+      DataManager.saveTasks(_tasks);
     }
     super.didChangeAppLifecycleState(state);
   }
@@ -94,8 +88,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     PageController pageController = PageController();
-    const double radius = 20;
-    const double padding = 3;
 
     void selectDestination(int index) {
       setState(() {
@@ -108,55 +100,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       setState(() {
         _selectedDestination = index;
       });
-    }
-
-    BoxDecoration gradientDeco = BoxDecoration(
-        gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: <Color>[Color.fromARGB(255, 135, 0, 193), Color.fromARGB(255, 34, 0, 253)]),
-        borderRadius: BorderRadius.circular(radius));
-
-    BoxDecoration innerDeco = BoxDecoration(
-        gradient: const LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: <Color>[Color.fromARGB(255, 15, 15, 15), Color.fromARGB(255, 19, 19, 19)]),
-        borderRadius: BorderRadius.circular(radius - padding));
-
-    BoxDecoration grayDeco = BoxDecoration(
-        gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: <Color>[Color.fromARGB(130, 224, 224, 224), Color.fromARGB(100, 146, 146, 146)]),
-        borderRadius: BorderRadius.circular(radius));
-
-    const BoxDecoration transparent = BoxDecoration(color: Colors.transparent);
-
-    Container grayOutline(Widget child) {
-      return Container(
-          decoration: transparent,
-          padding: const EdgeInsets.all(15),
-          child: Container(
-              decoration: grayDeco,
-              padding: const EdgeInsets.all(padding),
-              child: Container(decoration: innerDeco, child: child)));
-    }
-
-    Container gradientOutline(Widget child) {
-      return Container(
-          decoration: transparent,
-          padding: const EdgeInsets.all(15),
-          child: Container(
-              decoration: gradientDeco,
-              padding: const EdgeInsets.all(padding),
-              child: Container(decoration: innerDeco, child: child)));
-    }
-
-    LinearGradient makeDarker(Color color) {
-      HSLColor hsl = HSLColor.fromColor(color);
-      hsl = hsl.withLightness(max(hsl.lightness - 0.2, 0));
-      return LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [color, hsl.toColor()]);
     }
 
     void study(Subject subject) {
@@ -188,10 +131,25 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       Scaffold(
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
-            final subject = await newSubjectDialog();
-            if (subject == null || subject.name == '') {
-              return;
+            String name = await prompt(
+                  context,
+                  title: const Text('New Subject Name'),
+                ) ??
+                '';
+            List<String> names = List.generate(_subjects.length, (index) => _subjects[index].name);
+            if (context.mounted) {
+              if (names.contains(name)) {
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(SnackBar(content: Text('Subject called $name already exists')));
+                return;
+              }
+
+              if (name == '') {
+                return;
+              }
             }
+
+            final subject = Subject(name, icon: Icons.add);
             setState(() {
               _subjects.add(subject);
             });
@@ -205,31 +163,38 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             addAutomaticKeepAlives: true,
             padding: const EdgeInsets.all(10),
             itemCount: _subjects.length,
-            itemBuilder: (context, index) => grayOutline(Container(
+            itemBuilder: (context, index) => Theming.grayOutline(Container(
                 margin: const EdgeInsets.all(10),
                 child: GestureDetector(
-                    onDoubleTap: () => deleteSubject(_subjects[index]),
                     onTap: () => study(_subjects[index]),
                     child: Card(
                         semanticContainer: true,
-                        shape:
-                            const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(radius - 10))),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(Theming.radius - 10))),
                         child: Center(
                             child: Column(
                           children: [
                             Hero(
                                 tag: 'colorbox:${_subjects[index].name}',
                                 child: Container(
-                                  height: 60,
-                                  decoration: BoxDecoration(
-                                      borderRadius: const BorderRadius.all(Radius.circular(radius - 10)),
-                                      gradient: makeDarker(_subjects[index].color)),
-                                )),
+                                    height: 60,
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.all(Radius.circular(Theming.radius - 10)),
+                                        gradient: Theming.makeDarker(_subjects[index].color)),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10),
+                                      child: Align(
+                                        alignment: Alignment.centerRight,
+                                        child: IconButton(
+                                            icon: const Icon(Icons.delete_rounded),
+                                            onPressed: () => deleteSubject(_subjects[index])),
+                                      ),
+                                    ))),
                             Container(
-                              margin: const EdgeInsets.all(20),
+                              margin: const EdgeInsets.only(left: 20, right: 20),
                               child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                                 Align(
-                                    alignment: Alignment.centerLeft,
+                                    alignment: Alignment.topLeft,
                                     child: Text(
                                       _subjects[index].name,
                                       style: Theme.of(context).textTheme.titleLarge,
@@ -238,8 +203,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                                 Hero(
                                     tag: 'icon:${_subjects[index].name}',
                                     child: Align(
-                                        alignment: Alignment.centerRight,
-                                        child: Icon(_subjects[index].icon, size: 100)))
+                                        alignment: Alignment.topRight, child: Icon(_subjects[index].icon, size: 100)))
                               ]),
                             )
                           ],
@@ -247,11 +211,25 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       ),
       Scaffold(
           floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              setState(() {
-                _tasks.add(Task(TaskType.assignment, 'Test Assignment', DateTime.now()));
-                DataManager.saveTasks(_tasks);
-              });
+            onPressed: () async {
+              String name = await prompt(context, title: const Text('New Task Name')) ?? "";
+              DateTime invalidPlaceholder = DateTime.fromMillisecondsSinceEpoch(10000);
+              if (name != "" && context.mounted) {
+                DateTime date = await showDatePicker(
+                        initialDate: DateTime.now(),
+                        barrierDismissible: false,
+                        context: context,
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime.now().add(const Duration(days: 1000))) ??
+                    DateTime.fromMillisecondsSinceEpoch(10000);
+                if (date == invalidPlaceholder) {
+                  return;
+                }
+                setState(() {
+                  _tasks.add(Task(TaskType.assignment, name, date, false));
+                  DataManager.saveTasks(_tasks);
+                });
+              }
             },
             tooltip: 'New Subject',
             backgroundColor: Theme.of(context).indicatorColor,
@@ -260,13 +238,25 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           body: ListView.builder(
             padding: const EdgeInsets.all(10),
             itemCount: _tasks.length,
-            itemBuilder: (context, index) =>
-                CheckboxListTile(title: const Text('test'), value: true, onChanged: (_) {}),
+            itemBuilder: (context, index) => CheckboxListTile(
+                title: Text(_tasks[index].task),
+                value: _tasks[index].completed,
+                onChanged: (changed) {
+                  setState(() {
+                    Task task = _tasks[index];
+                    Future.delayed(Durations.long1, () {
+                      setState(() => _tasks.remove(task));
+                    });
+                    _tasks[index].completed = true;
+                    _completedTasks.add(task);
+                  });
+                }),
           )),
     ];
+
     return Scaffold(
         appBar: AppBar(),
-        bottomNavigationBar: gradientOutline(NavigationBar(
+        bottomNavigationBar: Theming.gradientOutline(NavigationBar(
           surfaceTintColor: Colors.transparent,
           shadowColor: Colors.transparent,
           selectedIndex: _selectedDestination,
@@ -281,26 +271,4 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         )),
         body: PageView(controller: pageController, onPageChanged: pageChanged, children: childs));
   }
-
-  void submitNewSubject(context) {
-    List<String> names = List.generate(_subjects.length, (index) => _subjects[index].name);
-    if (names.contains(newSubjectNameController.text)) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Subject called ${newSubjectNameController.text} already exists')));
-      return;
-    }
-    Navigator.of(context).pop(Subject(newSubjectNameController.text));
-    newSubjectNameController.clear();
-  }
-
-  Future<Subject?> newSubjectDialog() => showDialog<Subject?>(
-      context: context,
-      builder: (context) => AlertDialog(
-          title: const Text('New Subject Name'),
-          content: TextField(
-            controller: newSubjectNameController,
-            autofocus: true,
-            onSubmitted: (String? _) => submitNewSubject(context),
-          ),
-          actions: [TextButton(onPressed: () => submitNewSubject(context), child: const Text('Confirm'))]));
 }
