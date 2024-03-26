@@ -1,12 +1,8 @@
-import 'dart:convert';
-
 import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data_manager.dart';
 import 'package:flutter_application_1/study_page.dart';
 import 'package:flutter_application_1/subject.dart';
-import 'package:icon_picker/icon_picker.dart';
-import 'dart:developer' as developer;
 
 import 'package:flutter_application_1/task.dart';
 import 'package:flutter_application_1/utils.dart';

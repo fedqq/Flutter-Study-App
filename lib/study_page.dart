@@ -32,12 +32,6 @@ class _StudyPageState extends State<StudyPage> {
     super.dispose();
   }
 
-  LinearGradient darkerGradient(Color color) {
-    HSLColor hsl = HSLColor.fromColor(color);
-    hsl = hsl.withLightness(hsl.lightness - 0.2);
-    return LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [color, hsl.toColor()]);
-  }
-
   void selectTopic(List<ValueItem<dynamic>> topics) {}
 
   List<ValueItem> buildValueItems() {
@@ -62,8 +56,9 @@ class _StudyPageState extends State<StudyPage> {
 
     return Scaffold(
         appBar: AppBar(title: Text(widget.subject.name)),
-        floatingActionButton: Theming.gradientOutline(
-          FloatingActionButton(
+        floatingActionButton: Container(
+          decoration: Theming.gradientDeco,
+          child: FloatingActionButton(
             onPressed: () async {
               final topicName = await prompt(
                     context,
@@ -81,7 +76,10 @@ class _StudyPageState extends State<StudyPage> {
               });
             },
             tooltip: 'New Topic',
-            backgroundColor: Theme.of(context).splashColor,
+            backgroundColor: Colors.transparent,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            hoverElevation: 0,
             child: const Icon(Icons.add),
           ),
         ),
@@ -99,7 +97,7 @@ class _StudyPageState extends State<StudyPage> {
                       height: 60,
                       decoration: BoxDecoration(
                           borderRadius: const BorderRadius.all(Radius.circular(radius - 10)),
-                          gradient: darkerGradient(widget.subject.color)),
+                          gradient: Theming.makeDarker(widget.subject.color)),
                     )),
               ),
               Padding(
