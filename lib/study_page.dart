@@ -52,6 +52,8 @@ class _StudyPageState extends State<StudyPage> {
         developer.log('Current: $currentTerm. Length: ${widget.terms.length}');
       });
 
+  void learnTerm() => setState(() => widget.terms[currentTerm].learned = true);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,9 +76,38 @@ class _StudyPageState extends State<StudyPage> {
               )),
             ),
             Expanded(
-              child: Theming.gradientOutline(Center(
-                child: Text(getCurrentText()),
-              )),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(40.0),
+                      child: InkWell(
+                        onTap: () => setState(() => showingMeaning = !showingMeaning),
+                        child: Theming.gradientOutline(Center(
+                          child: AnimatedDefaultTextStyle(
+                              curve: Curves.ease,
+                              duration: Durations.short1,
+                              style: showingMeaning ? const TextStyle(fontSize: 30) : const TextStyle(fontSize: 40),
+                              child: Padding(
+                                padding: const EdgeInsets.all(15.0),
+                                child: Text(
+                                  getCurrentText(),
+                                  textAlign: TextAlign.center,
+                                ),
+                              )),
+                        )),
+                      ),
+                    ),
+                  ),
+                  Theming.grayOutline(
+                    FilledButton.tonal(
+                      style: Theming.transparentButtonStyle,
+                      onPressed: learnTerm,
+                      child: const Text('Mark As Learned', style: TextStyle(color: Colors.white)),
+                    ),
+                  ),
+                ],
+              ),
             ),
             AnimatedOpacity(
               duration: Durations.short1,

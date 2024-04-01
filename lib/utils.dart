@@ -53,4 +53,13 @@ class Theming {
     hsl = hsl.withLightness(max(hsl.lightness - 0.2, 0));
     return LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [color, hsl.toColor()]);
   }
+
+  static ButtonStyle transparentButtonStyle = const ButtonStyle(
+    shadowColor: MaterialStatePropertyAll(Colors.transparent),
+    overlayColor: MaterialStatePropertyAll(Colors.transparent),
+    backgroundColor: MaterialStatePropertyAll(Colors.transparent),
+    surfaceTintColor: MaterialStatePropertyAll(Colors.transparent),
+    foregroundColor: MaterialStatePropertyAll(Colors.white),
+    iconColor: MaterialStatePropertyAll(Colors.white),
+  );
 }

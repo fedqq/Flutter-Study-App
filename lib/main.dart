@@ -5,8 +5,6 @@ import 'package:flutter_application_1/subject_page.dart';
 import 'package:flutter_application_1/subject.dart';
 
 import 'package:flutter_application_1/task.dart';
-import 'package:flutter_application_1/term.dart';
-import 'package:flutter_application_1/topic.dart';
 import 'package:flutter_application_1/utils.dart';
 import 'package:prompt_dialog/prompt_dialog.dart';
 
@@ -14,7 +12,7 @@ import 'package:prompt_dialog/prompt_dialog.dart';
 import 'dart:developer' as developer;
 
 // ignore: constant_identifier_names
-const bool CLEAR = false;
+const bool CLEAR = true;
 
 void main() {
   runApp(const MyApp());
@@ -110,6 +108,23 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       Navigator.push(context, MaterialPageRoute(builder: (_) => SubjectPage(subject: subject)));
     }
 
+    List<String> getSubjectNames() {
+      return List.generate(_subjects.length, (index) => _subjects[index].name);
+    }
+
+    void editSubject(int index) async {
+      String newName = await prompt(
+            title: Text('Choose new name for ${_subjects[index].name}'),
+            context,
+          ) ??
+          '';
+      if (getSubjectNames().contains(newName)) {
+        return;
+      } else {
+        setState(() => _subjects[index].name = newName);
+      }
+    }
+
     void deleteSubject(Subject subject) async {
       if (_subjects.length == 1) {
         return;
@@ -141,9 +156,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     title: const Text('New Subject Name'),
                   ) ??
                   '';
-              List<String> names = List.generate(_subjects.length, (index) => _subjects[index].name);
               if (context.mounted) {
-                if (names.contains(name)) {
+                if (getSubjectNames().contains(name)) {
                   ScaffoldMessenger.of(context)
                       .showSnackBar(SnackBar(content: Text('Subject called $name already exists')));
                   return;
@@ -173,7 +187,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             itemCount: _subjects.length,
             itemBuilder: (context, index) => Theming.grayOutline(Container(
                 margin: const EdgeInsets.all(10),
-                child: GestureDetector(
+                child: InkWell(
                     onTap: () => study(_subjects[index]),
                     child: Card(
                         semanticContainer: true,
@@ -193,9 +207,17 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                                       padding: const EdgeInsets.all(10),
                                       child: Align(
                                         alignment: Alignment.centerRight,
-                                        child: IconButton(
-                                            icon: const Icon(Icons.delete_rounded),
-                                            onPressed: () => deleteSubject(_subjects[index])),
+                                        child: Row(
+                                          children: [
+                                            const Spacer(),
+                                            IconButton(
+                                                icon: const Icon(Icons.edit_rounded),
+                                                onPressed: () => editSubject(index)),
+                                            IconButton(
+                                                icon: const Icon(Icons.delete_rounded),
+                                                onPressed: () => deleteSubject(_subjects[index])),
+                                          ],
+                                        ),
                                       ),
                                     ))),
                             Container(
@@ -263,15 +285,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     if (CLEAR) {
       SaveDataManager.clearAll();
     }
-    var math = Subject('Math');
-    var linear = Topic('Linear Functions');
-    linear.addTerm(Term('Term 1', 'Term 2'));
-    math.addTopic(linear);
-
-    var physics = Subject('Physics');
-    var kinematics = Topic('kinematics');
-    kinematics.addTerm(Term('Term 3', 'Term 4'));
-    physics.addTopic(kinematics);
 
     return Scaffold(
         appBar: AppBar(),

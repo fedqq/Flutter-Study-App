@@ -44,7 +44,7 @@ class SaveDataManager {
         topicString += '|';
         String termsString = '';
         for (Term term in topic.terms) {
-          termsString += '${term.name}==${term.meaning}';
+          termsString += '${term.name}==${term.meaning}==${term.learned.toString()}';
           termsString += ',';
         }
         termsString = termsString.substring(0, termsString.length - 1);
@@ -93,7 +93,7 @@ class SaveDataManager {
           List<String> terms = split[1].split(',');
           for (String termString in terms) {
             var splitString = termString.split('==');
-            termObjs.add(Term(splitString[0], splitString[1]));
+            termObjs.add(Term(splitString[0], splitString[1], bool.parse(splitString[2])));
           }
         } catch (e) {
           termObjs = [];

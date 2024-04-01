@@ -69,8 +69,11 @@ class _SubjectPageState extends State<SubjectPage> {
                 return;
               }
               setState(() {
-                topic.addTerm(Term('Term 1', 'Meaning 1'));
-                topic.addTerm(Term('Term 2', 'Meaning 2'));
+                topic.addTerm(Term(
+                    'First Term name',
+                    'This is the meaning of the first term and it has to be long so that I can test the width and overflow settings. ',
+                    false));
+                topic.addTerm(Term('Term 2', 'Meaning 2', true));
                 widget.subject.addTopic(topic);
                 dropdownOptions = buildValueItems();
               });
