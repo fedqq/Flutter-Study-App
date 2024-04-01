@@ -1,12 +1,20 @@
 import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data_manager.dart';
-import 'package:flutter_application_1/study_page.dart';
+import 'package:flutter_application_1/subject_page.dart';
 import 'package:flutter_application_1/subject.dart';
 
 import 'package:flutter_application_1/task.dart';
+import 'package:flutter_application_1/term.dart';
+import 'package:flutter_application_1/topic.dart';
 import 'package:flutter_application_1/utils.dart';
 import 'package:prompt_dialog/prompt_dialog.dart';
+
+// ignore: unused_import
+import 'dart:developer' as developer;
+
+// ignore: constant_identifier_names
+const bool CLEAR = false;
 
 void main() {
   runApp(const MyApp());
@@ -37,30 +45,32 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
-  List<Subject> _subjects = [Subject('Math'), Subject('Physics', colour: const Color.fromARGB(255, 193, 193, 0))];
+  List<Subject> _subjects = [];
   List<Task> _tasks = [];
-  List<Task> _completedTasks = [];
+  final List<Task> _completedTasks = [];
   int _selectedDestination = 0;
+  bool initialLoaded = false;
 
   late TextEditingController newSubjectNameController;
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    DataManager.saveSubjects(_subjects);
+    SaveDataManager.saveData(_subjects, _tasks);
     super.dispose();
   }
 
   @override
   void initState() {
+    loadData();
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    loadData();
   }
 
   void loadData() async {
-    var subjectData = await DataManager.loadSubjects();
-    var taskData = await DataManager.loadTasks();
+    ReturnData ret = await SaveDataManager.loadData();
+    var subjectData = ret.subjects;
+    var taskData = ret.tasks;
     setState(() {
       _subjects = subjectData;
       int i = 0;
@@ -70,14 +80,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       }
       _tasks = taskData;
     });
+    initialLoaded = true;
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.inactive) {
-      DataManager.saveSubjects(_subjects);
-      DataManager.saveTasks(_tasks);
-    }
+    SaveDataManager.saveData(_subjects, _tasks);
     super.didChangeAppLifecycleState(state);
   }
 
@@ -99,7 +107,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     }
 
     void study(Subject subject) {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => StudyPage(subject: subject)));
+      Navigator.push(context, MaterialPageRoute(builder: (_) => SubjectPage(subject: subject)));
     }
 
     void deleteSubject(Subject subject) async {
@@ -108,7 +116,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       }
       if (await confirm(context, title: Text('Delete ${subject.name}'))) {
         setState(() => _subjects.remove(subject));
-        DataManager.saveSubjects(_subjects);
       }
     }
 
@@ -125,35 +132,40 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         ),
       ),
       Scaffold(
-        floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            String name = await prompt(
-                  context,
-                  title: const Text('New Subject Name'),
-                ) ??
-                '';
-            List<String> names = List.generate(_subjects.length, (index) => _subjects[index].name);
-            if (context.mounted) {
-              if (names.contains(name)) {
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text('Subject called $name already exists')));
-                return;
+        floatingActionButton: Container(
+          decoration: Theming.gradientDeco,
+          child: FloatingActionButton(
+            onPressed: () async {
+              String name = await prompt(
+                    context,
+                    title: const Text('New Subject Name'),
+                  ) ??
+                  '';
+              List<String> names = List.generate(_subjects.length, (index) => _subjects[index].name);
+              if (context.mounted) {
+                if (names.contains(name)) {
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text('Subject called $name already exists')));
+                  return;
+                }
+
+                if (name == '') {
+                  return;
+                }
               }
 
-              if (name == '') {
-                return;
-              }
-            }
-
-            final subject = Subject(name, icon: Icons.add);
-            setState(() {
-              _subjects.add(subject);
-            });
-            DataManager.addSubject(subject.name);
-          },
-          tooltip: 'New Subject',
-          backgroundColor: Theme.of(context).indicatorColor,
-          child: const Icon(Icons.add),
+              final subject = Subject(name, icon: Icons.add);
+              setState(() {
+                _subjects.add(subject);
+              });
+            },
+            tooltip: 'New Subject',
+            backgroundColor: Colors.transparent,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            hoverElevation: 0,
+            child: const Icon(Icons.add),
+          ),
         ),
         body: ListView.builder(
             addAutomaticKeepAlives: true,
@@ -223,7 +235,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 }
                 setState(() {
                   _tasks.add(Task(TaskType.assignment, name, date, false));
-                  DataManager.saveTasks(_tasks);
                 });
               }
             },
@@ -249,6 +260,18 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 }),
           )),
     ];
+    if (CLEAR) {
+      SaveDataManager.clearAll();
+    }
+    var math = Subject('Math');
+    var linear = Topic('Linear Functions');
+    linear.addTerm(Term('Term 1', 'Term 2'));
+    math.addTopic(linear);
+
+    var physics = Subject('Physics');
+    var kinematics = Topic('kinematics');
+    kinematics.addTerm(Term('Term 3', 'Term 4'));
+    physics.addTopic(kinematics);
 
     return Scaffold(
         appBar: AppBar(),
@@ -265,6 +288,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           backgroundColor: Colors.transparent,
           onDestinationSelected: selectDestination,
         )),
-        body: PageView(controller: pageController, onPageChanged: pageChanged, children: childs));
+        body: PageView(
+          controller: pageController,
+          onPageChanged: pageChanged,
+          padEnds: false,
+          children: childs,
+        ));
   }
 }

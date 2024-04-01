@@ -1,128 +1,98 @@
 import "package:flutter/material.dart";
-import "package:flutter_application_1/data_manager.dart";
-import "package:flutter_application_1/topic.dart";
-import "package:flutter_application_1/subject.dart";
-import "package:flutter_application_1/utils.dart";
-import "package:multi_dropdown/multiselect_dropdown.dart";
+import "package:flutter_application_1/term.dart";
 
-import 'package:prompt_dialog/prompt_dialog.dart';
 import 'dart:developer' as developer;
 
+import "package:flutter_application_1/utils.dart";
+
 class StudyPage extends StatefulWidget {
-  final Subject subject;
-  const StudyPage({super.key, required this.subject});
+  final List<Term> terms;
+  final String name;
+  const StudyPage({super.key, required this.terms, required this.name});
 
   @override
   State<StudyPage> createState() => _StudyPageState();
 }
 
 class _StudyPageState extends State<StudyPage> {
-  late TextEditingController newTopicNameController;
-  List<ValueItem> dropdownOptions = [];
+  int currentTerm = 0;
+  bool showingMeaning = false;
 
   @override
   void initState() {
-    newTopicNameController = TextEditingController();
     super.initState();
   }
 
   @override
   void dispose() {
-    newTopicNameController.dispose();
     super.dispose();
   }
 
-  void selectTopic(List<ValueItem<dynamic>> topics) {}
-
-  List<ValueItem> buildValueItems() {
-    developer.log(widget.subject.topics.toString());
-    List<ValueItem> names = [];
-    int i = 1;
-    for (Topic t in widget.subject.topics) {
-      names.add(ValueItem(label: t.name, value: i.toString()));
-      i++;
+  String getCurrentText() {
+    Term term = widget.terms[currentTerm];
+    if (showingMeaning) {
+      return term.meaning;
+    } else {
+      return term.name;
     }
-    developer.log(names.toString());
-    return names;
   }
+
+  void goForward() {
+    currentTerm++;
+    wrapCurrentTerm();
+  }
+
+  void goBackward() {
+    currentTerm--;
+    wrapCurrentTerm();
+  }
+
+  void wrapCurrentTerm() => setState(() {
+        currentTerm = currentTerm % widget.terms.length;
+        developer.log('Current: $currentTerm. Length: ${widget.terms.length}');
+      });
 
   @override
   Widget build(BuildContext context) {
-    developer.log(widget.subject.topics.toString());
-    const int radius = 20;
-    dropdownOptions = buildValueItems();
-
-    Key dropdownKey = UniqueKey();
-
     return Scaffold(
-        appBar: AppBar(title: Text(widget.subject.name)),
-        floatingActionButton: Container(
-          decoration: Theming.gradientDeco,
-          child: FloatingActionButton(
-            onPressed: () async {
-              final topicName = await prompt(
-                    context,
-                    title: const Text('New Subject Name'),
-                  ) ??
-                  '';
-              Topic topic = Topic(topicName);
-              if (topic.name == '') {
-                return;
-              }
-              setState(() {
-                widget.subject.addTopic(topic);
-                dropdownOptions = buildValueItems();
-                DataManager.addTopic(widget.subject, topic);
-              });
-            },
-            tooltip: 'New Topic',
-            backgroundColor: Colors.transparent,
-            foregroundColor: Colors.white,
-            elevation: 0,
-            hoverElevation: 0,
-            child: const Icon(Icons.add),
-          ),
+      appBar: AppBar(title: Text(widget.name)),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: [
+            AnimatedOpacity(
+              duration: Durations.short1,
+              opacity: currentTerm == 0 ? 0.2 : 1,
+              child: Theming.grayOutline(FloatingActionButton(
+                heroTag: 'first',
+                onPressed: goBackward,
+                backgroundColor: Colors.transparent,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                hoverElevation: 0,
+                child: const Icon(Icons.arrow_back_ios_rounded),
+              )),
+            ),
+            Expanded(
+              child: Theming.gradientOutline(Center(
+                child: Text(getCurrentText()),
+              )),
+            ),
+            AnimatedOpacity(
+              duration: Durations.short1,
+              opacity: currentTerm == widget.terms.length - 1 ? 0.2 : 1,
+              child: Theming.grayOutline(FloatingActionButton(
+                onPressed: goForward,
+                backgroundColor: Colors.transparent,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                hoverElevation: 0,
+                child: const Icon(Icons.arrow_forward_ios_rounded),
+              )),
+            )
+          ],
         ),
-        body: Center(
-          child: Column(
-            children: [
-              Align(
-                  alignment: Alignment.centerLeft,
-                  child: Hero(tag: 'icon:${widget.subject.name}', child: Icon(widget.subject.icon, size: 50))),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Hero(
-                    tag: 'colorbox:${widget.subject.name}',
-                    child: Container(
-                      height: 60,
-                      decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.all(Radius.circular(radius - 10)),
-                          gradient: Theming.makeDarker(widget.subject.color)),
-                    )),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: MultiSelectDropDown<dynamic>(
-                  key: dropdownKey,
-                  onOptionSelected: selectTopic,
-                  options: dropdownOptions,
-                  selectionType: SelectionType.multi,
-                  chipConfig: const ChipConfig(wrapType: WrapType.wrap),
-                  optionTextStyle: const TextStyle(fontSize: 16),
-                  selectedOptionIcon: const Icon(Icons.check_circle),
-                  fieldBackgroundColor: Theme.of(context).hoverColor,
-                  optionsBackgroundColor: Theme.of(context).dialogBackgroundColor,
-                  selectedOptionTextColor: Colors.white,
-                  borderColor: Colors.white,
-                  dropdownBackgroundColor: Theme.of(context).dialogBackgroundColor,
-                  selectedOptionBackgroundColor: Theme.of(context).primaryColorDark,
-                  dropdownHeight: dropdownOptions.length * 40,
-                  dropdownBorderRadius: 20,
-                  radiusGeometry: const BorderRadius.all(Radius.circular(20)),
-                ),
-              )
-            ],
-          ),
-        ));
+      ),
+    );
   }
 }

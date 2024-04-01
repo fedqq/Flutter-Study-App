@@ -1,129 +1,121 @@
 import 'package:flutter/material.dart';
 import "package:flutter_application_1/subject.dart";
 import 'package:flutter_application_1/task.dart';
+import 'package:flutter_application_1/term.dart';
 import 'package:flutter_application_1/topic.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class DataManager {
+// ignore: unused_import
+import 'dart:developer' as developer;
+
+class ReturnData {
+  late List<Subject> subjects;
+  late List<Task> tasks;
+
+  ReturnData(subjectsP, tasksP) {
+    subjects = subjectsP;
+    tasks = tasksP;
+  }
+}
+
+class SaveDataManager {
   static void clearAll() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.clear();
   }
 
+  static void saveData(List<Subject> subjects, List<Task> tasks) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.clear();
+    saveSubjects(subjects);
+    saveTasks(tasks);
+  }
+
   static void saveSubjects(List<Subject> subjects) async {
     final prefs = await SharedPreferences.getInstance();
     List<String> subjectNames = [];
+
     for (Subject subject in subjects) {
-      subjectNames.add(subject.name);
-      List<String> topicNames = [];
+      subjectNames.add('${subject.name}--${subject.color.value}');
+      List<String> topicStrings = [];
       for (Topic topic in subject.topics) {
-        topicNames.add(topic.name);
+        String topicString = '';
+        topicString += topic.name;
+        topicString += '|';
+        String termsString = '';
+        for (Term term in topic.terms) {
+          termsString += '${term.name}==${term.meaning}';
+          termsString += ',';
+        }
+        termsString = termsString.substring(0, termsString.length - 1);
+        topicString += termsString;
+        topicStrings.add(topicString);
       }
-      topicNames.add(subject.icon.codePoint.toString());
-      prefs.setStringList('${subject.name}_topics', topicNames);
+      prefs.setStringList('${subject.name}||topics', topicStrings);
     }
-    prefs.setStringList('subject_names', subjectNames);
+    prefs.setStringList('subjectss', subjectNames);
   }
 
-  static void addTopic(Subject subject, Topic topic) async {
-    final prefs = await SharedPreferences.getInstance();
-    String name = '${subject.name}_topics';
-    List<String>? topics = prefs.getStringList(name) ?? [];
-    try {
-      String icon = topics.removeLast();
-    } catch (e) {
-      String icon = Icons.add.codePoint.toString();
-    }
-    topics.add(topic.name);
-    prefs.setStringList(name, topics);
-  }
+  static Future<ReturnData> loadData() async => ReturnData(await loadSubjects(), await loadTasks());
 
-  static void addSubject(String subject) async {
+  static void saveTasks(List<Task> tasks) async {
     final prefs = await SharedPreferences.getInstance();
-    List<String> names = prefs.getStringList('subject_names') ?? [];
-    names.add(subject);
-    prefs.setStringList('subject_names', names);
-  }
-
-  static void saveTasks(List<Task> tasks, {bool archive = false}) async {
-    List<String> taskInfos = [];
-    final prefs = await SharedPreferences.getInstance();
+    List<String> finalStrings = [];
     for (Task task in tasks) {
-      String data = '${task.task}, ';
-      data += '${task.type.toString()}, ';
-      data += task.dueDate.millisecondsSinceEpoch.toString();
-      data += task.completed.toString();
-      taskInfos.add(data);
+      String taskString = '';
+      taskString += task.task;
+      taskString += ',';
+      taskString += task.type.toString();
+      taskString += ',';
+      taskString += task.dueDate.millisecondsSinceEpoch.toString();
+      taskString += ',';
+      taskString += task.completed.toString();
+      finalStrings.add(taskString);
     }
-    if (archive) {
-      prefs.setStringList('tasks_info', taskInfos);
-    } else {
-      prefs.setStringList('archive_tasks_info', taskInfos);
-    }
-  }
-
-  static void clearTasks() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setStringList('tasks_info', []);
-  }
-
-  static void clearSubject() async {
-    final prefs = await SharedPreferences.getInstance();
-    for (String name in prefs.getStringList('subject_names') ?? []) {
-      prefs.setStringList('${name}_topics', []);
-    }
-    prefs.setStringList('subject_names', []);
-  }
-
-  static Future<List<Task>> loadTasks() async {
-    List<Task> tasks = [];
-    final prefs = await SharedPreferences.getInstance();
-    List<String> taskNames = prefs.getStringList('tasks_info') ?? [];
-    for (String task in taskNames) {
-      List<String> split = task.split(', ');
-      String name = split[0];
-      TaskType type = taskFromString(split[1]);
-      DateTime date = DateTime.fromMillisecondsSinceEpoch(int.parse(split[2]));
-      bool completed = (split[3] == 'true');
-      tasks.add(Task(type, name, date, completed));
-    }
-    return tasks;
-  }
-
-  static Future<List<Task>> loadTasksArchive() async {
-    List<Task> tasks = [];
-    final prefs = await SharedPreferences.getInstance();
-    List<String> taskNames = prefs.getStringList('archive_tasks_info') ?? [];
-    for (String task in taskNames) {
-      List<String> split = task.split(', ');
-      String name = split[0];
-      TaskType type = taskFromString(split[1]);
-      DateTime date = DateTime.fromMillisecondsSinceEpoch(int.parse(split[2]));
-      bool completed = (split[3] == 'true');
-      tasks.add(Task(type, name, date, completed));
-    }
-    return tasks;
+    prefs.setStringList('taskss', finalStrings);
   }
 
   static Future<List<Subject>> loadSubjects() async {
     final prefs = await SharedPreferences.getInstance();
+    List<String> names = prefs.getStringList('subjectss') ?? [];
     List<Subject> subjects = [];
-
-    List<String>? subjectNames = prefs.getStringList('subject_names');
-    if (subjectNames != null) {
-      for (String subjectName in subjectNames) {
-        Subject subject = Subject(subjectName);
-        List<String>? subjectData = prefs.getStringList('${subjectName}_topics');
-        if (subjectData != null) {
-          String icon = subjectData.removeLast();
-          for (String topicName in subjectData) {
-            subject.addTopic(Topic(topicName));
+    for (String subjectData in names) {
+      var split = subjectData.split('--');
+      String name = split[0];
+      Color color = Color(int.parse(split[1]));
+      List<String> topics = prefs.getStringList('$name||topics') ?? [];
+      Subject subject = Subject(name, colour: color);
+      for (String topic in topics) {
+        List<String> split = topic.split("|");
+        String name = split[0];
+        List<Term> termObjs = [];
+        try {
+          List<String> terms = split[1].split(',');
+          for (String termString in terms) {
+            var splitString = termString.split('==');
+            termObjs.add(Term(splitString[0], splitString[1]));
           }
-          subject.icon = IconData(int.parse(icon));
+        } catch (e) {
+          termObjs = [];
         }
-        subjects.add(subject);
+        Topic finalTopic = Topic(name);
+        finalTopic.terms = termObjs;
+        subject.addTopic(finalTopic);
       }
+      subjects.add(subject);
     }
+
     return subjects;
+  }
+
+  static Future<List<Task>> loadTasks() async {
+    return [
+      Task(
+        TaskType.assignment,
+        'asdf',
+        DateTime.now(),
+        false,
+      )
+    ];
   }
 }

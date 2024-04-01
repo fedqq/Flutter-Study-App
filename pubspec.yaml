@@ -38,6 +38,8 @@ dependencies:
   prompt_dialog: ^1.0.15
   multi_dropdown: ^2.1.4
   icon_picker: ^2.1.0
+  gradient_widgets: ^0.6.0
+  flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
   flutter_test:
