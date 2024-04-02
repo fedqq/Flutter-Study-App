@@ -7,12 +7,13 @@ import 'package:flutter_application_1/subject.dart';
 import 'package:flutter_application_1/task.dart';
 import 'package:flutter_application_1/utils.dart';
 import 'package:prompt_dialog/prompt_dialog.dart';
+import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 
 // ignore: unused_import
 import 'dart:developer' as developer;
 
 // ignore: constant_identifier_names
-const bool CLEAR = true;
+const bool CLEAR = false;
 
 void main() {
   runApp(const MyApp());
@@ -134,6 +135,62 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       }
     }
 
+    Future<Color?> showColorPicker(Color color) async {
+      Color tempColor = color;
+      return showDialog<Color>(
+          context: context,
+          builder: (_) => AlertDialog(
+                  contentPadding: const EdgeInsets.all(8.0),
+                  title: const Text('Choose a color'),
+                  content: MaterialColorPicker(
+                    onColorChange: (value) => tempColor = value,
+                    selectedColor: color,
+                  ),
+                  actions: [
+                    TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+                    TextButton(onPressed: () => Navigator.pop(context, tempColor), child: const Text('Confirm'))
+                  ]));
+    }
+
+    void editColor(int index) async {
+      Color? newColor = await showColorPicker(_subjects[index].color);
+      if (newColor == null) {
+        return;
+      } else {
+        setState(() => _subjects[index].color = newColor);
+      }
+    }
+
+    void newSubject() async {
+      String name = await prompt(
+            context,
+            title: const Text('New Subject Name'),
+          ) ??
+          '';
+      if (context.mounted) {
+        if (getSubjectNames().contains(name)) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Subject called $name already exists'),
+          ));
+          return;
+        }
+
+        if (name == '') {
+          return;
+        }
+      }
+
+      Color? newColor = await showColorPicker(Colors.blue);
+      if (newColor == null) {
+        return;
+      }
+
+      final subject = Subject(name, icon: Icons.add, colour: newColor);
+      setState(() {
+        _subjects.add(subject);
+      });
+    }
+
     List<Widget> childs = [
       const Card(
         shadowColor: Colors.transparent,
@@ -150,29 +207,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         floatingActionButton: Container(
           decoration: Theming.gradientDeco,
           child: FloatingActionButton(
-            onPressed: () async {
-              String name = await prompt(
-                    context,
-                    title: const Text('New Subject Name'),
-                  ) ??
-                  '';
-              if (context.mounted) {
-                if (getSubjectNames().contains(name)) {
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(SnackBar(content: Text('Subject called $name already exists')));
-                  return;
-                }
-
-                if (name == '') {
-                  return;
-                }
-              }
-
-              final subject = Subject(name, icon: Icons.add);
-              setState(() {
-                _subjects.add(subject);
-              });
-            },
+            onPressed: newSubject,
             tooltip: 'New Subject',
             backgroundColor: Colors.transparent,
             foregroundColor: Colors.white,
@@ -182,7 +217,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           ),
         ),
         body: ListView.builder(
-            addAutomaticKeepAlives: true,
             padding: const EdgeInsets.all(10),
             itemCount: _subjects.length,
             itemBuilder: (context, index) => Theming.grayOutline(Container(
@@ -190,54 +224,53 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 child: InkWell(
                     onTap: () => study(_subjects[index]),
                     child: Card(
-                        semanticContainer: true,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(Theming.radius - 10))),
                         child: Center(
                             child: Column(
-                          children: [
+                      children: [
+                        Hero(
+                            tag: 'colorbox:${_subjects[index].name}',
+                            child: Container(
+                                height: 60,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.all(Radius.circular(Theming.radius - 10)),
+                                    gradient: Theming.gradientToDarker(_subjects[index].color)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Row(
+                                      children: [
+                                        const Spacer(),
+                                        IconButton(
+                                            icon: const Icon(Icons.color_lens_rounded),
+                                            onPressed: () => editColor(index)),
+                                        IconButton(
+                                            icon: const Icon(Icons.edit_rounded), onPressed: () => editSubject(index)),
+                                        IconButton(
+                                            icon: const Icon(Icons.delete_rounded),
+                                            onPressed: () => deleteSubject(_subjects[index])),
+                                      ],
+                                    ),
+                                  ),
+                                ))),
+                        Container(
+                          margin: const EdgeInsets.only(left: 20, right: 20),
+                          child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                            Align(
+                                alignment: Alignment.topLeft,
+                                child: Text(
+                                  _subjects[index].name,
+                                  style: Theme.of(context).textTheme.titleLarge,
+                                  overflow: TextOverflow.ellipsis,
+                                )),
                             Hero(
-                                tag: 'colorbox:${_subjects[index].name}',
-                                child: Container(
-                                    height: 60,
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.all(Radius.circular(Theming.radius - 10)),
-                                        gradient: Theming.makeDarker(_subjects[index].color)),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(10),
-                                      child: Align(
-                                        alignment: Alignment.centerRight,
-                                        child: Row(
-                                          children: [
-                                            const Spacer(),
-                                            IconButton(
-                                                icon: const Icon(Icons.edit_rounded),
-                                                onPressed: () => editSubject(index)),
-                                            IconButton(
-                                                icon: const Icon(Icons.delete_rounded),
-                                                onPressed: () => deleteSubject(_subjects[index])),
-                                          ],
-                                        ),
-                                      ),
-                                    ))),
-                            Container(
-                              margin: const EdgeInsets.only(left: 20, right: 20),
-                              child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                                Align(
-                                    alignment: Alignment.topLeft,
-                                    child: Text(
-                                      _subjects[index].name,
-                                      style: Theme.of(context).textTheme.titleLarge,
-                                      overflow: TextOverflow.ellipsis,
-                                    )),
-                                Hero(
-                                    tag: 'icon:${_subjects[index].name}',
-                                    child: Align(
-                                        alignment: Alignment.topRight, child: Icon(_subjects[index].icon, size: 100)))
-                              ]),
-                            )
-                          ],
-                        ))))))),
+                                tag: 'icon:${_subjects[index].name}',
+                                child:
+                                    Align(alignment: Alignment.topRight, child: Icon(_subjects[index].icon, size: 100)))
+                          ]),
+                        )
+                      ],
+                    ))))))),
       ),
       Scaffold(
           floatingActionButton: FloatingActionButton(

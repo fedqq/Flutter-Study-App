@@ -48,7 +48,7 @@ class Theming {
             child: Container(decoration: innerDeco, child: child)));
   }
 
-  static LinearGradient makeDarker(Color color) {
+  static LinearGradient gradientToDarker(Color color) {
     HSLColor hsl = HSLColor.fromColor(color);
     hsl = hsl.withLightness(max(hsl.lightness - 0.2, 0));
     return LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [color, hsl.toColor()]);

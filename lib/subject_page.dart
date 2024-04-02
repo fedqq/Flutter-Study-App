@@ -100,7 +100,7 @@ class _SubjectPageState extends State<SubjectPage> {
                       height: 60,
                       decoration: BoxDecoration(
                           borderRadius: const BorderRadius.all(Radius.circular(radius - 10)),
-                          gradient: Theming.makeDarker(widget.subject.color)),
+                          gradient: Theming.gradientToDarker(widget.subject.color)),
                     )),
               ),
               Padding(
