@@ -16,4 +16,7 @@ class Subject {
   void addTopic(Topic topic) {
     topics.add(topic);
   }
+
+  @override
+  String toString() => '$name--${color.value}';
 }

@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:flutter_application_1/term.dart";
 
+// ignore: unused_import
 import 'dart:developer' as developer;
 
 import "package:flutter_application_1/utils.dart";
@@ -17,6 +18,7 @@ class StudyPage extends StatefulWidget {
 class _StudyPageState extends State<StudyPage> {
   int currentTerm = 0;
   bool showingMeaning = false;
+  OverlayEntry? entry;
 
   @override
   void initState() {
@@ -26,6 +28,7 @@ class _StudyPageState extends State<StudyPage> {
   @override
   void dispose() {
     super.dispose();
+    entry?.remove();
   }
 
   String getCurrentText() {
@@ -47,82 +50,90 @@ class _StudyPageState extends State<StudyPage> {
     wrapCurrentTerm();
   }
 
-  void wrapCurrentTerm() => setState(() {
-        currentTerm = currentTerm % widget.terms.length;
-        developer.log('Current: $currentTerm. Length: ${widget.terms.length}');
-      });
+  void wrapCurrentTerm() {
+    void wrap() {
+      currentTerm = currentTerm % widget.terms.length;
+      showingMeaning = false;
+    }
+
+    setState(wrap);
+    Overlay.of(context).setState(wrap);
+  }
 
   void learnTerm() => setState(() => widget.terms[currentTerm].learned = true);
 
   @override
   Widget build(BuildContext context) {
+    //Remove the next and previous buttons currently overlayed
+    entry?.remove();
+
+    //Create row including next and previous buttons
+    Row buttons = Row(children: [
+      AnimatedOpacity(
+        duration: Durations.short1,
+        opacity: currentTerm == 0 ? 0.2 : 1,
+        child: Theming.grayOutline(FloatingActionButton(
+          onPressed: goBackward,
+          backgroundColor: Colors.transparent,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          hoverElevation: 0,
+          child: const Icon(Icons.arrow_back_ios_rounded),
+        )),
+      ),
+      const Spacer(),
+      AnimatedOpacity(
+        duration: Durations.short1,
+        opacity: currentTerm == widget.terms.length - 1 ? 0.2 : 1,
+        child: Theming.grayOutline(FloatingActionButton(
+          onPressed: goForward,
+          backgroundColor: Colors.transparent,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          hoverElevation: 0,
+          child: const Icon(Icons.arrow_forward_ios_rounded),
+        )),
+      )
+    ]);
+
+    entry = OverlayEntry(builder: (context) => buttons);
+
+    //Overlay the buttons on top of the current overlay
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Overlay.of(context).insert(entry!);
+    });
+
     return Scaffold(
       appBar: AppBar(title: Text(widget.name)),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          children: [
-            AnimatedOpacity(
-              duration: Durations.short1,
-              opacity: currentTerm == 0 ? 0.2 : 1,
-              child: Theming.grayOutline(FloatingActionButton(
-                heroTag: 'first',
-                onPressed: goBackward,
-                backgroundColor: Colors.transparent,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                hoverElevation: 0,
-                child: const Icon(Icons.arrow_back_ios_rounded),
-              )),
-            ),
-            Expanded(
-              child: Column(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(40.0),
-                      child: InkWell(
-                        onTap: () => setState(() => showingMeaning = !showingMeaning),
-                        child: Theming.gradientOutline(Center(
-                          child: AnimatedDefaultTextStyle(
-                              curve: Curves.ease,
-                              duration: Durations.short1,
-                              style: showingMeaning ? const TextStyle(fontSize: 30) : const TextStyle(fontSize: 40),
-                              child: Padding(
-                                padding: const EdgeInsets.all(15.0),
-                                child: Text(
-                                  getCurrentText(),
-                                  textAlign: TextAlign.center,
-                                ),
-                              )),
-                        )),
-                      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: InkWell(
+                onTap: () => setState(() => showingMeaning = !showingMeaning),
+                child: Theming.gradientOutline(Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(45.0),
+                    child: Text(
+                      getCurrentText(),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 25),
                     ),
                   ),
-                  Theming.grayOutline(
-                    FilledButton.tonal(
-                      style: Theming.transparentButtonStyle,
-                      onPressed: learnTerm,
-                      child: const Text('Mark As Learned', style: TextStyle(color: Colors.white)),
-                    ),
-                  ),
-                ],
+                )),
               ),
             ),
-            AnimatedOpacity(
-              duration: Durations.short1,
-              opacity: currentTerm == widget.terms.length - 1 ? 0.2 : 1,
-              child: Theming.grayOutline(FloatingActionButton(
-                onPressed: goForward,
-                backgroundColor: Colors.transparent,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                hoverElevation: 0,
-                child: const Icon(Icons.arrow_forward_ios_rounded),
-              )),
-            )
-          ],
-        ),
+          ),
+          Theming.grayOutline(
+            FilledButton.tonal(
+              style: Theming.transparentButtonStyle,
+              onPressed: learnTerm,
+              child: Text(widget.terms[currentTerm].learned ? 'Mark as unlearned' : 'Mark as learned',
+                  style: const TextStyle(color: Colors.white)),
+            ),
+          ),
+        ],
       ),
     );
   }

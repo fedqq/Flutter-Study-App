@@ -1,5 +1,8 @@
+import 'dart:ui';
+
 import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/data_manager.dart';
 import 'package:flutter_application_1/subject_page.dart';
 import 'package:flutter_application_1/subject.dart';
@@ -29,7 +32,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           colorScheme: const ColorScheme.dark(),
           useMaterial3: true,
-          indicatorColor: const Color.fromARGB(255, 87, 61, 255)),
+          indicatorColor: const Color.fromARGB(255, 87, 61, 255),
+          fontFamily: 'Inter'),
       home: const MyHomePage(title: 'Study Help App'),
     );
   }
@@ -67,9 +71,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   void loadData() async {
-    ReturnData ret = await SaveDataManager.loadData();
-    var subjectData = ret.subjects;
-    var taskData = ret.tasks;
+    var subjectData = await SaveDataManager.loadSubjects();
+    var taskData = await SaveDataManager.loadTasks();
     setState(() {
       _subjects = subjectData;
       int i = 0;
@@ -185,25 +188,23 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         return;
       }
 
-      final subject = Subject(name, icon: Icons.add, colour: newColor);
+      final subject = Subject(name, icon: Icons.add_rounded, colour: newColor);
       setState(() {
         _subjects.add(subject);
       });
     }
 
     List<Widget> childs = [
-      const Card(
-        shadowColor: Colors.transparent,
-        margin: EdgeInsets.all(8.0),
-        child: SizedBox.expand(
-          child: Center(
-            child: Text(
-              'Stats Page',
-            ),
-          ),
-        ),
+      const Scaffold(
+        body: SizedBox(),
+        backgroundColor: Colors.transparent,
       ),
       Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+            title: Center(
+                child: Text(_subjects.length == 1 ? 'Study 1 subject' : 'Study ${_subjects.length} subjects',
+                    style: const TextStyle(fontWeight: FontWeight.bold)))),
         floatingActionButton: Container(
           decoration: Theming.gradientDeco,
           child: FloatingActionButton(
@@ -213,89 +214,128 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             foregroundColor: Colors.white,
             elevation: 0,
             hoverElevation: 0,
-            child: const Icon(Icons.add),
+            child: const Icon(Icons.add_rounded),
           ),
         ),
         body: ListView.builder(
-            padding: const EdgeInsets.all(10),
-            itemCount: _subjects.length,
-            itemBuilder: (context, index) => Theming.grayOutline(Container(
-                margin: const EdgeInsets.all(10),
-                child: InkWell(
-                    onTap: () => study(_subjects[index]),
-                    child: Card(
-                        child: Center(
-                            child: Column(
+          padding: const EdgeInsets.all(8),
+          itemCount: _subjects.length,
+          itemBuilder: (context, index) => Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(50),
+              boxShadow: [
+                BoxShadow(
+                  color: _subjects[index].color.withAlpha(60),
+                  blurRadius: 10.0,
+                  spreadRadius: -10.0,
+                  offset: const Offset(
+                    0.0,
+                    3.0,
+                  ),
+                ),
+              ],
+            ),
+            child: Theming.grayOutline(
+                InkWell(
+                  borderRadius: BorderRadius.zero,
+                  onTap: () => study(_subjects[index]),
+                  child: Card(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Hero(
-                            tag: 'colorbox:${_subjects[index].name}',
-                            child: Container(
-                                height: 60,
+                        Padding(
+                          padding: const EdgeInsets.all(18.0),
+                          child: ImageFiltered(
+                            imageFilter: ImageFilter.blur(sigmaX: 12, sigmaY: 12, tileMode: TileMode.decal),
+                            child: Hero(
+                              tag: 'colorbox:${_subjects[index].name}',
+                              child: Container(
                                 decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.all(Radius.circular(Theming.radius - 10)),
+                                    borderRadius: BorderRadius.circular(Theming.radius - Theming.padding - 8),
                                     gradient: Theming.gradientToDarker(_subjects[index].color)),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(10),
-                                  child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Row(
-                                      children: [
-                                        const Spacer(),
-                                        IconButton(
-                                            icon: const Icon(Icons.color_lens_rounded),
-                                            onPressed: () => editColor(index)),
-                                        IconButton(
-                                            icon: const Icon(Icons.edit_rounded), onPressed: () => editSubject(index)),
-                                        IconButton(
-                                            icon: const Icon(Icons.delete_rounded),
-                                            onPressed: () => deleteSubject(_subjects[index])),
-                                      ],
+                                width: 100,
+                                height: 100,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const SizedBox(),
+                                Row(
+                                  children: [
+                                    Center(
+                                      child: Text(_subjects[index].name,
+                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30)),
                                     ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.color_lens_rounded),
+                                        onPressed: () => editColor(index),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.edit_rounded),
+                                        onPressed: () => editSubject(index),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.delete_rounded),
+                                        onPressed: () => deleteSubject(_subjects[index]),
+                                      ),
+                                    ],
                                   ),
-                                ))),
-                        Container(
-                          margin: const EdgeInsets.only(left: 20, right: 20),
-                          child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                            Align(
-                                alignment: Alignment.topLeft,
-                                child: Text(
-                                  _subjects[index].name,
-                                  style: Theme.of(context).textTheme.titleLarge,
-                                  overflow: TextOverflow.ellipsis,
-                                )),
-                            Hero(
-                                tag: 'icon:${_subjects[index].name}',
-                                child:
-                                    Align(alignment: Alignment.topRight, child: Icon(_subjects[index].icon, size: 100)))
-                          ]),
-                        )
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
-                    ))))))),
+                    ),
+                  ),
+                ),
+                outerPadding: 8.0),
+          ),
+        ),
       ),
       Scaffold(
-          floatingActionButton: FloatingActionButton(
-            onPressed: () async {
-              String name = await prompt(context, title: const Text('New Task Name')) ?? "";
-              DateTime invalidPlaceholder = DateTime.fromMillisecondsSinceEpoch(10000);
-              if (name != "" && context.mounted) {
-                DateTime date = await showDatePicker(
-                        initialDate: DateTime.now(),
-                        barrierDismissible: false,
-                        context: context,
-                        firstDate: DateTime.now(),
-                        lastDate: DateTime.now().add(const Duration(days: 1000))) ??
-                    DateTime.fromMillisecondsSinceEpoch(10000);
-                if (date == invalidPlaceholder) {
-                  return;
+          backgroundColor: Colors.transparent,
+          floatingActionButton: Container(
+            decoration: Theming.gradientDeco,
+            child: FloatingActionButton(
+              backgroundColor: Colors.transparent,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              hoverElevation: 0,
+              onPressed: () async {
+                String name = await prompt(context, title: const Text('New Task Name')) ?? "";
+                DateTime invalidPlaceholder = DateTime.fromMillisecondsSinceEpoch(10000);
+                if (name != "" && context.mounted) {
+                  DateTime date = await showDatePicker(
+                          initialDate: DateTime.now(),
+                          context: context,
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime.now().add(const Duration(days: 1000))) ??
+                      DateTime.fromMillisecondsSinceEpoch(10000);
+                  if (date == invalidPlaceholder) {
+                    return;
+                  }
+                  setState(() {
+                    _tasks.add(Task(TaskType.assignment, name, date, false));
+                  });
                 }
-                setState(() {
-                  _tasks.add(Task(TaskType.assignment, name, date, false));
-                });
-              }
-            },
-            tooltip: 'New Subject',
-            backgroundColor: Theme.of(context).indicatorColor,
-            child: const Icon(Icons.add),
+              },
+              tooltip: 'New Task',
+              child: const Icon(Icons.add_rounded),
+            ),
           ),
           body: ListView.builder(
             padding: const EdgeInsets.all(10),
@@ -319,26 +359,41 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       SaveDataManager.clearAll();
     }
 
-    return Scaffold(
-        appBar: AppBar(),
-        bottomNavigationBar: Theming.gradientOutline(NavigationBar(
-          surfaceTintColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          selectedIndex: _selectedDestination,
-          indicatorColor: const Color.fromARGB(255, 66, 37, 255),
-          destinations: const [
-            NavigationDestination(icon: Icon(Icons.query_stats_outlined), label: "Stats"),
-            NavigationDestination(icon: Icon(Icons.school_outlined), label: "Study"),
-            NavigationDestination(icon: Icon(Icons.check_outlined), label: "Tasks")
-          ],
-          backgroundColor: Colors.transparent,
-          onDestinationSelected: selectDestination,
-        )),
-        body: PageView(
-          controller: pageController,
-          onPageChanged: pageChanged,
-          padEnds: false,
-          children: childs,
-        ));
+    Color bgColor = Theme.of(context).scaffoldBackgroundColor;
+    HSLColor hslBg = HSLColor.fromColor(bgColor);
+
+    return Stack(
+      children: [
+        Positioned.fill(
+            child: Container(
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [bgColor, hslBg.withLightness(hslBg.lightness - 0.03).toColor()])))),
+        Scaffold(
+            backgroundColor: Colors.transparent,
+            appBar: AppBar(),
+            bottomNavigationBar: Theming.gradientOutline(NavigationBar(
+              surfaceTintColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              selectedIndex: _selectedDestination,
+              indicatorColor: const Color.fromARGB(255, 66, 37, 255),
+              destinations: const [
+                NavigationDestination(icon: Icon(Icons.query_stats_outlined), label: "Stats"),
+                NavigationDestination(icon: Icon(Icons.school_outlined), label: "Study"),
+                NavigationDestination(icon: Icon(Icons.check_outlined), label: "Tasks")
+              ],
+              backgroundColor: Colors.transparent,
+              onDestinationSelected: selectDestination,
+            )),
+            body: PageView(
+              controller: pageController,
+              onPageChanged: pageChanged,
+              padEnds: false,
+              children: childs,
+            ))
+      ],
+    );
   }
 }

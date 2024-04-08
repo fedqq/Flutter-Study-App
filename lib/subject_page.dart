@@ -1,3 +1,5 @@
+import "dart:ui";
+
 import "package:flutter/material.dart";
 import "package:flutter_application_1/study_page.dart";
 import "package:flutter_application_1/term.dart";
@@ -46,12 +48,90 @@ class _SubjectPageState extends State<SubjectPage> {
     return names;
   }
 
+  void studyTopic(Topic topic) => Navigator.push(
+      context,
+      PageRouteBuilder(
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const begin = Offset(0.0, 1.0);
+            const end = Offset.zero;
+            const curve = Curves.ease;
+
+            Animatable<Offset> tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: child,
+            );
+          },
+          pageBuilder: (_, __, ___) => StudyPage(terms: topic.terms, name: topic.name)));
+
   @override
   Widget build(BuildContext context) {
     const int radius = 20;
-    dropdownOptions = buildValueItems();
+    List<ValueItem> dropdownOptions = buildValueItems();
 
-    Key dropdownKey = UniqueKey();
+    Expanded topicList = Expanded(
+      child: ListView.builder(
+        itemCount: widget.subject.topics.length,
+        itemBuilder: (context, index) => Theming.gradientOutline(
+          ListTileTheme(
+            contentPadding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
+            minLeadingWidth: 10,
+            child: ExpansionTile(
+              controlAffinity: ListTileControlAffinity.leading,
+              shape: const Border(),
+              onExpansionChanged: (expanded) => setState(() {
+                final controller = ExpansionTileController.maybeOf(context);
+                if (expanded) {
+                  controller?.collapse();
+                } else {
+                  controller?.expand();
+                }
+              }),
+              trailing: SizedBox(
+                width: 80,
+                height: 40,
+                child: Row(
+                  children: [
+                    IconButton(
+                        onPressed: () => studyTopic(widget.subject.topics[index]),
+                        icon: const Icon(Icons.school_rounded)),
+                    PopupMenuButton(
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          child: Row(
+                            children: [
+                              Text('Rename'),
+                              Spacer(),
+                              Icon(Icons.edit_rounded),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              title: Text(
+                widget.subject.topics[index].name,
+                textAlign: TextAlign.center,
+              ),
+              children: List.generate(
+                  widget.subject.topics[index].terms.length,
+                  (termIndex) => ListTile(
+                        contentPadding: const EdgeInsets.all(20.0),
+                        title: Text(widget.subject.topics[index].terms[termIndex].name),
+                        subtitle: ImageFiltered(
+                          imageFilter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                          child: Text(widget.subject.topics[index].terms[termIndex].meaning,
+                              overflow: TextOverflow.ellipsis),
+                        ),
+                      )),
+            ),
+          ),
+        ),
+      ),
+    );
 
     return Scaffold(
         appBar: AppBar(title: Text(widget.subject.name)),
@@ -106,7 +186,6 @@ class _SubjectPageState extends State<SubjectPage> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: MultiSelectDropDown<dynamic>(
-                  key: dropdownKey,
                   onOptionSelected: selectTopic,
                   options: dropdownOptions,
                   selectionType: SelectionType.multi,
@@ -124,40 +203,7 @@ class _SubjectPageState extends State<SubjectPage> {
                   radiusGeometry: const BorderRadius.all(Radius.circular(20)),
                 ),
               ),
-              if (widget.subject.topics.isNotEmpty)
-                Expanded(
-                  child: ListView.builder(
-                      itemCount: widget.subject.topics.length,
-                      itemBuilder: (context, index) => InkWell(
-                            onTap: () => Navigator.push(
-                                context,
-                                PageRouteBuilder(
-                                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                      const begin = Offset(0.0, 1.0);
-                                      const end = Offset.zero;
-                                      const curve = Curves.ease;
-
-                                      Animatable<Offset> tween =
-                                          Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-
-                                      return SlideTransition(
-                                        position: animation.drive(tween),
-                                        child: child,
-                                      );
-                                    },
-                                    pageBuilder: (_, __, ___) => StudyPage(
-                                        terms: widget.subject.topics[index].terms,
-                                        name: widget.subject.topics[index].name))),
-                            child: Theming.gradientOutline(
-                              ListTile(
-                                title: Text(
-                                  widget.subject.topics[index].name,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                          )),
-                ),
+              if (widget.subject.topics.isNotEmpty) topicList,
             ],
           ),
         ));
