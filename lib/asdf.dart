@@ -1,4 +1,6 @@
 
+// ignore_for_file: non_constant_identifier_names
+
                 /*child: Card(
                 child: Center(
                   child: Column(
@@ -48,4 +50,37 @@
                     ],
                   ),
                 ),
-              ), */
+              ), 
+
+
+
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                SizedBox(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.color_lens_rounded),
+                                        onPressed: () => editColor(index),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.edit_rounded),
+                                        onPressed: () => editSubject(index),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.delete_rounded),
+                                        onPressed: () => deleteSubject(_subjects[index]),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),*/

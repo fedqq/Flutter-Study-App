@@ -1,14 +1,12 @@
 import "package:flutter/material.dart";
-import "package:flutter_application_1/topic.dart";
+import "package:flutter_application_1/states/topic.dart";
 
 class Subject {
   String name = 'Default';
   List<Topic> topics = [];
   Color color = Colors.blue;
-  IconData icon = Icons.abc;
 
-  Subject(String nameP, {Color colour = Colors.blue, IconData icon = Icons.abc}) {
-    icon = icon;
+  Subject(String nameP, {Color colour = Colors.blue}) {
     color = colour;
     name = nameP;
   }

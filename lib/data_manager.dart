@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import "package:flutter_application_1/subject.dart";
-import 'package:flutter_application_1/task.dart';
-import 'package:flutter_application_1/topic.dart';
+import "package:flutter_application_1/states/subject.dart";
+import 'package:flutter_application_1/states/task.dart';
+import 'package:flutter_application_1/states/topic.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // ignore: unused_import

@@ -4,15 +4,18 @@ Features Added:
 - Topics
 - Basic Navigation
 - Simple data persistence
-
-Features tba:
-
 - Terms
+
+Features In Progress:
+
+- Tasks
 - Studying
 - Flashcards
+- UI Design
+- Calendar
+
+Features To Be Added:
+
 - Tests
-- Tasks
 - Customization
 - Light theme
-- UI Design
--

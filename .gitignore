@@ -43,6 +43,4 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-
-/lib/asdf.dart
-/lib/asdf.dart
+lib/asdf.dart

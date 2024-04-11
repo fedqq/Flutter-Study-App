@@ -1,4 +1,4 @@
-import "package:flutter_application_1/term.dart";
+import "package:flutter_application_1/states/term.dart";
 
 class Topic {
   String name = '';
@@ -14,17 +14,14 @@ class Topic {
 
   @override
   String toString() {
-    String ret = '$name|';
-
     String termData = '';
     for (Term term in terms) {
       termData += '${term.toString()},';
     }
 
-    termData = termData.substring(0, termData.length - 1);
+    if (termData.isNotEmpty) termData = termData.substring(0, termData.length - 1);
 
-    ret = '$name|$termData';
-    return ret;
+    return '$name|$termData';
   }
 
   static Topic fromString(String str) {
@@ -39,7 +36,6 @@ class Topic {
         finalTopic.addTerm(Term.fromString(termString));
       }
     }
-
     return finalTopic;
   }
 }
