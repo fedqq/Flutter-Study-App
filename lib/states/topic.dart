@@ -1,27 +1,25 @@
-import "package:flutter_application_1/states/term.dart";
+import "package:flutter_application_1/states/flashcard.dart";
 
 class Topic {
   String name = '';
-  List<Term> terms = [];
+  List<FlashCard> cards = [];
 
-  Topic(String nameP) {
-    name = nameP;
-  }
+  Topic(this.name);
 
-  void addTerm(term) {
-    terms.add(term);
+  void addCard(card) {
+    cards.add(card);
   }
 
   @override
   String toString() {
-    String termData = '';
-    for (Term term in terms) {
-      termData += '${term.toString()},';
+    String cardData = '';
+    for (FlashCard card in cards) {
+      cardData += '${card.toString()},';
     }
 
-    if (termData.isNotEmpty) termData = termData.substring(0, termData.length - 1);
+    if (cardData.isNotEmpty) cardData = cardData.substring(0, cardData.length - 1);
 
-    return '$name|$termData';
+    return '$name|$cardData';
   }
 
   static Topic fromString(String str) {
@@ -29,11 +27,11 @@ class Topic {
 
     String name = split[0];
     Topic finalTopic = Topic(name);
-    String terms = split[1];
-    if (terms != '') {
-      List<String> terms = split[1].split(',');
-      for (String termString in terms) {
-        finalTopic.addTerm(Term.fromString(termString));
+    String cards = split[1];
+    if (cards != '') {
+      List<String> cards = split[1].split(',');
+      for (String cardString in cards) {
+        finalTopic.addCard(FlashCard.fromString(cardString));
       }
     }
     return finalTopic;

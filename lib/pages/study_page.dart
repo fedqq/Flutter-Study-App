@@ -1,32 +1,31 @@
 import "package:confirm_dialog/confirm_dialog.dart";
 import "package:flutter/material.dart";
-import "package:flutter_application_1/states/term.dart";
+import "package:flutter_application_1/states/flashcard.dart";
 import "package:flutter_application_1/states/topic.dart";
 
 // ignore: unused_import
 import 'dart:developer' as developer;
 
 import "package:flutter_application_1/utils.dart";
-import "package:prompt_dialog/prompt_dialog.dart";
 
 class StudyPage extends StatefulWidget {
-  final List<Term> terms;
+  final List<FlashCard> cards;
   final Topic topic;
   final Function(String) renameCallback;
-  const StudyPage({super.key, required this.terms, required this.topic, required this.renameCallback});
+  const StudyPage({super.key, required this.cards, required this.topic, required this.renameCallback});
 
   @override
   State<StudyPage> createState() => _StudyPageState();
 }
 
 class _StudyPageState extends State<StudyPage> {
-  int currentTerm = 0;
+  int currentCard = 0;
   bool showingMeaning = false;
-  List<Term> terms = [];
+  List<FlashCard> cards = [];
 
   @override
   void initState() {
-    terms = widget.terms.where((term) => !term.learned).toList() + widget.terms.where((term) => term.learned).toList();
+    cards = widget.cards.where((card) => !card.learned).toList() + widget.cards.where((card) => card.learned).toList();
     super.initState();
   }
 
@@ -36,75 +35,78 @@ class _StudyPageState extends State<StudyPage> {
   }
 
   String getCurrentText() {
-    Term term = terms[currentTerm];
+    FlashCard card = cards[currentCard];
     if (showingMeaning) {
-      return term.meaning;
+      return card.meaning;
     } else {
-      return term.name;
+      return card.name;
     }
   }
 
   void goForward() {
     setState(() {
-      currentTerm++;
-      wrapCurrentTerm();
+      currentCard++;
+      wrapCurrentCard();
     });
   }
 
   void goBackward() {
     setState(() {
-      currentTerm--;
-      wrapCurrentTerm();
+      currentCard--;
+      wrapCurrentCard();
     });
   }
 
-  void wrapCurrentTerm() {
-    currentTerm = currentTerm % terms.length;
+  void wrapCurrentCard() {
+    currentCard = currentCard % cards.length;
     showingMeaning = false;
   }
 
-  void learnTerm() => setState(() {
-        terms[currentTerm].learned = !terms[currentTerm].learned;
+  void learnCard() => setState(() {
+        cards[currentCard].learned = !cards[currentCard].learned;
       });
 
-  void editTerm() async {
+  void editCard() async {
     if (showingMeaning) {
-      String newMeaning = await prompt(context,
-              title: Text('New meaning for ${terms[currentTerm].name}'), initialValue: terms[currentTerm].meaning) ??
+      String newMeaning = await showInputDialog(context, 'New meaning for ${cards[currentCard].name}', 'Meaning',
+              initialValue: cards[currentCard].meaning) ??
           '';
       if (newMeaning == '') return;
       setState(() {
-        terms[currentTerm].meaning = newMeaning;
+        cards[currentCard].meaning = newMeaning;
       });
     } else {
-      String? newName = await prompt(context,
-              title: Text('Rename ${terms[currentTerm].name}'), initialValue: terms[currentTerm].name) ??
+      String newName = await showInputDialog(
+            context,
+            'Rename ${cards[currentCard].name}',
+            'Name',
+            initialValue: cards[currentCard].meaning,
+          ) ??
           '';
       if (newName == '') return;
       setState(() {
-        terms[currentTerm].name = newName;
+        cards[currentCard].name = newName;
       });
     }
   }
 
-  void deleteTerm() async {
+  void deleteCard() async {
     bool delete = await confirm(context,
-        title: Text('Are you sure you would like to delete ${terms[currentTerm].name}?'),
+        title: Text('Are you sure you would like to delete ${cards[currentCard].name}?'),
         content: const Text('This action cannot be undone. '));
     if (delete) {
-      if (terms.length == 1) {
-        widget.terms.removeAt(0);
+      if (cards.length == 1) {
+        widget.cards.removeAt(0);
         // ignore: use_build_context_synchronously
         Navigator.pop(context);
         return;
       }
-      setState(() => widget.terms.removeAt(currentTerm));
+      setState(() => widget.cards.removeAt(currentCard));
     }
   }
 
   void editTopicName() async {
-    String newName =
-        await prompt(context, title: Text('Rename ${widget.topic.name}'), initialValue: widget.topic.name) ?? '';
+    String newName = await showInputDialog(context, 'Rename ${widget.topic.name}', 'Name') ?? '';
     if (newName == '') return;
     setState(() {
       widget.topic.name = newName;
@@ -118,7 +120,7 @@ class _StudyPageState extends State<StudyPage> {
     Row buttons = Row(children: [
       AnimatedOpacity(
         duration: Durations.short1,
-        opacity: currentTerm == 0 ? 0.2 : 1,
+        opacity: currentCard == 0 ? 0.2 : 1,
         child: GradientOutline(
           gradient: Theming.grayGradient,
           child: FloatingActionButton(
@@ -135,7 +137,7 @@ class _StudyPageState extends State<StudyPage> {
       const Spacer(),
       AnimatedOpacity(
         duration: Durations.short1,
-        opacity: currentTerm == terms.length - 1 ? 0.2 : 1,
+        opacity: currentCard == cards.length - 1 ? 0.2 : 1,
         child: GradientOutline(
           gradient: Theming.grayGradient,
           child: FloatingActionButton(
@@ -180,7 +182,7 @@ class _StudyPageState extends State<StudyPage> {
                       duration: Durations.long1,
                       decoration: BoxDecoration(boxShadow: [
                         BoxShadow(
-                          color: !terms[currentTerm].learned
+                          color: !cards[currentCard].learned
                               ? Theming.boxShadowColor
                               : const Color.fromARGB(80, 30, 253, 0),
                           spreadRadius: 0,
@@ -188,7 +190,7 @@ class _StudyPageState extends State<StudyPage> {
                         )
                       ]),
                       child: GradientOutline(
-                          gradient: terms[currentTerm].learned
+                          gradient: cards[currentCard].learned
                               ? Theming.gradientToDarker(const Color.fromARGB(80, 30, 253, 0))
                               : Theming.coloredGradient,
                           child: Center(
@@ -209,7 +211,7 @@ class _StudyPageState extends State<StudyPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   IconButton(
-                    onPressed: editTerm,
+                    onPressed: editCard,
                     icon: const Icon(Icons.mode_edit_rounded),
                   ),
                   SizedBox(
@@ -218,14 +220,14 @@ class _StudyPageState extends State<StudyPage> {
                       gradient: Theming.grayGradient,
                       child: FilledButton.tonal(
                         style: Theming.transparentButtonStyle,
-                        onPressed: learnTerm,
-                        child: Text(terms[currentTerm].learned ? 'Mark as unlearned' : 'Mark as learned',
+                        onPressed: learnCard,
+                        child: Text(cards[currentCard].learned ? 'Mark as unlearned' : 'Mark as learned',
                             style: const TextStyle(color: Colors.white)),
                       ),
                     ),
                   ),
                   IconButton(
-                    onPressed: deleteTerm,
+                    onPressed: deleteCard,
                     icon: const Icon(Icons.delete_forever_rounded),
                   ),
                 ],

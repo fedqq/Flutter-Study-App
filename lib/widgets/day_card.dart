@@ -1,29 +1,81 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/widgets/task_popup.dart';
+import 'package:flutter_application_1/states/task.dart';
 import 'package:flutter_application_1/utils.dart';
 import 'package:intl/intl.dart';
 
 class DayCard extends StatefulWidget {
   final DateTime date;
-  final int tdyOrTmrw;
-  const DayCard({super.key, required this.date, required this.tdyOrTmrw});
+  final List<Task> tasks;
+  const DayCard({super.key, required this.date, required this.tasks});
 
   @override
   State<DayCard> createState() => _DayCardState();
 }
 
 class _DayCardState extends State<DayCard> {
+  String getDateLabel() {
+    String formatted = DateFormat("EEEE, MMMM d, yyyy", 'en-US').format(widget.date);
+    if (formatted == DateFormat("EEEE, MMMM d, yyyy", 'en-US').format(DateTime.now().add(const Duration(days: 1)))) {
+      return 'Tomorrow';
+    } else if (formatted == DateFormat("EEEE, MMMM d, yyyy", 'en-US').format(DateTime.now())) {
+      return 'Today';
+    } else {
+      return formatted;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return GradientOutline(
-      gradient: Theming.grayGradient,
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            margin: const EdgeInsets.all(8.0),
-            child: Text(
-              DateFormat.yMMMMd('en_US').format(widget.date),
-              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+    return Container(
+      decoration: BoxDecoration(boxShadow: [
+        BoxShadow(color: Theming.grayGradient.colors[0].withAlpha(80), spreadRadius: -30, blurRadius: 30)
+      ]),
+      child: GradientOutline(
+        gradient: Theming.grayGradient,
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  margin: const EdgeInsets.all(8.0),
+                  child: Text(
+                    getDateLabel(),
+                    style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Wrap(
+                  children: List.generate(
+                    widget.tasks.length,
+                    (index) {
+                      return GradientOutline(
+                        gradient: Theming.gradientToDarker(widget.tasks[index].color, delta: 0.1),
+                        outerPadding: 14,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(width: 4.0),
+                            Text(
+                              widget.tasks[index].task,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(width: 14.0),
+                            Icon(widget.tasks[index].getIcon()),
+                            const SizedBox(width: 12.0),
+                            IconButton(
+                              icon: const Icon(Icons.info_rounded),
+                              onPressed: () =>
+                                  showDialog(context: context, builder: (_) => TaskPopup(task: widget.tasks[index])),
+                            )
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
         ),

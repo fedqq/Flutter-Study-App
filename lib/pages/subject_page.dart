@@ -1,11 +1,10 @@
 import "package:flutter/material.dart";
 import "package:flutter_application_1/states/topic.dart";
 import "package:flutter_application_1/states/subject.dart";
-import "package:flutter_application_1/widgets/topic_view.dart";
+import "package:flutter_application_1/widgets/topic_card.dart";
 import "package:flutter_application_1/utils.dart";
 import "package:multi_dropdown/multiselect_dropdown.dart";
 
-import 'package:prompt_dialog/prompt_dialog.dart';
 // ignore: unused_import
 import 'dart:developer' as developer;
 
@@ -37,12 +36,10 @@ class _SubjectPageState extends State<SubjectPage> {
 
   @override
   Widget build(BuildContext context) {
-    const int radius = 20;
-
     Expanded topicList = Expanded(
       child: ListView.builder(
         itemCount: widget.subject.topics.length,
-        itemBuilder: (context, index) => TopicView(topic: widget.subject.topics[index]),
+        itemBuilder: (context, index) => TopicCard(topic: widget.subject.topics[index]),
       ),
     );
 
@@ -54,11 +51,8 @@ class _SubjectPageState extends State<SubjectPage> {
       appBar: AppBar(title: Text(widget.subject.name)),
       floatingActionButton: GradientFAB(
         onPressed: () async {
-          final topicName = await prompt(
-                context,
-                title: const Text('New Topic Name'),
-              ) ??
-              '';
+          final String topicName = await showInputDialog(context, 'New Topic Name', 'Name') ?? '';
+
           Topic topic = Topic(topicName);
           if (topic.name == '') return;
 
@@ -86,17 +80,8 @@ class _SubjectPageState extends State<SubjectPage> {
             child: Column(
               children: [
                 const Align(alignment: Alignment.centerLeft),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Hero(
-                      tag: 'colorbox:${widget.subject.name}',
-                      child: Container(
-                        height: 60,
-                        decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.all(Radius.circular(radius - 10)),
-                            gradient: Theming.gradientToDarker(widget.subject.color)),
-                      )),
-                ),
+                Text('${widget.subject.name} Topics (${widget.subject.topics.length})',
+                    style: Theme.of(context).textTheme.titleLarge),
                 if (widget.subject.topics.isNotEmpty) topicList,
               ],
             ),

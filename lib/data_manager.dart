@@ -55,7 +55,7 @@ class SaveDataManager {
       String name = split[0];
       Color color = Color(int.parse(split[1]));
       List<String> topics = prefs.getStringList('$name||topics') ?? [];
-      Subject subject = Subject(name, colour: color);
+      Subject subject = Subject(name, color);
       for (String topic in topics) {
         subject.addTopic(Topic.fromString(topic));
       }

@@ -360,14 +360,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.7.4"
-  prompt_dialog:
-    dependency: "direct main"
-    description:
-      name: prompt_dialog
-      sha256: de171ecb5b7df70a7776657390e266a4638f4387e5a758065433e6c9e5211756
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.15"
   shared_preferences:
     dependency: "direct main"
     description:

@@ -6,10 +6,7 @@ class Subject {
   List<Topic> topics = [];
   Color color = Colors.blue;
 
-  Subject(String nameP, {Color colour = Colors.blue}) {
-    color = colour;
-    name = nameP;
-  }
+  Subject(this.name, this.color);
 
   void addTopic(Topic topic) {
     topics.add(topic);

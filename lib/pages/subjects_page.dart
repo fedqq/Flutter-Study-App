@@ -9,8 +9,6 @@ import 'package:flutter_application_1/states/subject.dart';
 import 'package:flutter_application_1/utils.dart';
 import 'package:flutter_application_1/widgets/subject_card.dart';
 import 'package:flutter_application_1/widgets/subject_option_menu.dart';
-import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
-import 'package:prompt_dialog/prompt_dialog.dart';
 
 class SubjectsPage extends StatefulWidget {
   final List<Subject> subjects;
@@ -24,50 +22,31 @@ class _SubjectsPageState extends State<SubjectsPage> {
   int currentFocused = -1;
 
   void study(Subject subject) =>
-      Navigator.push(context, MaterialPageRoute(builder: (_) => SubjectPage(subject: subject)));
+      Navigator.push(context, MaterialPageRoute(builder: (_) => SubjectPage(subject: subject)))
+          .then((value) => setState(() => currentFocused = -1));
 
   void newSubject() async {
-    String name = await prompt(
-          context,
-          title: const Text('New Subject Name'),
-        ) ??
-        '';
-
-    if (getSubjectNames().contains(name)) {
-      basicSnackBar(context, 'Subject named $name already exists');
-      return;
+    bool validate(String str) {
+      if (getSubjectNames().contains(str)) {
+        simpleSnackBar(context, 'Subject named $str already exists');
+        return false;
+      }
+      return true;
     }
+
+    String name = await showInputDialog(context, 'New Subject Name', 'Name', extraValidate: validate) ?? '';
 
     if (name == '') return;
 
-    Color? newColor = await showColorPicker(Colors.blue);
+    Color? newColor = await showColorPicker(context, Colors.blue);
     if (newColor == null) {
       return;
     }
 
-    final subject = Subject(name, colour: newColor);
+    final subject = Subject(name, newColor);
     setState(() {
       widget.subjects.add(subject);
     });
-  }
-
-  Future<Color?> showColorPicker(Color color) async {
-    Color tempColor = color;
-    return showDialog<Color>(
-      context: context,
-      builder: (_) => AlertDialog(
-        contentPadding: const EdgeInsets.all(8.0),
-        title: const Text('Choose a color'),
-        content: MaterialColorPicker(
-          onColorChange: (value) => tempColor = value,
-          selectedColor: color,
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, tempColor), child: const Text('Confirm'))
-        ],
-      ),
-    );
   }
 
   void deleteSubject(int index) async {
@@ -80,7 +59,7 @@ class _SubjectsPageState extends State<SubjectsPage> {
 
   void editColor(int index) async {
     if (index == -1) index = currentFocused;
-    Color? newColor = await showColorPicker(widget.subjects[index].color);
+    Color? newColor = await showColorPicker(context, widget.subjects[index].color);
     if (newColor == null) return;
     setState(() => widget.subjects[index].color = newColor);
   }
@@ -88,19 +67,24 @@ class _SubjectsPageState extends State<SubjectsPage> {
   List<String> getSubjectNames() => List.generate(widget.subjects.length, (index) => widget.subjects[index].name);
 
   void editSubject(int index) async {
-    if (index == -1) index = currentFocused;
-    String newName = await prompt(
-          title: Text('Choose new name for ${widget.subjects[index].name}'),
-          context,
-        ) ??
-        '';
-    if (newName == '') return;
-    if (getSubjectNames().contains(newName)) {
-      basicSnackBar(context, 'Subject named $newName already exists');
-      return;
-    } else {
-      setState(() => widget.subjects[index].name = newName);
+    if (index == -1) {
+      index = currentFocused;
     }
+
+    bool validate(String str) {
+      if (getSubjectNames().contains(str)) {
+        simpleSnackBar(context, 'Subject named $str already exists');
+        return false;
+      }
+      return true;
+    }
+
+    String newName =
+        await showInputDialog(context, 'Rename ${widget.subjects[index].name}', 'Name', extraValidate: validate) ?? '';
+
+    if (newName == '') return;
+
+    setState(() => widget.subjects[index].name = newName);
   }
 
   @override

@@ -2,20 +2,21 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/study_page.dart';
-import 'package:flutter_application_1/states/term.dart';
+import 'package:flutter_application_1/states/flashcard.dart';
 import 'package:flutter_application_1/states/topic.dart';
 import 'package:flutter_application_1/utils.dart';
-import 'package:prompt_dialog/prompt_dialog.dart';
 
-class TopicView extends StatefulWidget {
+import 'dart:developer' as developer;
+
+class TopicCard extends StatefulWidget {
   final Topic topic;
-  const TopicView({super.key, required this.topic});
+  const TopicCard({super.key, required this.topic});
 
   @override
-  State<TopicView> createState() => _TopicViewState();
+  State<TopicCard> createState() => _TopicCardState();
 }
 
-class _TopicViewState extends State<TopicView> {
+class _TopicCardState extends State<TopicCard> {
   void renameCallback(String newName) {
     setState(() {
       widget.topic.name = newName;
@@ -38,27 +39,35 @@ class _TopicViewState extends State<TopicView> {
             );
           },
           pageBuilder: (_, __, ___) => StudyPage(
-                terms: topic.terms,
+                cards: topic.cards,
                 topic: topic,
                 renameCallback: renameCallback,
               ))).then((_) => setState(() {}));
 
   void renameTopic(Topic topic) async {
-    String newName = await prompt(
-          context,
-          title: Text('Rename ${topic.name}'),
-        ) ??
-        '';
+    String newName = await showInputDialog(context, 'Rename ${topic.name}', 'Name') ?? '';
     if (newName == '') return;
     setState(() => topic.name = newName);
   }
 
-  void addTerm(Topic topic) async {
-    String name = await prompt(context, title: const Text('New Term Name')) ?? '';
+  void addCard(Topic topic) async {
+    DialogResult result =
+        await showDoubleInputDialog(context, 'Create New Card', 'Name', 'Meaning', nullableSecond: false) ??
+            emptyResult;
+
+    String name = result.first;
     if (name == '') return;
-    String meaning = await prompt(context, title: const Text('New Term Meaning')) ?? '';
+    String meaning = result.second;
     if (meaning == '') return;
-    setState(() => topic.terms.add(Term(name, meaning, false)));
+    setState(() => topic.cards.add(FlashCard(name, meaning, false)));
+  }
+
+  double learnedPercentage() {
+    double ret = widget.topic.cards.isNotEmpty
+        ? widget.topic.cards.where((element) => element.learned).length / widget.topic.cards.length
+        : 0;
+    developer.log(ret.toString());
+    return ret;
   }
 
   @override
@@ -79,6 +88,23 @@ class _TopicViewState extends State<TopicView> {
           contentPadding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
           minLeadingWidth: 10,
           child: ExpansionTile(
+            subtitle: Stack(
+              children: [
+                Container(
+                  width: 450,
+                  height: 5,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(Theming.radius),
+                      color: const Color.fromARGB(255, 51, 51, 51)),
+                ),
+                Container(
+                  width: learnedPercentage() * 450,
+                  height: 5,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(Theming.radius), gradient: Theming.coloredGradient),
+                ),
+              ],
+            ),
             controlAffinity: ListTileControlAffinity.leading,
             shape: const Border(),
             onExpansionChanged: (expanded) => setState(() {
@@ -95,14 +121,14 @@ class _TopicViewState extends State<TopicView> {
               child: Row(
                 children: [
                   IconButton(
-                      onPressed: () => topic.terms.isNotEmpty ? studyTopic(topic) : null,
+                      onPressed: () => topic.cards.isNotEmpty ? studyTopic(topic) : null,
                       icon: const Icon(Icons.school_rounded)),
                   IconButton(
                     onPressed: () => renameTopic(topic),
                     icon: const Icon(Icons.edit_rounded),
                   ),
                   IconButton(
-                    onPressed: () => addTerm(topic),
+                    onPressed: () => addCard(topic),
                     icon: const Icon(Icons.add_rounded),
                   ),
                 ],
@@ -114,11 +140,11 @@ class _TopicViewState extends State<TopicView> {
             ),
             childrenPadding: const EdgeInsets.all(0),
             children: List.generate(
-                topic.terms.length,
-                (termIndex) => ListTile(
+                topic.cards.length,
+                (cardIndex) => ListTile(
                       minVerticalPadding: 0,
                       contentPadding: const EdgeInsets.all(8.0),
-                      title: Text(topic.terms[termIndex].name),
+                      title: Text(topic.cards[cardIndex].name),
                     )),
           ),
         ),

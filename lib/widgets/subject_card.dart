@@ -28,15 +28,12 @@ class _SubjectCardState extends State<SubjectCard> {
             children: [
               Padding(
                 padding: const EdgeInsets.all(18.0),
-                child: Hero(
-                  tag: 'colorbox:${subject.name}',
-                  child: ImageFiltered(
-                    imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8, tileMode: TileMode.decal),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(Theming.radius - Theming.padding - 8),
-                        gradient: Theming.gradientToDarker(subject.color),
-                      ),
+                child: ImageFiltered(
+                  imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8, tileMode: TileMode.decal),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(Theming.radius - Theming.padding - 8),
+                      gradient: Theming.gradientToDarker(subject.color),
                     ),
                   ),
                 ),

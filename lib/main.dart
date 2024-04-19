@@ -5,7 +5,6 @@ import 'package:flutter_application_1/pages/subjects_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data_manager.dart';
 import 'package:flutter_application_1/pages/calendar_page.dart';
-import 'package:flutter_application_1/pages/tasks_page.dart';
 import 'package:flutter_application_1/states/subject.dart';
 
 import 'package:flutter_application_1/states/task.dart';
@@ -103,23 +102,16 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    Map<DateTime, List<Task>> dateTasks = {};
-    for (Task task in tasks) {
-      if (!dateTasks.containsKey(task.dueDate)) {
-        dateTasks[task.dueDate] = [task];
-      } else {
-        dateTasks[task.dueDate]!.add(task);
-      }
-    }
-
     SubjectsPage studyPage = SubjectsPage(subjects: subjects);
 
-    TasksPage tasksPage = TasksPage(tasks: tasks);
-
     List<Widget> pages = [
-      CalendarPage(dateTasks: dateTasks),
+      CalendarPage(tasks: tasks),
       studyPage,
-      tasksPage,
+      Scaffold(
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => simpleSnackBar(context, 'Testt'),
+        ),
+      )
     ];
     if (CLEAR) {
       SaveDataManager.clearAll();
@@ -159,7 +151,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 destinations: const [
                   NavigationDestination(icon: Icon(Icons.calendar_today_rounded), label: "Calendar"),
                   NavigationDestination(icon: Icon(Icons.school_outlined), label: "Study"),
-                  NavigationDestination(icon: Icon(Icons.check_outlined), label: "Tasks")
+                  NavigationDestination(icon: Icon(Icons.show_chart_rounded), label: "Statistics")
                 ],
                 backgroundColor: Colors.transparent,
                 onDestinationSelected: selectDestination,
