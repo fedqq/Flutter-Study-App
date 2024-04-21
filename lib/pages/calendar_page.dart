@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/utils.dart';
 import 'package:flutter_application_1/widgets/day_card.dart';
 import 'package:flutter_application_1/states/task.dart';
+import 'package:flutter_application_1/widgets/input_dialogs.dart';
 
 import 'dart:developer' as developer;
+
+import '../widgets/gradient_widgets.dart';
 
 class CalendarPage extends StatefulWidget {
   final List<Task> tasks;
@@ -17,10 +20,12 @@ class CalendarPage extends StatefulWidget {
 
 class _CalendarPageState extends State<CalendarPage> {
   Set<TaskType> selected = {TaskType.homework};
+  List<Task> timelyTasks = [];
+  List<Task> lateTasks = [];
 
-  Map<DateTime, List<Task>> getDateTasks() {
+  Map<DateTime, List<Task>> getDateTasks(bool late) {
     Map<DateTime, List<Task>> ret = {};
-    for (Task task in widget.tasks) {
+    for (Task task in (late ? lateTasks : timelyTasks)) {
       if (!ret.containsKey(task.dueDate)) {
         ret[task.dueDate] = [task];
       } else {
@@ -58,7 +63,19 @@ class _CalendarPageState extends State<CalendarPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<DateTime> dates = getDateTasks().keys.toList()
+    timelyTasks = [];
+    lateTasks = [];
+    for (Task task in widget.tasks) {
+      if (task.dueDate.compareTo(DateTime.now()) < 0) {
+        lateTasks.add(task);
+      } else {
+        timelyTasks.add(task);
+      }
+    }
+
+    List<DateTime> dates = getDateTasks(false).keys.toList()
+      ..sort((DateTime first, DateTime second) => first.compareTo(second));
+    List<DateTime> lateDates = getDateTasks(true).keys.toList()
       ..sort((DateTime first, DateTime second) => first.compareTo(second));
     developer.log(dates.length.toString());
 
@@ -67,13 +84,38 @@ class _CalendarPageState extends State<CalendarPage> {
       appBar: AppBar(
         scrolledUnderElevation: 0,
       ),
-      floatingActionButton: GradientFAB(
+      floatingActionButton: GradientActionButton(
         onPressed: () => newTask(context),
         tooltip: 'New Task',
         child: const Icon(Icons.add_rounded),
       ),
       body: Column(
         children: [
+          ExpansionTile(
+            shape: const Border(),
+            title: const Text('Overdue Tasks'),
+            children: [
+              ListView.builder(
+                physics: const ScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: dates.length,
+                itemBuilder: (context, index) => DayCard(
+                  date: lateDates[index],
+                  tasks: getDateTasks(true)[lateDates[index]] ?? [],
+                  overdue: true,
+                ),
+              )
+            ],
+          ),
+          Container(
+            margin: const EdgeInsets.all(16.0),
+            width: double.infinity,
+            height: 2,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(100),
+              color: Theming.grayGradient.colors[1],
+            ),
+          ),
           Flexible(
             child: ListView(
               children: [
@@ -83,7 +125,7 @@ class _CalendarPageState extends State<CalendarPage> {
                   itemCount: dates.length,
                   itemBuilder: (context, index) => DayCard(
                     date: dates[index],
-                    tasks: getDateTasks()[dates[index]] ?? [],
+                    tasks: getDateTasks(false)[dates[index]] ?? [],
                   ),
                 ),
                 const Padding(

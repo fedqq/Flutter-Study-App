@@ -7,8 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/subject_page.dart';
 import 'package:flutter_application_1/states/subject.dart';
 import 'package:flutter_application_1/utils.dart';
+import 'package:flutter_application_1/widgets/expandable_fab.dart';
+import 'package:flutter_application_1/widgets/input_dialogs.dart';
 import 'package:flutter_application_1/widgets/subject_card.dart';
 import 'package:flutter_application_1/widgets/subject_option_menu.dart';
+
+import 'dart:developer' as developer;
 
 class SubjectsPage extends StatefulWidget {
   final List<Subject> subjects;
@@ -87,6 +91,12 @@ class _SubjectsPageState extends State<SubjectsPage> {
     setState(() => widget.subjects[index].name = newName);
   }
 
+  void clearSubjects() {
+    developer.log('asdf');
+  }
+
+  void studyAll() {}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,8 +106,23 @@ class _SubjectsPageState extends State<SubjectsPage> {
           centerTitle: true,
           title: Text(widget.subjects.length == 1 ? 'Study 1 Subject' : 'Study ${widget.subjects.length} Subjects',
               style: const TextStyle(fontWeight: FontWeight.bold))),
-      floatingActionButton:
-          GradientFAB(onPressed: newSubject, tooltip: 'New Subject', child: const Icon(Icons.add_rounded)),
+      floatingActionButton: ExpandableFab(
+        distance: 112,
+        children: [
+          ActionButton(
+            onPressed: newSubject,
+            icon: const Icon(Icons.add_rounded),
+          ),
+          ActionButton(
+            onPressed: clearSubjects,
+            icon: const Icon(Icons.delete_rounded),
+          ),
+          ActionButton(
+            onPressed: studyAll,
+            icon: const Icon(Icons.school_rounded),
+          ),
+        ],
+      ),
       body: GestureDetector(
         onTap: () => setState(() {
           currentFocused = -1;

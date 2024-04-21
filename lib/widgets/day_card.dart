@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/widgets/gradient_widgets.dart';
 import 'package:flutter_application_1/widgets/task_popup.dart';
 import 'package:flutter_application_1/states/task.dart';
 import 'package:flutter_application_1/utils.dart';
@@ -7,7 +8,8 @@ import 'package:intl/intl.dart';
 class DayCard extends StatefulWidget {
   final DateTime date;
   final List<Task> tasks;
-  const DayCard({super.key, required this.date, required this.tasks});
+  final bool overdue;
+  const DayCard({super.key, required this.date, required this.tasks, this.overdue = false});
 
   @override
   State<DayCard> createState() => _DayCardState();
@@ -51,8 +53,9 @@ class _DayCardState extends State<DayCard> {
                     widget.tasks.length,
                     (index) {
                       return GradientOutline(
-                        gradient: Theming.gradientToDarker(widget.tasks[index].color, delta: 0.1),
-                        outerPadding: 14,
+                        gradient: Theming.gradientToDarker(widget.overdue ? Colors.red : widget.tasks[index].color,
+                            delta: 0.1),
+                        innerPadding: 14,
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

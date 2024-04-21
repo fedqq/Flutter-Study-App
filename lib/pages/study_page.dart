@@ -7,6 +7,8 @@ import "package:flutter_application_1/states/topic.dart";
 import 'dart:developer' as developer;
 
 import "package:flutter_application_1/utils.dart";
+import "package:flutter_application_1/widgets/gradient_widgets.dart";
+import "package:flutter_application_1/widgets/input_dialogs.dart";
 
 class StudyPage extends StatefulWidget {
   final List<FlashCard> cards;

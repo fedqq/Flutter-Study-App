@@ -1,12 +1,14 @@
 import "package:flutter/material.dart";
 import "package:flutter_application_1/states/topic.dart";
 import "package:flutter_application_1/states/subject.dart";
+import "package:flutter_application_1/widgets/input_dialogs.dart";
 import "package:flutter_application_1/widgets/topic_card.dart";
-import "package:flutter_application_1/utils.dart";
 import "package:multi_dropdown/multiselect_dropdown.dart";
 
 // ignore: unused_import
 import 'dart:developer' as developer;
+
+import "../widgets/gradient_widgets.dart";
 
 class SubjectPage extends StatefulWidget {
   final Subject subject;
@@ -18,7 +20,6 @@ class SubjectPage extends StatefulWidget {
 
 class _SubjectPageState extends State<SubjectPage> {
   late TextEditingController newTopicNameController;
-  List<ValueItem> dropdownOptions = [];
 
   @override
   void initState() {
@@ -49,7 +50,7 @@ class _SubjectPageState extends State<SubjectPage> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(title: Text(widget.subject.name)),
-      floatingActionButton: GradientFAB(
+      floatingActionButton: GradientActionButton(
         onPressed: () async {
           final String topicName = await showInputDialog(context, 'New Topic Name', 'Name') ?? '';
 

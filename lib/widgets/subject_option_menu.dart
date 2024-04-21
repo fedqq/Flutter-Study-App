@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/utils.dart';
+import 'package:flutter_application_1/widgets/gradient_widgets.dart';
 
 class SubjectOptionMenu extends StatelessWidget {
   final Function() editSubject;

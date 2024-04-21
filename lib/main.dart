@@ -1,10 +1,12 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:flutter_application_1/pages/stats_page.dart';
 import 'package:flutter_application_1/pages/subjects_page.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data_manager.dart';
 import 'package:flutter_application_1/pages/calendar_page.dart';
+import 'package:flutter_application_1/states/statistics.dart';
 import 'package:flutter_application_1/states/subject.dart';
 
 import 'package:flutter_application_1/states/task.dart';
@@ -12,6 +14,8 @@ import 'package:flutter_application_1/utils.dart';
 
 // ignore: unused_import
 import 'dart:developer' as developer;
+
+import 'package:flutter_application_1/widgets/gradient_widgets.dart';
 
 // ignore: constant_identifier_names
 const bool CLEAR = false;
@@ -37,24 +41,23 @@ class MyApp extends StatelessWidget {
         indicatorColor: const Color.fromARGB(255, 87, 61, 255),
         fontFamily: 'Inter',
       ),
-      home: const MyHomePage(title: 'Study Help App'),
+      home: const NavigationPage(title: 'Study Help App'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+class NavigationPage extends StatefulWidget {
+  const NavigationPage({super.key, required this.title});
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<NavigationPage> createState() => _NavigationPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
+class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObserver {
   List<Subject> subjects = [];
   List<Task> tasks = [];
-  int _selectedDestination = 0;
-  bool initialLoaded = false;
+  int selectedDest = 0;
   PageController pageController = PageController();
 
   @override
@@ -74,44 +77,39 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   void loadData() async {
     var subjectsAsync = await SaveDataManager.loadSubjects();
     var tasksAsync = await SaveDataManager.loadTasks();
+    Statistics.load();
     setState(() {
       subjects = subjectsAsync;
       tasks = tasksAsync;
     });
-    initialLoaded = true;
   }
 
   void pageChanged(int index) {
     setState(() {
-      _selectedDestination = index;
+      selectedDest = index;
     });
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     SaveDataManager.saveData(subjects, tasks);
+    Statistics.save();
     super.didChangeAppLifecycleState(state);
   }
 
   void selectDestination(int index) {
     setState(() {
-      _selectedDestination = index;
+      selectedDest = index;
       pageController.animateToPage(index, duration: const Duration(milliseconds: 250), curve: Curves.easeOut);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    SubjectsPage studyPage = SubjectsPage(subjects: subjects);
-
     List<Widget> pages = [
       CalendarPage(tasks: tasks),
-      studyPage,
-      Scaffold(
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => simpleSnackBar(context, 'Testt'),
-        ),
-      )
+      SubjectsPage(subjects: subjects),
+      const StatsPage(),
     ];
     if (CLEAR) {
       SaveDataManager.clearAll();
@@ -123,12 +121,16 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     return Stack(
       children: [
         Positioned.fill(
-            child: Container(
-                decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [bgColor, hslBg.withLightness(hslBg.lightness - 0.03).toColor()])))),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [bgColor, hslBg.withLightness(hslBg.lightness - 0.03).toColor()],
+              ),
+            ),
+          ),
+        ),
         Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(),
@@ -144,9 +146,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             ),
             child: GradientOutline(
               child: NavigationBar(
+                elevation: 10,
                 surfaceTintColor: Colors.transparent,
                 shadowColor: Colors.transparent,
-                selectedIndex: _selectedDestination,
+                selectedIndex: selectedDest,
                 indicatorColor: const Color.fromARGB(255, 66, 37, 255),
                 destinations: const [
                   NavigationDestination(icon: Icon(Icons.calendar_today_rounded), label: "Calendar"),
