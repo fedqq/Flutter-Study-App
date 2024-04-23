@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/utils.dart';
 import 'package:flutter_application_1/widgets/day_card.dart';
 import 'package:flutter_application_1/states/task.dart';
-import 'package:flutter_application_1/widgets/input_dialogs.dart';
+import 'package:flutter_application_1/reused_widgets/input_dialogs.dart';
 
 import 'dart:developer' as developer;
 
-import '../widgets/gradient_widgets.dart';
+import '../reused_widgets/gradient_widgets.dart';
 
 class CalendarPage extends StatefulWidget {
   final List<Task> tasks;
@@ -18,10 +18,24 @@ class CalendarPage extends StatefulWidget {
   State<CalendarPage> createState() => _CalendarPageState();
 }
 
-class _CalendarPageState extends State<CalendarPage> {
+class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderStateMixin {
   Set<TaskType> selected = {TaskType.homework};
   List<Task> timelyTasks = [];
   List<Task> lateTasks = [];
+  late AnimationController controller;
+  late Animation<double> animation;
+
+  @override
+  void initState() {
+    controller = AnimationController(vsync: this, value: 0, duration: Durations.long3);
+
+    animation = CurvedAnimation(
+      curve: Curves.easeIn,
+      reverseCurve: Curves.easeOutQuad,
+      parent: controller,
+    );
+    super.initState();
+  }
 
   Map<DateTime, List<Task>> getDateTasks(bool late) {
     Map<DateTime, List<Task>> ret = {};

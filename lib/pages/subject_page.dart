@@ -1,14 +1,14 @@
 import "package:flutter/material.dart";
 import "package:flutter_application_1/states/topic.dart";
 import "package:flutter_application_1/states/subject.dart";
-import "package:flutter_application_1/widgets/input_dialogs.dart";
+import "package:flutter_application_1/reused_widgets/input_dialogs.dart";
 import "package:flutter_application_1/widgets/topic_card.dart";
 import "package:multi_dropdown/multiselect_dropdown.dart";
 
 // ignore: unused_import
 import 'dart:developer' as developer;
 
-import "../widgets/gradient_widgets.dart";
+import "../reused_widgets/gradient_widgets.dart";
 
 class SubjectPage extends StatefulWidget {
   final Subject subject;

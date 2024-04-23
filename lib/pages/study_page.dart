@@ -1,5 +1,6 @@
 import "package:confirm_dialog/confirm_dialog.dart";
 import "package:flutter/material.dart";
+import "package:flutter_application_1/state_managers/statistics.dart";
 import "package:flutter_application_1/states/flashcard.dart";
 import "package:flutter_application_1/states/topic.dart";
 
@@ -7,8 +8,8 @@ import "package:flutter_application_1/states/topic.dart";
 import 'dart:developer' as developer;
 
 import "package:flutter_application_1/utils.dart";
-import "package:flutter_application_1/widgets/gradient_widgets.dart";
-import "package:flutter_application_1/widgets/input_dialogs.dart";
+import "package:flutter_application_1/reused_widgets/gradient_widgets.dart";
+import "package:flutter_application_1/reused_widgets/input_dialogs.dart";
 
 class StudyPage extends StatefulWidget {
   final List<FlashCard> cards;
@@ -179,7 +180,10 @@ class _StudyPageState extends State<StudyPage> {
                   padding: const EdgeInsets.fromLTRB(20.0, 0, 20, 0),
                   child: InkWell(
                     hoverColor: Colors.transparent,
-                    onTap: () => setState(() => showingMeaning = !showingMeaning),
+                    onTap: () {
+                      setState(() => showingMeaning = !showingMeaning);
+                      Statistics.study();
+                    },
                     child: AnimatedContainer(
                       duration: Durations.long1,
                       decoration: BoxDecoration(boxShadow: [

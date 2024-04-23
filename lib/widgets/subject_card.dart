@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/states/subject.dart';
 import 'package:flutter_application_1/utils.dart';
-import 'package:flutter_application_1/widgets/gradient_widgets.dart';
+import 'package:flutter_application_1/reused_widgets/gradient_widgets.dart';
 
 class SubjectCard extends StatefulWidget {
   final Subject subject;

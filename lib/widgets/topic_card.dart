@@ -8,8 +8,8 @@ import 'package:flutter_application_1/utils.dart';
 
 import 'dart:developer' as developer;
 
-import 'package:flutter_application_1/widgets/gradient_widgets.dart';
-import 'package:flutter_application_1/widgets/input_dialogs.dart';
+import 'package:flutter_application_1/reused_widgets/gradient_widgets.dart';
+import 'package:flutter_application_1/reused_widgets/input_dialogs.dart';
 
 class TopicCard extends StatefulWidget {
   final Topic topic;

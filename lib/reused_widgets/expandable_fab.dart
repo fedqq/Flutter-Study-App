@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/utils.dart';
-import 'package:flutter_application_1/widgets/gradient_widgets.dart';
+import 'package:flutter_application_1/reused_widgets/gradient_widgets.dart';
 
 class ExpandableFab extends StatefulWidget {
   final bool? initialOpen;

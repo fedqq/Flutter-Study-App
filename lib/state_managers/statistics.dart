@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Statistics {
   static Map<String, int> dailyStudied = {};
+  static String userName = '';
   static int dailyGoal = 0;
 
   static void load() async {
@@ -13,6 +14,7 @@ class Statistics {
       List<String> split = day.split('--');
       dailyStudied[split[0]] = int.parse(split[1]);
     }
+    userName = prefs.getString('user-name') ?? '';
   }
 
   static void save() async {
@@ -23,10 +25,12 @@ class Statistics {
       reparsed.add('$key--${dailyStudied[key]}');
     }
     prefs.setStringList('studied-per-day', reparsed);
+
+    prefs.setString('user-name', userName);
   }
 
   static void study() async {
-    String formatted = DateFormat("EEEE, MMMM, yyyy", 'en-US').format(DateTime.now());
+    String formatted = getNowString();
     if (!dailyStudied.containsKey(formatted)) {
       dailyStudied[formatted] = 1;
       return;
@@ -37,4 +41,8 @@ class Statistics {
   static void setDailyGoal(int goal) {
     dailyGoal = goal;
   }
+
+  static int getTodayStudied() => dailyStudied[getNowString()] ?? 0;
+
+  static String getNowString() => DateFormat("EEEE, MMMM, yyyy", 'en-US').format(DateTime.now());
 }

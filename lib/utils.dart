@@ -1,16 +1,6 @@
 import "package:flutter/material.dart";
 import 'dart:math';
 
-bool validInput(String str) {
-  List<String> invalid = [',', '[', ']', '{', '}', '-', '=', '!', '*'];
-  for (String c in invalid) {
-    if (str.contains(c)) {
-      return false;
-    }
-  }
-  return true;
-}
-
 Future<void> simpleSnackBar(BuildContext context, String s) async =>
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       behavior: SnackBarBehavior.floating,

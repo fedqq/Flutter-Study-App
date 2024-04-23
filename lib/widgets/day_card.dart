@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/widgets/gradient_widgets.dart';
+import 'package:flutter_application_1/reused_widgets/gradient_widgets.dart';
 import 'package:flutter_application_1/widgets/task_popup.dart';
 import 'package:flutter_application_1/states/task.dart';
 import 'package:flutter_application_1/utils.dart';

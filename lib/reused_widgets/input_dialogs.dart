@@ -2,6 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/utils.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 
+bool validInput(String str) {
+  List<String> invalid = [',', '[', ']', '{', '}', '-', '=', '!', '*'];
+  for (String c in invalid) {
+    if (str.contains(c)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 class DialogResult {
   String first = '';
   String second = '';
@@ -17,6 +27,7 @@ Future<String?> showInputDialog(
   String name, {
   String initialValue = '',
   bool Function(String)? extraValidate,
+  bool cancellable = true,
 }) async {
   DialogResult? result = await showDoubleInputDialog(
     context,
@@ -25,6 +36,7 @@ Future<String?> showInputDialog(
     '',
     initialValue: initialValue,
     extraValidateFirst: extraValidate,
+    cancellable: cancellable,
   );
 
   if (result == null) {
@@ -34,8 +46,16 @@ Future<String?> showInputDialog(
   }
 }
 
-Future<DialogResult?> showDoubleInputDialog(BuildContext context, String title, String first, String second,
-    {bool nullableSecond = false, String initialValue = '', bool Function(String)? extraValidateFirst}) async {
+Future<DialogResult?> showDoubleInputDialog(
+  BuildContext context,
+  String title,
+  String first,
+  String second, {
+  bool nullableSecond = false,
+  String initialValue = '',
+  bool Function(String)? extraValidateFirst,
+  bool cancellable = true,
+}) async {
   String? firstStr = '';
   String? secondStr = second == '' ? '404' : '';
   await showDialog(
@@ -81,14 +101,15 @@ Future<DialogResult?> showDoubleInputDialog(BuildContext context, String title, 
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              TextButton(
-                child: const Text('Cancel'),
-                onPressed: () {
-                  firstStr = '';
-                  secondStr = '';
-                  Navigator.of(context).maybePop();
-                },
-              ),
+              if (cancellable)
+                TextButton(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    firstStr = '';
+                    secondStr = '';
+                    Navigator.of(context).maybePop();
+                  },
+                ),
               FilledButton(
                 child: const Text('Confirm'),
                 onPressed: () {

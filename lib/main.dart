@@ -4,9 +4,9 @@ import 'package:flutter_application_1/pages/stats_page.dart';
 import 'package:flutter_application_1/pages/subjects_page.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/data_manager.dart';
+import 'package:flutter_application_1/state_managers/data_manager.dart';
 import 'package:flutter_application_1/pages/calendar_page.dart';
-import 'package:flutter_application_1/states/statistics.dart';
+import 'package:flutter_application_1/state_managers/statistics.dart';
 import 'package:flutter_application_1/states/subject.dart';
 
 import 'package:flutter_application_1/states/task.dart';
@@ -15,7 +15,7 @@ import 'package:flutter_application_1/utils.dart';
 // ignore: unused_import
 import 'dart:developer' as developer;
 
-import 'package:flutter_application_1/widgets/gradient_widgets.dart';
+import 'package:flutter_application_1/reused_widgets/gradient_widgets.dart';
 
 // ignore: constant_identifier_names
 const bool CLEAR = false;
@@ -64,6 +64,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     SaveDataManager.saveData(subjects, tasks);
+    Statistics.save();
     super.dispose();
   }
 
