@@ -3,7 +3,6 @@ import "package:flutter_application_1/states/topic.dart";
 import "package:flutter_application_1/states/subject.dart";
 import "package:flutter_application_1/reused_widgets/input_dialogs.dart";
 import "package:flutter_application_1/widgets/topic_card.dart";
-import "package:multi_dropdown/multiselect_dropdown.dart";
 
 // ignore: unused_import
 import 'dart:developer' as developer;
@@ -19,21 +18,14 @@ class SubjectPage extends StatefulWidget {
 }
 
 class _SubjectPageState extends State<SubjectPage> {
-  late TextEditingController newTopicNameController;
+  void newTopic() async {
+    final String topicName = await showInputDialog(context, 'New Topic Name', 'Name') ?? '';
 
-  @override
-  void initState() {
-    newTopicNameController = TextEditingController();
-    super.initState();
+    if (topicName == '') return;
+    Topic topic = Topic(topicName);
+
+    setState(() => widget.subject.addTopic(topic));
   }
-
-  @override
-  void dispose() {
-    newTopicNameController.dispose();
-    super.dispose();
-  }
-
-  void selectTopic(List<ValueItem<dynamic>> topics) {}
 
   @override
   Widget build(BuildContext context) {
@@ -51,18 +43,8 @@ class _SubjectPageState extends State<SubjectPage> {
       backgroundColor: Colors.transparent,
       appBar: AppBar(title: Text(widget.subject.name)),
       floatingActionButton: GradientActionButton(
-        onPressed: () async {
-          final String topicName = await showInputDialog(context, 'New Topic Name', 'Name') ?? '';
-
-          Topic topic = Topic(topicName);
-          if (topic.name == '') return;
-
-          setState(() {
-            widget.subject.addTopic(topic);
-          });
-        },
+        onPressed: newTopic,
         tooltip: 'New Topic',
-        child: const Icon(Icons.add_rounded),
       ),
       body: Stack(
         children: [

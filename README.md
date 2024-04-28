@@ -16,6 +16,10 @@ Features In Progress:
 
 Features To Be Added:
 
+- Automatically closing optionmenu
+- Fixcing importing on android
+- Daily reminder notification
+- Homescreen widget shortcut
 - Tests
 - Customization
 - Light theme

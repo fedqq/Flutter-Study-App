@@ -2,11 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/utils.dart';
 import 'package:flutter_application_1/reused_widgets/gradient_widgets.dart';
 
+class ExFabController {
+  bool open = false;
+  late void Function(bool) updateState;
+  void close() {
+    open = false;
+
+    updateState(open);
+  }
+
+  void expand() {
+    open = true;
+    updateState(open);
+  }
+
+  void setCallback(var func) {
+    updateState = func;
+  }
+}
+
 class ExpandableFab extends StatefulWidget {
-  final bool? initialOpen;
-  final double distance;
   final List<Widget> children;
-  const ExpandableFab({super.key, this.initialOpen, required this.distance, required this.children});
+  final ExFabController? controller;
+  const ExpandableFab({super.key, required this.children, this.controller});
 
   @override
   State<ExpandableFab> createState() => _ExpandableFabState();
@@ -31,10 +49,19 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
     );
   }
 
+  void set(bool b) {
+    if (b != _open) {
+      toggle();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    _open = widget.initialOpen ?? false;
+    if (widget.controller != null) {
+      widget.controller?.setCallback(set);
+    }
+    _open = false;
     _controller = AnimationController(
       value: _open ? 1.0 : 0.0,
       duration: const Duration(milliseconds: 250),

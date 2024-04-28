@@ -34,6 +34,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Study App',
       theme: ThemeData(
         colorScheme: const ColorScheme.dark(),
@@ -57,13 +58,14 @@ class NavigationPage extends StatefulWidget {
 class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObserver {
   List<Subject> subjects = [];
   List<Task> tasks = [];
+  List<Task> completedTasks = [];
   int selectedDest = 0;
   PageController pageController = PageController();
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    SaveDataManager.saveData(subjects, tasks);
+    SaveDataManager.saveData(subjects, tasks, completedTasks);
     Statistics.save();
     super.dispose();
   }
@@ -78,10 +80,13 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
   void loadData() async {
     var subjectsAsync = await SaveDataManager.loadSubjects();
     var tasksAsync = await SaveDataManager.loadTasks();
+    var completedTasksAsync = await SaveDataManager.loadCompletedTasks();
     Statistics.load();
+    developer.log(completedTasksAsync.toString());
     setState(() {
       subjects = subjectsAsync;
       tasks = tasksAsync;
+      completedTasks = completedTasksAsync;
     });
   }
 
@@ -93,7 +98,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    SaveDataManager.saveData(subjects, tasks);
+    SaveDataManager.saveData(subjects, tasks, completedTasks);
     Statistics.save();
     super.didChangeAppLifecycleState(state);
   }
@@ -108,7 +113,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
   @override
   Widget build(BuildContext context) {
     List<Widget> pages = [
-      CalendarPage(tasks: tasks),
+      CalendarPage(tasks: tasks, completedTasks: completedTasks),
       SubjectsPage(subjects: subjects),
       const StatsPage(),
     ];

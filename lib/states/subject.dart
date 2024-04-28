@@ -13,5 +13,28 @@ class Subject {
   }
 
   @override
-  String toString() => '$name--${color.value}';
+  String toString() {
+    String ret = '${name}__${color.value}///';
+    if (topics.isEmpty) {
+      for (Topic topic in topics) {
+        ret += '${topic.toString()}]';
+      }
+    }
+    return ret;
+  }
+
+  static Subject fromString(String str) {
+    String nameStr;
+    String topicsStr;
+    [nameStr, topicsStr] = str.split('///');
+    String name;
+    String color;
+    [name, color] = nameStr.split('__');
+    if (topicsStr.isEmpty) return Subject(name, Color(int.parse(color)));
+    List<String> topicsData = topicsStr.split(']');
+    List<Topic> topics = List.generate(topicsData.length - 1, (i) => Topic.fromString(topicsData[i]));
+    Subject ret = Subject(name, Color(int.parse(color)));
+    ret.topics = topics;
+    return ret;
+  }
 }

@@ -14,8 +14,8 @@ import "package:flutter_application_1/reused_widgets/input_dialogs.dart";
 class StudyPage extends StatefulWidget {
   final List<FlashCard> cards;
   final Topic topic;
-  final Function(String) renameCallback;
-  const StudyPage({super.key, required this.cards, required this.topic, required this.renameCallback});
+  final Function(String)? renameCallback;
+  const StudyPage({super.key, required this.cards, required this.topic, this.renameCallback});
 
   @override
   State<StudyPage> createState() => _StudyPageState();
@@ -83,7 +83,7 @@ class _StudyPageState extends State<StudyPage> {
             context,
             'Rename ${cards[currentCard].name}',
             'Name',
-            initialValue: cards[currentCard].meaning,
+            initialValue: cards[currentCard].name,
           ) ??
           '';
       if (newName == '') return;
@@ -113,46 +113,35 @@ class _StudyPageState extends State<StudyPage> {
     if (newName == '') return;
     setState(() {
       widget.topic.name = newName;
-      widget.renameCallback(newName);
+      widget.renameCallback!(newName);
     });
+  }
+
+  Widget buildNavButton(double opacity, void Function() onPressed, String heroTag) {
+    return AnimatedOpacity(
+      duration: Durations.short1,
+      opacity: opacity,
+      child: GradientOutline(
+        gradient: Theming.grayGradient,
+        child: FloatingActionButton(
+          heroTag: heroTag,
+          onPressed: onPressed,
+          backgroundColor: Colors.transparent,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          hoverElevation: 0,
+          child: const Icon(Icons.arrow_back_ios_rounded),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    //Create row including next and previous buttons
     Row buttons = Row(children: [
-      AnimatedOpacity(
-        duration: Durations.short1,
-        opacity: currentCard == 0 ? 0.2 : 1,
-        child: GradientOutline(
-          gradient: Theming.grayGradient,
-          child: FloatingActionButton(
-            heroTag: 'backwardbtn',
-            onPressed: goBackward,
-            backgroundColor: Colors.transparent,
-            foregroundColor: Colors.white,
-            elevation: 0,
-            hoverElevation: 0,
-            child: const Icon(Icons.arrow_back_ios_rounded),
-          ),
-        ),
-      ),
+      buildNavButton(currentCard == 0 ? 0.2 : 1, goBackward, 'backwardbtn'),
       const Spacer(),
-      AnimatedOpacity(
-        duration: Durations.short1,
-        opacity: currentCard == cards.length - 1 ? 0.2 : 1,
-        child: GradientOutline(
-          gradient: Theming.grayGradient,
-          child: FloatingActionButton(
-            onPressed: goForward,
-            backgroundColor: Colors.transparent,
-            foregroundColor: Colors.white,
-            elevation: 0,
-            hoverElevation: 0,
-            child: const Icon(Icons.arrow_forward_ios_rounded),
-          ),
-        ),
-      )
+      buildNavButton(currentCard == cards.length - 1 ? 0.2 : 1, goForward, 'forwardbtn'),
     ]);
 
     return Scaffold(
@@ -165,7 +154,8 @@ class _StudyPageState extends State<StudyPage> {
                   child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  IconButton(icon: const Icon(Icons.edit_rounded), onPressed: editTopicName),
+                  if (widget.renameCallback != null)
+                    IconButton(icon: const Icon(Icons.edit_rounded), onPressed: editTopicName),
                   SizedBox(
                     height: 75,
                     child: Text(
@@ -182,19 +172,25 @@ class _StudyPageState extends State<StudyPage> {
                     hoverColor: Colors.transparent,
                     onTap: () {
                       setState(() => showingMeaning = !showingMeaning);
-                      Statistics.study();
+                      if (showingMeaning) {
+                        if (Statistics.study()) {
+                          simpleSnackBar(context, 'You reached you daily goal of ${Statistics.dailyGoal} terms!');
+                        }
+                      }
                     },
                     child: AnimatedContainer(
                       duration: Durations.long1,
-                      decoration: BoxDecoration(boxShadow: [
-                        BoxShadow(
-                          color: !cards[currentCard].learned
-                              ? Theming.boxShadowColor
-                              : const Color.fromARGB(80, 30, 253, 0),
-                          spreadRadius: 0,
-                          blurRadius: 20,
-                        )
-                      ]),
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: !cards[currentCard].learned
+                                ? Theming.boxShadowColor
+                                : const Color.fromARGB(80, 30, 253, 0),
+                            spreadRadius: 0,
+                            blurRadius: 20,
+                          )
+                        ],
+                      ),
                       child: GradientOutline(
                           gradient: cards[currentCard].learned
                               ? Theming.gradientToDarker(const Color.fromARGB(80, 30, 253, 0))

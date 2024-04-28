@@ -1,17 +1,20 @@
 import "package:flutter/material.dart";
 import 'dart:math';
 
-Future<void> simpleSnackBar(BuildContext context, String s) async =>
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      behavior: SnackBarBehavior.floating,
-      content: Text(s),
-    ));
+void simpleSnackBar(BuildContext context, String s) async {
+  ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
+  messenger.clearSnackBars();
+  messenger.showSnackBar(SnackBar(behavior: SnackBarBehavior.floating, content: Text(s)));
+}
 
 class Theming {
   static double radius = 20;
   static double padding = 3;
 
-  static const List<Color> gradientColors = [Color.fromARGB(255, 135, 0, 193), Color.fromARGB(255, 34, 0, 253)];
+  static const purple = Color.fromARGB(255, 135, 0, 193);
+  static const blue = Color.fromARGB(255, 34, 0, 253);
+
+  static const List<Color> gradientColors = [purple, blue];
 
   static Color boxShadowColor = gradientColors[1].withAlpha(60);
 

@@ -14,7 +14,7 @@ class Topic {
   String toString() {
     String cardData = '';
     for (FlashCard card in cards) {
-      cardData += '${card.toString()},';
+      cardData += '${card.toString()};';
     }
 
     if (cardData.isNotEmpty) cardData = cardData.substring(0, cardData.length - 1);
@@ -29,7 +29,7 @@ class Topic {
     Topic finalTopic = Topic(name);
     String cards = split[1];
     if (cards != '') {
-      List<String> cards = split[1].split(',');
+      List<String> cards = split[1].split(';');
       for (String cardString in cards) {
         finalTopic.addCard(FlashCard.fromString(cardString));
       }

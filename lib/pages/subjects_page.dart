@@ -1,20 +1,27 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'dart:ffi';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:confirm_dialog/confirm_dialog.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/subject_page.dart';
+import 'package:flutter_application_1/pages/study_page.dart';
+import 'package:flutter_application_1/states/flashcard.dart';
 import 'package:flutter_application_1/states/subject.dart';
+import 'package:flutter_application_1/states/topic.dart';
 import 'package:flutter_application_1/utils.dart';
 import 'package:flutter_application_1/reused_widgets/expandable_fab.dart';
 import 'package:flutter_application_1/reused_widgets/input_dialogs.dart';
 import 'package:flutter_application_1/widgets/subject_card.dart';
 import 'package:flutter_application_1/widgets/subject_option_menu.dart';
+import 'package:path_provider/path_provider.dart';
 
 // ignore: unused_import
 import 'dart:developer' as developer;
+
+import 'package:share_plus/share_plus.dart';
 
 class SubjectsPage extends StatefulWidget {
   final List<Subject> subjects;
@@ -31,6 +38,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
   late Animation<double> enterAnimation;
   late AnimationController blurController;
   late Animation<double> blurAnimation;
+  ExFabController controller = ExFabController();
 
   @override
   void initState() {
@@ -62,7 +70,13 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
       Navigator.push(context, MaterialPageRoute(builder: (_) => SubjectPage(subject: subject)))
           .then((value) => setState(() => currentFocused = -1));
 
+  void closeMenus() => setState(() {
+        controller.close();
+        currentFocused = -1;
+      });
+
   void newSubject() async {
+    closeMenus();
     bool validate(String str) {
       if (getSubjectNames().contains(str)) {
         simpleSnackBar(context, 'Subject named $str already exists');
@@ -86,27 +100,53 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     });
   }
 
-  void deleteSubject(int index) async {
-    if (widget.subjects.length == 1) return;
-    if (index == -1) index = currentFocused;
-    if (await confirm(context, title: Text('Delete ${widget.subjects[index].name}'))) {
-      setState(() => widget.subjects.removeAt(index));
+  void deleteSubject() async {
+    closeMenus();
+    if (await confirm(context, title: Text('Delete ${widget.subjects[currentFocused].name}'))) {
+      setState(() => widget.subjects.removeAt(currentFocused));
     }
   }
 
-  void editColor(int index) async {
-    if (index == -1) index = currentFocused;
-    Color? newColor = await showColorPicker(context, widget.subjects[index].color);
+  void editColor() async {
+    closeMenus();
+    Color? newColor = await showColorPicker(context, widget.subjects[currentFocused].color);
     if (newColor == null) return;
-    setState(() => widget.subjects[index].color = newColor);
+    setState(() => widget.subjects[currentFocused].color = newColor);
+  }
+
+  void exportSubject() async {
+    closeMenus();
+    String res = widget.subjects[currentFocused].toString();
+    String dir = (await getTemporaryDirectory()).path;
+    File temp = File('$dir/${widget.subjects[currentFocused].name}.txt');
+    developer.log(dir);
+    temp.writeAsString(res);
+    Share.shareXFiles([XFile('$dir/${widget.subjects[currentFocused].name}.txt')]);
+  }
+
+  void importSubject() async {
+    closeMenus();
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    if (result != null) {
+      File file = File(result.files.single.path!);
+      String res = await file.readAsString();
+      Subject subject;
+      try {
+        subject = Subject.fromString(res);
+      } catch (e) {
+        simpleSnackBar(context, 'Invalid Format. ');
+        return;
+      }
+      setState(() {
+        widget.subjects.add(subject);
+      });
+    }
   }
 
   List<String> getSubjectNames() => List.generate(widget.subjects.length, (index) => widget.subjects[index].name);
 
-  void editSubject(int index) async {
-    if (index == -1) {
-      index = currentFocused;
-    }
+  void editSubject() async {
+    closeMenus();
 
     bool validate(String str) {
       if (getSubjectNames().contains(str)) {
@@ -116,24 +156,40 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
       return true;
     }
 
-    String newName =
-        await showInputDialog(context, 'Rename ${widget.subjects[index].name}', 'Name', extraValidate: validate) ?? '';
+    String newName = await showInputDialog(context, 'Rename ${widget.subjects[currentFocused].name}', 'Name',
+            extraValidate: validate) ??
+        '';
 
     if (newName == '') return;
 
-    setState(() => widget.subjects[index].name = newName);
+    setState(() => widget.subjects[currentFocused].name = newName);
   }
 
   void clearSubjects() async {
+    closeMenus();
     bool confirmed = await confirm(context,
         title: const Text('Delete All Subjects'),
         content: const Text('Are you sure you would like to delete all subjects? This action cannot be undone. '));
     if (confirmed) {
-      widget.subjects.clear();
+      setState(() {
+        widget.subjects.clear();
+        currentFocused = -1;
+      });
     }
   }
 
-  void studyAll() {}
+  void studyAll() {
+    closeMenus();
+    List<FlashCard> cards = [];
+    for (Subject subject in widget.subjects) {
+      for (Topic topic in subject.topics) {
+        cards += topic.cards;
+      }
+    }
+    if (cards.isEmpty) return;
+    Navigator.push(context,
+        MaterialPageRoute(builder: (_) => StudyPage(cards: cards, topic: Topic('All Subjects'), renameCallback: null)));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -147,7 +203,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
           title: Text(widget.subjects.length == 1 ? 'Study 1 Subject' : 'Study ${widget.subjects.length} Subjects',
               style: const TextStyle(fontWeight: FontWeight.bold))),
       floatingActionButton: ExpandableFab(
-        distance: 112,
+        controller: controller,
         children: [
           ActionButton(
             onPressed: newSubject,
@@ -155,74 +211,85 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
           ),
           ActionButton(
             onPressed: clearSubjects,
-            icon: const Icon(Icons.delete_rounded),
+            icon: const Icon(Icons.delete_forever_rounded),
           ),
           ActionButton(
             onPressed: studyAll,
             icon: const Icon(Icons.school_rounded),
+          ),
+          ActionButton(
+            onPressed: importSubject,
+            icon: const Icon(Icons.file_upload_rounded),
           ),
         ],
       ),
       body: GestureDetector(
         onTap: () async {
           await blurController.reverse();
-          setState(() {
-            currentFocused = -1;
-          });
+          closeMenus();
+          setState(() => currentFocused = -1);
         },
         child: AnimatedBuilder(
           animation: enterController,
-          builder: (context, _) => ListView.builder(
-            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8 + (60 * (1 - enterAnimation.value))),
-            itemCount: widget.subjects.length,
-            itemBuilder: (context, index) => GestureDetector(
-              onTap: () async {
-                if (currentFocused == -1 ? false : currentFocused != index) {
-                  await blurController.reverse();
-                  setState(() {
-                    currentFocused = -1;
-                  });
-                } else {
-                  study(widget.subjects[index]);
-                }
-              },
-              onLongPress: () => setState(() {
-                currentFocused = index;
-                blurController.forward();
-              }),
-              child: AnimatedBuilder(
-                animation: blurAnimation,
-                builder: (_, __) => ImageFiltered(
-                  imageFilter: (currentFocused == -1 ? false : currentFocused != index)
-                      ? ImageFilter.blur(
-                          sigmaX: 8 * blurAnimation.value, sigmaY: 8 * blurAnimation.value, tileMode: TileMode.decal)
-                      : ImageFilter.blur(
-                          sigmaX: 8 * (1 - enterAnimation.value), sigmaY: 8 * (1 - enterAnimation.value)),
-                  child: Stack(children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(50),
-                        boxShadow: [
-                          BoxShadow(
-                            color: widget.subjects[index].color.withAlpha((60 * enterAnimation.value).toInt()),
-                            blurRadius: 10.0 * enterAnimation.value,
-                            spreadRadius: currentFocused == index ? 0 : -8,
-                          ),
-                        ],
+          builder: (context, _) => widget.subjects.isEmpty
+              ? const Center(child: Text('No Subjects. Expand the menu and press + to make a new subject. '))
+              : ListView.builder(
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                  itemCount: widget.subjects.length,
+                  itemBuilder: (context, index) => GestureDetector(
+                    onTap: () async {
+                      closeMenus();
+                      if (currentFocused == -1 ? false : currentFocused != index) {
+                        await blurController.reverse();
+                        setState(() => currentFocused = -1);
+                      } else {
+                        study(widget.subjects[index]);
+                      }
+                    },
+                    onLongPress: () => setState(() {
+                      closeMenus();
+                      currentFocused = index;
+                      blurController.forward();
+                    }),
+                    child: AnimatedBuilder(
+                      animation: blurAnimation,
+                      builder: (_, __) => ImageFiltered(
+                        imageFilter: (currentFocused == -1 ? false : currentFocused != index)
+                            ? ImageFilter.blur(
+                                sigmaX: 8 * blurAnimation.value,
+                                sigmaY: 8 * blurAnimation.value,
+                                tileMode: TileMode.decal)
+                            : ImageFilter.blur(
+                                sigmaX: 8 * (1 - enterAnimation.value), sigmaY: 8 * (1 - enterAnimation.value)),
+                        child: Stack(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(50),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: widget.subjects[index].color.withAlpha((60 * enterAnimation.value).toInt()),
+                                    blurRadius: 10.0 * enterAnimation.value,
+                                    spreadRadius: currentFocused == index ? 0 : -8,
+                                  ),
+                                ],
+                              ),
+                              child: SubjectCard(subject: widget.subjects[index]),
+                            ),
+                            if (currentFocused == index)
+                              SubjectOptionMenu(
+                                editSubject: editSubject,
+                                editColor: editColor,
+                                deleteSubject: deleteSubject,
+                                exportSubject: exportSubject,
+                                animation: blurAnimation,
+                              )
+                          ],
+                        ),
                       ),
-                      child: SubjectCard(subject: widget.subjects[index]),
                     ),
-                    if (currentFocused == index)
-                      SubjectOptionMenu(
-                        editSubject: () => editSubject(-1),
-                        editColor: () => editColor(-1),
-                        deleteSubject: () => deleteSubject(-1),
-                      )
-                  ]),
+                  ),
                 ),
-              ),
-            ),
-          ),
         ),
       ),
     );

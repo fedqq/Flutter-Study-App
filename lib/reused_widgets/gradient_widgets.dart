@@ -4,8 +4,8 @@ import 'package:flutter_application_1/utils.dart';
 class GradientActionButton extends StatelessWidget {
   final Function() onPressed;
   final String tooltip;
-  final Widget child;
-  const GradientActionButton({super.key, required this.onPressed, required this.tooltip, required this.child});
+  final Icon? icon;
+  const GradientActionButton({super.key, required this.onPressed, required this.tooltip, this.icon});
 
   @override
   Widget build(BuildContext context) => Container(
@@ -17,7 +17,7 @@ class GradientActionButton extends StatelessWidget {
           foregroundColor: Colors.white,
           elevation: 0,
           hoverElevation: 0,
-          child: child,
+          child: icon ?? const Icon(Icons.add_rounded),
         ),
       );
 }

@@ -1,7 +1,11 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/reused_widgets/expandable_fab.dart';
 import 'package:flutter_application_1/state_managers/statistics.dart';
 import 'package:flutter_application_1/reused_widgets/input_dialogs.dart';
 import 'package:flutter_application_1/utils.dart';
+import 'package:flutter_application_1/widgets/studied_chart.dart';
 
 class StatsPage extends StatefulWidget {
   const StatsPage({super.key});
@@ -33,6 +37,29 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
     super.initState();
   }
 
+  void setDailyGoal() async {
+    String result = await showInputDialog(context, 'Choose Daily Goal', 'Goal',
+            numerical: true, extraValidate: (str) => (int.tryParse(str) ?? 0) > 0) ??
+        '';
+    if (result == '') return;
+    setState(() => Statistics.dailyGoal = int.parse(result));
+  }
+
+  void editUserName() async {
+    String name = await showInputDialog(context, 'Change Username', 'Username') ?? '';
+    if (name == '') return;
+    setState(() {
+      Statistics.userName = name;
+    });
+  }
+
+  void editReminderTime() async {
+    TimeOfDay? time = await showTimePicker(context: context, initialTime: Statistics.getTime());
+    if (time != null) {
+      setState(() => Statistics.setTime(time));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (Statistics.userName == '') {
@@ -42,44 +69,87 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
         showingNameInput = true;
         Future<String?> res = showInputDialog(context, 'Set User Name', 'Name', cancellable: false);
         String name = await res ?? '';
+        setState(() => Statistics.userName = name);
         showingNameInput = false;
-        setState(() {
-          Statistics.userName = name;
-        });
       });
     }
 
     controller.forward();
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Center(
-        child: Column(
-          children: [
-            AnimatedBuilder(
-              animation: animation,
-              builder: (context, __) => Container(
-                margin: const EdgeInsets.all(100.0),
-                decoration: BoxDecoration(boxShadow: [
-                  BoxShadow(
-                    color: Theming.coloredGradient.colors[0].withAlpha((120 * animation.value).toInt()),
-                    blurRadius: 60 * animation.value,
-                  )
-                ]),
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    'Hello ${Statistics.userName}',
-                    textAlign: TextAlign.right,
-                    overflow: TextOverflow.visible,
-                    softWrap: false,
-                    style: Theme.of(context).textTheme.displayLarge!.copyWith(fontWeight: FontWeight.bold),
+    ExFabController exFabController = ExFabController();
+
+    return SafeArea(
+      child: GestureDetector(
+        onTap: () => setState(() => exFabController.close()),
+        child: Scaffold(
+          extendBodyBehindAppBar: true,
+          backgroundColor: Colors.transparent,
+          floatingActionButton: ExpandableFab(
+            controller: exFabController,
+            children: [
+              ActionButton(onPressed: editUserName, icon: const Icon(Icons.person_rounded)),
+              ActionButton(onPressed: setDailyGoal, icon: const Icon(Icons.flag_rounded)),
+              ActionButton(onPressed: editReminderTime, icon: const Icon(Icons.access_time_rounded))
+            ],
+          ),
+          body: Column(
+            children: [
+              AnimatedBuilder(
+                animation: animation,
+                builder: (context, __) => Container(
+                  margin: const EdgeInsets.fromLTRB(80.0, 30, 80, 50),
+                  decoration: BoxDecoration(boxShadow: [
+                    BoxShadow(
+                      color: Theming.purple.withAlpha((120 * animation.value).toInt()),
+                      blurRadius: 60 * animation.value,
+                    )
+                  ]),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: ImageFiltered(
+                      imageFilter:
+                          ImageFilter.blur(sigmaX: 8 * (1 - animation.value), sigmaY: 8 * (1 - animation.value)),
+                      child: Text(
+                        'Hello\n${Statistics.userName}',
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.visible,
+                        softWrap: false,
+                        style: Theme.of(context)
+                            .textTheme
+                            .displayLarge!
+                            .copyWith(fontWeight: FontWeight.w800, fontSize: 100),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-            Text('Today you have studied ${Statistics.getTodayStudied()} cards out of ${Statistics.dailyGoal}')
-          ],
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                    'Today you have studied ${Statistics.getTodayStudied()}\ncards out of ${Statistics.dailyGoal}',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold)),
+              ),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(52, 20, 52, 50),
+                  child: AnimatedBuilder(
+                    animation: animation,
+                    builder: (_, __) => Container(
+                        decoration: BoxDecoration(boxShadow: [
+                          BoxShadow(
+                              color: Theming.blue.withAlpha((80 * animation.value).toInt()),
+                              spreadRadius: 10,
+                              blurRadius: 60 * animation.value)
+                        ]),
+                        child: StudiedChart(animValue: animation.value)),
+                  ),
+                ),
+              ),
+              Text('Daily reminder at: ${Statistics.reminderTime}',
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold))
+            ],
+          ),
         ),
       ),
     );

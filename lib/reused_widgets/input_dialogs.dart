@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/utils.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
+// ignore: unused_import
+import 'dart:developer' as developer;
 
 bool validInput(String str) {
-  List<String> invalid = [',', '[', ']', '{', '}', '-', '=', '!', '*'];
+  List<String> invalid = ['<', '>', '///', '__', ']', ';', '|'];
+
   for (String c in invalid) {
     if (str.contains(c)) {
       return false;
@@ -28,6 +31,7 @@ Future<String?> showInputDialog(
   String initialValue = '',
   bool Function(String)? extraValidate,
   bool cancellable = true,
+  bool numerical = false,
 }) async {
   DialogResult? result = await showDoubleInputDialog(
     context,
@@ -37,6 +41,7 @@ Future<String?> showInputDialog(
     initialValue: initialValue,
     extraValidateFirst: extraValidate,
     cancellable: cancellable,
+    numerical: numerical,
   );
 
   if (result == null) {
@@ -53,11 +58,13 @@ Future<DialogResult?> showDoubleInputDialog(
   String second, {
   bool nullableSecond = false,
   String initialValue = '',
+  String initialSecondValue = '',
   bool Function(String)? extraValidateFirst,
   bool cancellable = true,
+  bool numerical = false,
 }) async {
-  String? firstStr = '';
-  String? secondStr = second == '' ? '404' : '';
+  String? firstStr = initialValue;
+  String? secondStr = initialSecondValue;
   await showDialog(
     context: context,
     barrierDismissible: false,
@@ -73,6 +80,8 @@ Future<DialogResult?> showDoubleInputDialog(
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextFormField(
+              keyboardType: numerical ? TextInputType.number : TextInputType.name,
+              textCapitalization: TextCapitalization.sentences,
               initialValue: initialValue,
               onChanged: (newText) => firstStr = newText,
               autofocus: true,
@@ -85,7 +94,9 @@ Future<DialogResult?> showDoubleInputDialog(
           if (second != '')
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: TextField(
+              child: TextFormField(
+                textCapitalization: TextCapitalization.sentences,
+                initialValue: initialSecondValue,
                 onChanged: (newText) => secondStr = newText,
                 decoration: InputDecoration(
                   border: const OutlineInputBorder(),
@@ -113,9 +124,12 @@ Future<DialogResult?> showDoubleInputDialog(
               FilledButton(
                 child: const Text('Confirm'),
                 onPressed: () {
+                  firstStr = firstStr ?? ''.trim();
+                  secondStr = secondStr ?? ''.trim();
+
                   bool extraValidated = true;
                   if (extraValidateFirst != null) {
-                    extraValidated = extraValidateFirst(first);
+                    extraValidated = extraValidateFirst(firstStr ?? '');
                   }
 
                   bool validFirst = (firstStr != '');
@@ -130,6 +144,7 @@ Future<DialogResult?> showDoubleInputDialog(
                   }
 
                   validFirst = validInput(firstStr ?? '') && extraValidated && validFirst;
+
                   validSecond = validInput(secondStr ?? '') && validSecond;
 
                   if (!validFirst) {
@@ -142,6 +157,13 @@ Future<DialogResult?> showDoubleInputDialog(
                     simpleSnackBar(context,
                         'Invalid ${second.toLowerCase()}. Please remove any special characters and do not leave ${second.toLowerCase()} empty. ');
                     return;
+                  }
+
+                  if (numerical) {
+                    if (int.tryParse(firstStr ?? '') == null) {
+                      simpleSnackBar(context, 'Only numbers allowed in ${first.toLowerCase()}');
+                      return;
+                    }
                   }
 
                   Navigator.of(context).pop();

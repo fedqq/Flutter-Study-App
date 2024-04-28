@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 enum TaskType { homework, test, quiz, coursework, personal }
 
 class Task {
-  late String task;
+  late String name;
   late TaskType type;
   late DateTime dueDate;
   late bool completed;
@@ -11,14 +11,14 @@ class Task {
   late String desc;
   late int review;
 
-  Task(this.type, this.task, this.dueDate, this.completed, this.color, this.desc);
+  Task(this.type, this.name, this.dueDate, this.completed, this.color, this.desc);
 
   @override
   String toString() =>
-      '$task,${type.toString()},${dueDate.millisecondsSinceEpoch.toString()},${completed.toString()},${color.value},$desc';
+      '$name;${type.toString()};${dueDate.millisecondsSinceEpoch.toString()};${completed.toString()};${color.value};$desc';
 
   static Task fromString(String str) {
-    List<String> data = str.split(',');
+    List<String> data = str.split(';');
     String name = data[0];
     TaskType type = typeFromString(data[1]);
     DateTime date = DateTime.fromMillisecondsSinceEpoch(int.parse(data[2]));
