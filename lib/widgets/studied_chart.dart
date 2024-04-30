@@ -3,8 +3,9 @@ import 'dart:math';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/state_managers/statistics.dart';
-import 'package:flutter_application_1/utils.dart';
 import 'package:intl/intl.dart';
+
+import '../utils/theming.dart';
 
 class StudiedChart extends StatefulWidget {
   final double animValue;
@@ -20,6 +21,7 @@ class _StudiedChartState extends State<StudiedChart> {
     for (int i = 0; i < 7; i++) {
       strs.add(DateFormat("EEE", 'en-US').format(DateTime.now().add(Duration(days: 7 - i))));
     }
+
     return strs.reversed.toList();
   }
 
@@ -34,6 +36,7 @@ class _StudiedChartState extends State<StudiedChart> {
           max = i;
         }
       }
+
       return max;
     }
 
@@ -48,12 +51,13 @@ class _StudiedChartState extends State<StudiedChart> {
         lineBarsData: [
           LineChartBarData(
             belowBarData: BarAreaData(
-                gradient: LinearGradient(
-                  colors: [Theming.blue.withAlpha(200), Theming.blue.withAlpha(30)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-                show: true),
+              gradient: LinearGradient(
+                colors: [Theming.blue.withAlpha(200), Theming.blue.withAlpha(30)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+              show: true,
+            ),
             color: Theming.blue,
             barWidth: 5,
             isStrokeCapRound: true,
@@ -71,7 +75,7 @@ class _StudiedChartState extends State<StudiedChart> {
           LineChartBarData(
             spots: [FlSpot(0, Statistics.getDailyGoal()), FlSpot(6, Statistics.getDailyGoal())],
             dotData: const FlDotData(show: false),
-          )
+          ),
         ],
       ),
     );

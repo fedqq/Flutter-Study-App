@@ -20,6 +20,7 @@ class Subject {
         ret += '${topic.toString()}]';
       }
     }
+
     return ret;
   }
 
@@ -35,6 +36,7 @@ class Subject {
     List<Topic> topics = List.generate(topicsData.length - 1, (i) => Topic.fromString(topicsData[i]));
     Subject ret = Subject(name, Color(int.parse(color)));
     ret.topics = topics;
+    
     return ret;
   }
 }

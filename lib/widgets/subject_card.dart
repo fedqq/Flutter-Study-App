@@ -2,8 +2,9 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/states/subject.dart';
-import 'package:flutter_application_1/utils.dart';
-import 'package:flutter_application_1/reused_widgets/gradient_widgets.dart';
+import 'package:flutter_application_1/utils/gradient_widgets.dart';
+
+import '../utils/theming.dart';
 
 class SubjectCard extends StatefulWidget {
   final Subject subject;
@@ -19,6 +20,7 @@ class _SubjectCardState extends State<SubjectCard> {
   @override
   Widget build(BuildContext context) {
     Subject subject = widget.subject;
+
     return GradientOutline(
       innerPadding: 8.0,
       gradient: Theming.grayGradient,
@@ -47,7 +49,7 @@ class _SubjectCardState extends State<SubjectCard> {
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),

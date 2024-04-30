@@ -1,11 +1,5 @@
-import "package:flutter/material.dart";
 import 'dart:math';
-
-void simpleSnackBar(BuildContext context, String s) async {
-  ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
-  messenger.clearSnackBars();
-  messenger.showSnackBar(SnackBar(behavior: SnackBarBehavior.floating, content: Text(s)));
-}
+import 'package:flutter/material.dart';
 
 class Theming {
   static double radius = 20;
@@ -25,19 +19,22 @@ class Theming {
   );
 
   static const Gradient grayGradient = LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: <Color>[Color.fromARGB(130, 224, 224, 224), Color.fromARGB(100, 146, 146, 146)]);
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: <Color>[Color.fromARGB(130, 224, 224, 224), Color.fromARGB(100, 146, 146, 146)],
+  );
 
   static BoxDecoration gradientDeco =
       BoxDecoration(gradient: coloredGradient, borderRadius: BorderRadius.circular(radius));
 
   static BoxDecoration innerDeco = BoxDecoration(
-      gradient: const LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: <Color>[Color.fromARGB(255, 15, 15, 15), Color.fromARGB(255, 19, 19, 19)]),
-      borderRadius: BorderRadius.circular(radius - padding));
+    gradient: const LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: <Color>[Color.fromARGB(255, 15, 15, 15), Color.fromARGB(255, 19, 19, 19)],
+    ),
+    borderRadius: BorderRadius.circular(radius - padding),
+  );
 
   static BoxDecoration grayDeco = BoxDecoration(gradient: grayGradient, borderRadius: BorderRadius.circular(radius));
 
@@ -46,6 +43,7 @@ class Theming {
   static LinearGradient gradientToDarker(Color color, {double delta = 0.2}) {
     HSLColor hsl = HSLColor.fromColor(color);
     hsl = hsl.withLightness(max(hsl.lightness - delta, 0));
+
     return LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [color, hsl.toColor()]);
   }
 

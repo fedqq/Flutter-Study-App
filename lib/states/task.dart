@@ -25,6 +25,7 @@ class Task {
     bool completed = bool.parse(data[3]);
     Color color = Color(int.parse(data[4]));
     String desc = data[5];
+    
     return Task(type, name, date, completed, color, desc);
   }
 

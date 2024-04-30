@@ -34,6 +34,7 @@ class Topic {
         finalTopic.addCard(FlashCard.fromString(cardString));
       }
     }
+
     return finalTopic;
   }
 }

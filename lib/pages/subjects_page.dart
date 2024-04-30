@@ -11,9 +11,9 @@ import 'package:flutter_application_1/pages/study_page.dart';
 import 'package:flutter_application_1/states/flashcard.dart';
 import 'package:flutter_application_1/states/subject.dart';
 import 'package:flutter_application_1/states/topic.dart';
-import 'package:flutter_application_1/utils.dart';
-import 'package:flutter_application_1/reused_widgets/expandable_fab.dart';
-import 'package:flutter_application_1/reused_widgets/input_dialogs.dart';
+import 'package:flutter_application_1/utils/snackbar.dart';
+import 'package:flutter_application_1/utils/expandable_fab.dart';
+import 'package:flutter_application_1/utils/input_dialogs.dart';
 import 'package:flutter_application_1/widgets/subject_card.dart';
 import 'package:flutter_application_1/widgets/subject_option_menu.dart';
 import 'package:path_provider/path_provider.dart';
@@ -80,12 +80,15 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     bool validate(String str) {
       if (getSubjectNames().contains(str)) {
         simpleSnackBar(context, 'Subject named $str already exists');
+
         return false;
       }
+
       return true;
     }
 
-    String name = await showInputDialog(context, 'New Subject Name', 'Name', extraValidate: validate) ?? '';
+    String name =
+        await singleInputDialog(context, 'New Subject Name', InputType(name: 'Name', validate: validate)) ?? '';
 
     if (name == '') return;
 
@@ -135,6 +138,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
         subject = Subject.fromString(res);
       } catch (e) {
         simpleSnackBar(context, 'Invalid Format. ');
+
         return;
       }
       setState(() {
@@ -151,13 +155,21 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     bool validate(String str) {
       if (getSubjectNames().contains(str)) {
         simpleSnackBar(context, 'Subject named $str already exists');
+
         return false;
       }
+
       return true;
     }
 
-    String newName = await showInputDialog(context, 'Rename ${widget.subjects[currentFocused].name}', 'Name',
-            extraValidate: validate) ??
+    String newName = await singleInputDialog(
+          context,
+          'Rename ${widget.subjects[currentFocused].name}',
+          InputType(
+            name: 'Name',
+            validate: validate,
+          ),
+        ) ??
         '';
 
     if (newName == '') return;
@@ -167,9 +179,11 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
 
   void clearSubjects() async {
     closeMenus();
-    bool confirmed = await confirm(context,
-        title: const Text('Delete All Subjects'),
-        content: const Text('Are you sure you would like to delete all subjects? This action cannot be undone. '));
+    bool confirmed = await confirm(
+      context,
+      title: const Text('Delete All Subjects'),
+      content: const Text('Are you sure you would like to delete all subjects? This action cannot be undone. '),
+    );
     if (confirmed) {
       setState(() {
         widget.subjects.clear();
@@ -187,8 +201,14 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
       }
     }
     if (cards.isEmpty) return;
-    Navigator.push(context,
-        MaterialPageRoute(builder: (_) => StudyPage(cards: cards, topic: Topic('All Subjects'), renameCallback: null)));
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => StudyPage(cards: cards, topic: Topic('All Subjects'), renameCallback: null)),
+    );
+  }
+
+  void a(int i) {
+    return;
   }
 
   @override
@@ -198,10 +218,13 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-          scrolledUnderElevation: 0,
-          centerTitle: true,
-          title: Text(widget.subjects.length == 1 ? 'Study 1 Subject' : 'Study ${widget.subjects.length} Subjects',
-              style: const TextStyle(fontWeight: FontWeight.bold))),
+        scrolledUnderElevation: 0,
+        centerTitle: true,
+        title: Text(
+          widget.subjects.length == 1 ? 'Study 1 Subject' : 'Study ${widget.subjects.length} Subjects',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ),
       floatingActionButton: ExpandableFab(
         controller: controller,
         children: [
@@ -258,9 +281,12 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
                             ? ImageFilter.blur(
                                 sigmaX: 8 * blurAnimation.value,
                                 sigmaY: 8 * blurAnimation.value,
-                                tileMode: TileMode.decal)
+                                tileMode: TileMode.decal,
+                              )
                             : ImageFilter.blur(
-                                sigmaX: 8 * (1 - enterAnimation.value), sigmaY: 8 * (1 - enterAnimation.value)),
+                                sigmaX: 8 * (1 - enterAnimation.value),
+                                sigmaY: 8 * (1 - enterAnimation.value),
+                              ),
                         child: Stack(
                           children: [
                             Container(
@@ -283,7 +309,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
                                 deleteSubject: deleteSubject,
                                 exportSubject: exportSubject,
                                 animation: blurAnimation,
-                              )
+                              ),
                           ],
                         ),
                       ),

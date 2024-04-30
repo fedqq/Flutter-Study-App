@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/reused_widgets/gradient_widgets.dart';
+import 'package:flutter_application_1/utils/gradient_widgets.dart';
 import 'package:flutter_application_1/widgets/task_popup.dart';
 import 'package:flutter_application_1/states/task.dart';
-import 'package:flutter_application_1/utils.dart';
 import 'package:intl/intl.dart';
+
+import '../utils/theming.dart';
 
 class DayCard extends StatefulWidget {
   final DateTime date;
@@ -11,13 +12,14 @@ class DayCard extends StatefulWidget {
   final Color? color;
   final void Function(Task) removeCallback;
   final void Function(Task)? completeCallback;
-  const DayCard(
-      {super.key,
-      required this.date,
-      required this.tasks,
-      this.color,
-      required this.removeCallback,
-      required this.completeCallback});
+  const DayCard({
+    super.key,
+    required this.date,
+    required this.tasks,
+    this.color,
+    required this.removeCallback,
+    required this.completeCallback,
+  });
 
   @override
   State<DayCard> createState() => _DayCardState();
@@ -91,8 +93,8 @@ class _DayCardState extends State<DayCard> {
                                     () => widget.removeCallback(task),
                                   ),
                                 ),
-                              ).then((_) => setState(() {})),
-                            )
+                              ),
+                            ),
                           ],
                         ),
                       ),

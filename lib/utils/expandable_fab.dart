@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/utils.dart';
-import 'package:flutter_application_1/reused_widgets/gradient_widgets.dart';
+import 'package:flutter_application_1/utils/gradient_widgets.dart';
+
+import 'theming.dart';
 
 class ExFabController {
   bool open = false;
@@ -94,12 +95,13 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
         width: 56,
         height: 56,
         child: AnimatedContainer(
-            width: _open ? 50 : 56,
-            height: _open ? 50 : 56,
-            margin: _open ? EdgeInsets.all(Theming.padding) : null,
-            duration: Durations.short3,
-            decoration: _open ? Theming.innerDeco : Theming.innerDeco.copyWith(gradient: Theming.coloredGradient),
-            child: Center(child: AnimatedIcon(icon: AnimatedIcons.menu_close, progress: _controller))),
+          width: _open ? 50 : 56,
+          height: _open ? 50 : 56,
+          margin: _open ? EdgeInsets.all(Theming.padding) : null,
+          duration: Durations.short3,
+          decoration: _open ? Theming.innerDeco : Theming.innerDeco.copyWith(gradient: Theming.coloredGradient),
+          child: Center(child: AnimatedIcon(icon: AnimatedIcons.menu_close, progress: _controller)),
+        ),
       ),
     );
   }
@@ -117,6 +119,7 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
         ),
       );
     }
+
     return children;
   }
 }
@@ -135,6 +138,7 @@ class ActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     return Align(
       alignment: Alignment.center,
       child: GradientOutline(
@@ -170,6 +174,7 @@ class ExpandingActionButton extends StatelessWidget {
       animation: progress,
       builder: (context, child) {
         final offset = Offset(0, ((index + 1) * 60) * progress.value);
+
         return Positioned(
           bottom: 10 + offset.dy,
           child: Transform.rotate(

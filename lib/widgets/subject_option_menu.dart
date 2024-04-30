@@ -1,8 +1,9 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/utils.dart';
-import 'package:flutter_application_1/reused_widgets/gradient_widgets.dart';
+import 'package:flutter_application_1/utils/gradient_widgets.dart';
+
+import '../utils/theming.dart';
 
 class SubjectOptionMenu extends StatelessWidget {
   final Function() editSubject;
@@ -18,7 +19,7 @@ class SubjectOptionMenu extends StatelessWidget {
       required this.editColor,
       required this.deleteSubject,
       required this.exportSubject,
-      required this.animation});
+      required this.animation,});
 
   @override
   Widget build(BuildContext context) {

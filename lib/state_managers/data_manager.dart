@@ -62,6 +62,7 @@ class SaveDataManager {
     for (String data in strs) {
       subjects.add(Subject.fromString(data));
     }
+    
     return subjects;
   }
 
@@ -72,6 +73,7 @@ class SaveDataManager {
     for (String task in tasks) {
       finalTasks.add(Task.fromString(task));
     }
+
     return finalTasks;
   }
 
@@ -82,6 +84,7 @@ class SaveDataManager {
     for (String task in tasks) {
       finalTasks.add(Task.fromString(task));
     }
+    
     return finalTasks;
   }
 }

@@ -7,9 +7,12 @@ import "package:flutter_application_1/states/topic.dart";
 // ignore: unused_import
 import 'dart:developer' as developer;
 
-import "package:flutter_application_1/utils.dart";
-import "package:flutter_application_1/reused_widgets/gradient_widgets.dart";
-import "package:flutter_application_1/reused_widgets/input_dialogs.dart";
+import "package:flutter_application_1/utils/snackbar.dart";
+import "package:flutter_application_1/utils/gradient_widgets.dart";
+import "package:flutter_application_1/utils/input_dialogs.dart";
+import "package:latext/latext.dart";
+
+import "../utils/theming.dart";
 
 class StudyPage extends StatefulWidget {
   final List<FlashCard> cards;
@@ -39,11 +42,8 @@ class _StudyPageState extends State<StudyPage> {
 
   String getCurrentText() {
     FlashCard card = cards[currentCard];
-    if (showingMeaning) {
-      return card.meaning;
-    } else {
-      return card.name;
-    }
+
+    return showingMeaning ? card.meaning : card.name;
   }
 
   void goForward() {
@@ -71,19 +71,21 @@ class _StudyPageState extends State<StudyPage> {
 
   void editCard() async {
     if (showingMeaning) {
-      String newMeaning = await showInputDialog(context, 'New meaning for ${cards[currentCard].name}', 'Meaning',
-              initialValue: cards[currentCard].meaning) ??
+      String newMeaning = await singleInputDialog(
+            context,
+            'New meaning for ${cards[currentCard].name}',
+            InputType(name: 'Meaning', initialValue: cards[currentCard].meaning),
+          ) ??
           '';
       if (newMeaning == '') return;
       setState(() {
         cards[currentCard].meaning = newMeaning;
       });
     } else {
-      String newName = await showInputDialog(
+      String newName = await singleInputDialog(
             context,
             'Rename ${cards[currentCard].name}',
-            'Name',
-            initialValue: cards[currentCard].name,
+            InputType(name: 'Name', initialValue: cards[currentCard].name),
           ) ??
           '';
       if (newName == '') return;
@@ -94,14 +96,17 @@ class _StudyPageState extends State<StudyPage> {
   }
 
   void deleteCard() async {
-    bool delete = await confirm(context,
-        title: Text('Are you sure you would like to delete ${cards[currentCard].name}?'),
-        content: const Text('This action cannot be undone. '));
+    bool delete = await confirm(
+      context,
+      title: Text('Are you sure you would like to delete ${cards[currentCard].name}?'),
+      content: const Text('This action cannot be undone. '),
+    );
     if (delete) {
       if (cards.length == 1) {
         widget.cards.removeAt(0);
         // ignore: use_build_context_synchronously
         Navigator.pop(context);
+
         return;
       }
       setState(() => widget.cards.removeAt(currentCard));
@@ -109,7 +114,7 @@ class _StudyPageState extends State<StudyPage> {
   }
 
   void editTopicName() async {
-    String newName = await showInputDialog(context, 'Rename ${widget.topic.name}', 'Name') ?? '';
+    String newName = await singleInputDialog(context, 'Rename ${widget.topic.name}', InputType(name: 'Name')) ?? '';
     if (newName == '') return;
     setState(() {
       widget.topic.name = newName;
@@ -151,20 +156,21 @@ class _StudyPageState extends State<StudyPage> {
           Column(
             children: [
               Center(
-                  child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (widget.renameCallback != null)
-                    IconButton(icon: const Icon(Icons.edit_rounded), onPressed: editTopicName),
-                  SizedBox(
-                    height: 75,
-                    child: Text(
-                      widget.topic.name,
-                      style: const TextStyle(fontSize: 35, height: 2),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (widget.renameCallback != null)
+                      IconButton(icon: const Icon(Icons.edit_rounded), onPressed: editTopicName),
+                    SizedBox(
+                      height: 75,
+                      child: Text(
+                        widget.topic.name,
+                        style: const TextStyle(fontSize: 35, height: 2),
+                      ),
                     ),
-                  ),
-                ],
-              )),
+                  ],
+                ),
+              ),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20.0, 0, 20, 0),
@@ -188,23 +194,28 @@ class _StudyPageState extends State<StudyPage> {
                                 : const Color.fromARGB(80, 30, 253, 0),
                             spreadRadius: 0,
                             blurRadius: 20,
-                          )
+                          ),
                         ],
                       ),
                       child: GradientOutline(
-                          gradient: cards[currentCard].learned
-                              ? Theming.gradientToDarker(const Color.fromARGB(80, 30, 253, 0))
-                              : Theming.coloredGradient,
-                          child: Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(45.0),
-                              child: Text(
-                                getCurrentText(),
+                        gradient: cards[currentCard].learned
+                            ? Theming.gradientToDarker(const Color.fromARGB(80, 30, 253, 0))
+                            : Theming.coloredGradient,
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(45.0),
+                            child: LaTexT(
+                              laTeXCode: Text(
+                                widget.cards[currentCard].latex && showingMeaning
+                                    ? '\$${getCurrentText()}\$'
+                                    : getCurrentText(),
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(fontSize: 25),
                               ),
                             ),
-                          )),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -223,8 +234,10 @@ class _StudyPageState extends State<StudyPage> {
                       child: FilledButton.tonal(
                         style: Theming.transparentButtonStyle,
                         onPressed: learnCard,
-                        child: Text(cards[currentCard].learned ? 'Mark as unlearned' : 'Mark as learned',
-                            style: const TextStyle(color: Colors.white)),
+                        child: Text(
+                          cards[currentCard].learned ? 'Mark as unlearned' : 'Mark as learned',
+                          style: const TextStyle(color: Colors.white),
+                        ),
                       ),
                     ),
                   ),

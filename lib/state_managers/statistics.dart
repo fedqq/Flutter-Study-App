@@ -23,6 +23,7 @@ class Statistics {
 
   static TimeOfDay getTime() {
     if (reminderTime == '') reminderTime = '18:00';
+
     return TimeOfDay(hour: int.parse(reminderTime.split(':')[0]), minute: int.parse(reminderTime.split(':')[1]));
   }
 
@@ -53,7 +54,8 @@ class Statistics {
     } else {
       dailyStudied[formatted] = dailyStudied[formatted]! + 1;
     }
-    return ((dailyStudied[formatted] ?? 0) >= dailyGoal);
+
+    return ((dailyStudied[formatted] ?? 0) == dailyGoal);
   }
 
   static List<int> getLastWeek() {
@@ -66,6 +68,7 @@ class Statistics {
       int num = dailyStudied[date] ?? 0;
       res.add(num);
     }
+
     return res;
   }
 
@@ -74,6 +77,7 @@ class Statistics {
     for (int i in getLastWeek()) {
       sum += i;
     }
+
     return sum / 7;
   }
 

@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/widgets/expanding_task_list.dart';
 import 'package:flutter_application_1/widgets/day_card.dart';
 import 'package:flutter_application_1/states/task.dart';
-import 'package:flutter_application_1/reused_widgets/input_dialogs.dart';
+import 'package:flutter_application_1/utils/input_dialogs.dart';
 
 // ignore: unused_import
 import 'dart:developer' as developer;
 
-import '../reused_widgets/gradient_widgets.dart';
+import '../utils/gradient_widgets.dart';
 
 class CalendarPage extends StatefulWidget {
   final List<Task> tasks;
@@ -50,6 +50,7 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
         ret[task.dueDate]!.add(task);
       }
     }
+
     return ret;
   }
 
@@ -62,12 +63,18 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
         ret[task.dueDate]!.add(task);
       }
     }
+
     return ret;
   }
 
   void newTask(BuildContext context) async {
-    DialogResult result =
-        await showDoubleInputDialog(context, 'New task', 'Name', 'Description', nullableSecond: true) ?? emptyResult;
+    DialogResult result = await doubleInputDialog(
+          context,
+          'New task',
+          InputType(name: 'Name'),
+          InputType(name: 'Description', nullable: true),
+        ) ??
+        DialogResult.empty();
 
     String name = result.first;
     String desc = result.second;

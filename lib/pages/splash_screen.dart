@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/main.dart';
-import 'package:flutter_application_1/utils.dart';
+
+import '../utils/theming.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -8,23 +9,26 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Future.delayed(
-        const Duration(seconds: 2),
-        () => Navigator.push(
-            context,
-            PageRouteBuilder(
-                transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                  const begin = Offset(0.0, 0.0);
-                  const end = Offset.zero;
-                  const curve = Curves.ease;
+      const Duration(seconds: 2),
+      () => Navigator.push(
+        context,
+        PageRouteBuilder(
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const begin = Offset(0.0, 0.0);
+            const end = Offset.zero;
+            const curve = Curves.ease;
 
-                  Animatable<Offset> tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+            Animatable<Offset> tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 
-                  return SlideTransition(
-                    position: animation.drive(tween),
-                    child: child,
-                  );
-                },
-                pageBuilder: (_, __, ___) => const MyApp())));
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: child,
+            );
+          },
+          pageBuilder: (_, __, ___) => const MyApp(),
+        ),
+      ),
+    );
 
     const double size = 250;
 
@@ -46,7 +50,7 @@ class SplashScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text('Study App', style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold, color: Colors.white)),
-                  SizedBox(height: size + 50)
+                  SizedBox(height: size + 50),
                 ],
               ),
               ShaderMask(

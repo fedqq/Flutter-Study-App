@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/reused_widgets/input_dialogs.dart';
+import 'package:flutter_application_1/utils/input_dialogs.dart';
 import 'package:flutter_application_1/states/task.dart';
 
 class TaskPopup extends StatefulWidget {
@@ -13,9 +13,13 @@ class TaskPopup extends StatefulWidget {
 
 class _TaskPopupState extends State<TaskPopup> {
   void edit() async {
-    DialogResult result = await showDoubleInputDialog(context, 'Edit Task', 'Name', 'Description',
-            nullableSecond: true, initialValue: widget.task.name, initialSecondValue: widget.task.desc) ??
-        emptyResult;
+    DialogResult result = await doubleInputDialog(
+          context,
+          'Edit Task',
+          InputType(name: 'Name', initialValue: widget.task.name),
+          InputType(name: 'Desc', nullable: true, initialValue: widget.task.desc),
+        ) ??
+        DialogResult.empty();
 
     if (result.first == '') return;
     setState(() {
@@ -47,9 +51,9 @@ class _TaskPopupState extends State<TaskPopup> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             FilledButton(onPressed: delete, child: const Text('Delete')),
-            TextButton(onPressed: () {}, child: const Text('Edit Color')),
+            TextButton(onPressed: editColor, child: const Text('Edit Color')),
           ],
-        )
+        ),
       ],
     );
   }

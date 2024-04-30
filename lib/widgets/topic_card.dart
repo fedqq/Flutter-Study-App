@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/study_page.dart';
 import 'package:flutter_application_1/states/flashcard.dart';
 import 'package:flutter_application_1/states/topic.dart';
-import 'package:flutter_application_1/utils.dart';
 
+// ignore: unused_import
 import 'dart:developer' as developer;
 
-import 'package:flutter_application_1/reused_widgets/gradient_widgets.dart';
-import 'package:flutter_application_1/reused_widgets/input_dialogs.dart';
+import 'package:flutter_application_1/utils/gradient_widgets.dart';
+import 'package:flutter_application_1/utils/input_dialogs.dart';
+
+import '../utils/theming.dart';
 
 class TopicCard extends StatefulWidget {
   final Topic topic;
@@ -27,8 +29,8 @@ class _TopicCardState extends State<TopicCard> {
   }
 
   void studyTopic(Topic topic) => Navigator.push(
-      context,
-      PageRouteBuilder(
+        context,
+        PageRouteBuilder(
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             const begin = Offset(0.0, 1.0);
             const end = Offset.zero;
@@ -42,40 +44,49 @@ class _TopicCardState extends State<TopicCard> {
             );
           },
           pageBuilder: (_, __, ___) => StudyPage(
-                cards: topic.cards,
-                topic: topic,
-                renameCallback: renameCallback,
-              ))).then((_) => setState(() {}));
+            cards: topic.cards,
+            topic: topic,
+            renameCallback: renameCallback,
+          ),
+        ),
+      ).then((_) => setState(() {
+            return;
+          }));
 
   void renameTopic(Topic topic) async {
-    String newName = await showInputDialog(context, 'Rename ${topic.name}', 'Name') ?? '';
-    if (newName == '') return;
-    setState(() => topic.name = newName);
+    String newName = await singleInputDialog(
+          context,
+          'Rename ${topic.name}',
+          InputType(name: 'Name'),
+        ) ??
+        '';
+    if (newName != '') setState(() => topic.name = newName);
   }
 
   void addCard(Topic topic) async {
-    DialogResult result =
-        await showDoubleInputDialog(context, 'Create New Card', 'Name', 'Meaning', nullableSecond: false) ??
-            emptyResult;
+    DialogResult result = await doubleInputDialog(
+          context,
+          'Create New Card',
+          InputType(name: 'Name'),
+          InputType(name: 'Meaning', nullable: false, latex: true),
+          cancellable: true,
+        ) ??
+        DialogResult.empty();
 
     String name = result.first;
     if (name == '') return;
     String meaning = result.second;
-    if (meaning == '') return;
-    setState(() => topic.cards.add(FlashCard(name, meaning, false)));
+    if (meaning != '') setState(() => topic.cards.add(FlashCard(name, meaning, false, true)));
   }
 
-  double learnedPercentage() {
-    double ret = widget.topic.cards.isNotEmpty
-        ? widget.topic.cards.where((element) => element.learned).length / widget.topic.cards.length
-        : 0;
-    developer.log(ret.toString());
-    return ret;
-  }
+  double learnedPercentage() => widget.topic.cards.isNotEmpty
+      ? widget.topic.cards.where((element) => element.learned).length / widget.topic.cards.length
+      : 0;
 
   @override
   Widget build(BuildContext context) {
     Topic topic = widget.topic;
+
     return Container(
       decoration: BoxDecoration(
         boxShadow: [
@@ -97,14 +108,17 @@ class _TopicCardState extends State<TopicCard> {
                   width: 450,
                   height: 5,
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(Theming.radius),
-                      color: const Color.fromARGB(255, 51, 51, 51)),
+                    borderRadius: BorderRadius.circular(Theming.radius),
+                    color: const Color.fromARGB(255, 51, 51, 51),
+                  ),
                 ),
                 Container(
                   width: learnedPercentage() * 450,
                   height: 5,
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(Theming.radius), gradient: Theming.coloredGradient),
+                    borderRadius: BorderRadius.circular(Theming.radius),
+                    gradient: Theming.coloredGradient,
+                  ),
                 ),
               ],
             ),
@@ -124,8 +138,9 @@ class _TopicCardState extends State<TopicCard> {
               child: Row(
                 children: [
                   IconButton(
-                      onPressed: () => topic.cards.isNotEmpty ? studyTopic(topic) : null,
-                      icon: const Icon(Icons.school_rounded)),
+                    onPressed: () => topic.cards.isNotEmpty ? studyTopic(topic) : null,
+                    icon: const Icon(Icons.school_rounded),
+                  ),
                   IconButton(
                     onPressed: () => renameTopic(topic),
                     icon: const Icon(Icons.edit_rounded),
@@ -143,12 +158,13 @@ class _TopicCardState extends State<TopicCard> {
             ),
             childrenPadding: const EdgeInsets.all(0),
             children: List.generate(
-                topic.cards.length,
-                (cardIndex) => ListTile(
-                      minVerticalPadding: 0,
-                      contentPadding: const EdgeInsets.all(8.0),
-                      title: Text(topic.cards[cardIndex].name),
-                    )),
+              topic.cards.length,
+              (cardIndex) => ListTile(
+                minVerticalPadding: 0,
+                contentPadding: const EdgeInsets.all(8.0),
+                title: Text(topic.cards[cardIndex].name),
+              ),
+            ),
           ),
         ),
       ),

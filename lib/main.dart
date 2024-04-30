@@ -10,12 +10,13 @@ import 'package:flutter_application_1/state_managers/statistics.dart';
 import 'package:flutter_application_1/states/subject.dart';
 
 import 'package:flutter_application_1/states/task.dart';
-import 'package:flutter_application_1/utils.dart';
 
 // ignore: unused_import
 import 'dart:developer' as developer;
 
-import 'package:flutter_application_1/reused_widgets/gradient_widgets.dart';
+import 'package:flutter_application_1/utils/gradient_widgets.dart';
+
+import 'utils/theming.dart';
 
 // ignore: constant_identifier_names
 const bool CLEAR = false;
@@ -147,7 +148,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
                   color: Theming.boxShadowColor,
                   spreadRadius: -10,
                   blurRadius: 30,
-                )
+                ),
               ],
             ),
             child: GradientOutline(
@@ -160,7 +161,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
                 destinations: const [
                   NavigationDestination(icon: Icon(Icons.calendar_today_rounded), label: "Calendar"),
                   NavigationDestination(icon: Icon(Icons.school_outlined), label: "Study"),
-                  NavigationDestination(icon: Icon(Icons.show_chart_rounded), label: "Statistics")
+                  NavigationDestination(icon: Icon(Icons.show_chart_rounded), label: "Statistics"),
                 ],
                 backgroundColor: Colors.transparent,
                 onDestinationSelected: selectDestination,
@@ -168,7 +169,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
             ),
           ),
           body: PageView(controller: pageController, onPageChanged: pageChanged, padEnds: false, children: pages),
-        )
+        ),
       ],
     );
   }

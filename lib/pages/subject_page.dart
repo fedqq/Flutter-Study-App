@@ -1,13 +1,13 @@
 import "package:flutter/material.dart";
 import "package:flutter_application_1/states/topic.dart";
 import "package:flutter_application_1/states/subject.dart";
-import "package:flutter_application_1/reused_widgets/input_dialogs.dart";
+import "package:flutter_application_1/utils/input_dialogs.dart";
 import "package:flutter_application_1/widgets/topic_card.dart";
 
 // ignore: unused_import
 import 'dart:developer' as developer;
 
-import "../reused_widgets/gradient_widgets.dart";
+import "../utils/gradient_widgets.dart";
 
 class SubjectPage extends StatefulWidget {
   final Subject subject;
@@ -19,7 +19,7 @@ class SubjectPage extends StatefulWidget {
 
 class _SubjectPageState extends State<SubjectPage> {
   void newTopic() async {
-    final String topicName = await showInputDialog(context, 'New Topic Name', 'Name') ?? '';
+    final String topicName = await singleInputDialog(context, 'New Topic Name', InputType(name: 'Name')) ?? '';
 
     if (topicName == '') return;
     Topic topic = Topic(topicName);
@@ -64,7 +64,7 @@ class _SubjectPageState extends State<SubjectPage> {
               children: [
                 const Align(alignment: Alignment.centerLeft),
                 Text('${widget.subject.name} Topics (${widget.subject.topics.length})',
-                    style: Theme.of(context).textTheme.titleLarge),
+                    style: Theme.of(context).textTheme.titleLarge,),
                 if (widget.subject.topics.isNotEmpty) topicList,
               ],
             ),

@@ -1,11 +1,12 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/reused_widgets/expandable_fab.dart';
+import 'package:flutter_application_1/utils/expandable_fab.dart';
 import 'package:flutter_application_1/state_managers/statistics.dart';
-import 'package:flutter_application_1/reused_widgets/input_dialogs.dart';
-import 'package:flutter_application_1/utils.dart';
+import 'package:flutter_application_1/utils/input_dialogs.dart';
 import 'package:flutter_application_1/widgets/studied_chart.dart';
+
+import '../utils/theming.dart';
 
 class StatsPage extends StatefulWidget {
   const StatsPage({super.key});
@@ -38,15 +39,18 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
   }
 
   void setDailyGoal() async {
-    String result = await showInputDialog(context, 'Choose Daily Goal', 'Goal',
-            numerical: true, extraValidate: (str) => (int.tryParse(str) ?? 0) > 0) ??
+    String result = await singleInputDialog(
+          context,
+          'Choose Daily Goal',
+          InputType(name: 'Goal', numerical: true, validate: (str) => (int.tryParse(str) ?? 0) > 0),
+        ) ??
         '';
     if (result == '') return;
     setState(() => Statistics.dailyGoal = int.parse(result));
   }
 
   void editUserName() async {
-    String name = await showInputDialog(context, 'Change Username', 'Username') ?? '';
+    String name = await singleInputDialog(context, 'Change Username', InputType(name: 'Username')) ?? '';
     if (name == '') return;
     setState(() {
       Statistics.userName = name;
@@ -67,7 +71,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
         if (showingNameInput) return;
 
         showingNameInput = true;
-        Future<String?> res = showInputDialog(context, 'Set User Name', 'Name', cancellable: false);
+        Future<String?> res = singleInputDialog(context, 'Set User Name', InputType(name: 'Name'), cancellable: false);
         String name = await res ?? '';
         setState(() => Statistics.userName = name);
         showingNameInput = false;
@@ -89,7 +93,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
             children: [
               ActionButton(onPressed: editUserName, icon: const Icon(Icons.person_rounded)),
               ActionButton(onPressed: setDailyGoal, icon: const Icon(Icons.flag_rounded)),
-              ActionButton(onPressed: editReminderTime, icon: const Icon(Icons.access_time_rounded))
+              ActionButton(onPressed: editReminderTime, icon: const Icon(Icons.access_time_rounded)),
             ],
           ),
           body: Column(
@@ -102,7 +106,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                     BoxShadow(
                       color: Theming.purple.withAlpha((120 * animation.value).toInt()),
                       blurRadius: 60 * animation.value,
-                    )
+                    ),
                   ]),
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
@@ -126,9 +130,10 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
               FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(
-                    'Today you have studied ${Statistics.getTodayStudied()}\ncards out of ${Statistics.dailyGoal}',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold)),
+                  'Today you have studied ${Statistics.getTodayStudied()}\ncards out of ${Statistics.dailyGoal}',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
+                ),
               ),
               Expanded(
                 child: Container(
@@ -136,18 +141,22 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                   child: AnimatedBuilder(
                     animation: animation,
                     builder: (_, __) => Container(
-                        decoration: BoxDecoration(boxShadow: [
-                          BoxShadow(
-                              color: Theming.blue.withAlpha((80 * animation.value).toInt()),
-                              spreadRadius: 10,
-                              blurRadius: 60 * animation.value)
-                        ]),
-                        child: StudiedChart(animValue: animation.value)),
+                      decoration: BoxDecoration(boxShadow: [
+                        BoxShadow(
+                          color: Theming.blue.withAlpha((80 * animation.value).toInt()),
+                          spreadRadius: 10,
+                          blurRadius: 60 * animation.value,
+                        ),
+                      ]),
+                      child: StudiedChart(animValue: animation.value),
+                    ),
                   ),
                 ),
               ),
-              Text('Daily reminder at: ${Statistics.reminderTime}',
-                  style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold))
+              Text(
+                'Daily reminder at: ${Statistics.reminderTime}',
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
+              ),
             ],
           ),
         ),

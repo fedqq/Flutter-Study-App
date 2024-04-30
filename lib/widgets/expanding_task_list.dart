@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/states/task.dart';
-import 'package:flutter_application_1/utils.dart';
 import 'package:flutter_application_1/widgets/day_card.dart';
+
+import '../utils/theming.dart';
 
 class ExpandingTaskList extends StatefulWidget {
   final List<DateTime> dates;
@@ -58,7 +59,7 @@ class _ExpandingTaskListState extends State<ExpandingTaskList> {
                   completeCallback: widget.completeCallback,
                 ),
               ),
-            )
+            ),
           ],
         ),
       ],
