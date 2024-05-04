@@ -2,22 +2,24 @@ Features Added:
 
 - Subjects
 - Topics
-- Basic Navigation
-- Simple data persistence
 - Terms
-
-Features In Progress:
-
-- Tasks
 - Studying
-- Flashcards
-- UI Design
+- Data persistence
+- Navigation
+- Custom UI Design
 - Calendar
+- Daily studied graph
+- Daily study goal
+- Daily reminder time (no notification support yet)
+- LaTeX rendering
+- Exporting to share menu
+- Importing (only on windows for now)
+- Animations for page entering
 
 Features To Be Added:
 
 - Automatically closing optionmenu
-- Fixcing importing on android
+- Fixing importing on android
 - Daily reminder notification
 - Homescreen widget shortcut
 - Tests

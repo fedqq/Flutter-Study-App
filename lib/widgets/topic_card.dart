@@ -76,7 +76,7 @@ class _TopicCardState extends State<TopicCard> {
     String name = result.first;
     if (name == '') return;
     String meaning = result.second;
-    if (meaning != '') setState(() => topic.cards.add(FlashCard(name, meaning, false, true)));
+    if (meaning != '') setState(() => topic.cards.add(FlashCard(name, meaning, false)));
   }
 
   double learnedPercentage() => widget.topic.cards.isNotEmpty

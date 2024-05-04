@@ -3,32 +3,59 @@ import 'package:flutter_application_1/main.dart';
 
 import '../utils/theming.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+  late AnimationController animationController;
+  late Animation<double> animation;
+
+  @override
+  void initState() {
+    animationController = AnimationController(vsync: this, duration: Durations.extralong4);
+    animation = CurvedAnimation(
+      curve: Curves.easeInOut,
+      reverseCurve: Curves.easeOutQuad,
+      parent: animationController,
+    );
+    super.initState();
+  }
+
+  void pushMain(BuildContext context) {
     Future.delayed(
-      const Duration(seconds: 2),
-      () => Navigator.push(
+      Durations.long1,
+      () => Navigator.pushReplacement(
         context,
         PageRouteBuilder(
+          transitionDuration: Durations.extralong3,
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const begin = Offset(0.0, 0.0);
+            const begin = Offset(0.0, 1.0);
             const end = Offset.zero;
-            const curve = Curves.ease;
 
-            Animatable<Offset> tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+            final tween = Tween(begin: begin, end: end);
+            final curvedAnimation = CurvedAnimation(
+              parent: animation,
+              curve: Curves.ease,
+            );
 
             return SlideTransition(
-              position: animation.drive(tween),
+              position: tween.animate(curvedAnimation),
               child: child,
             );
           },
-          pageBuilder: (_, __, ___) => const MyApp(),
+          pageBuilder: (_, __, ___) => const NavigationPage(title: 'Study Help App'),
         ),
       ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    animationController.forward().then((_) => pushMain(context));
 
     const double size = 250;
 
@@ -42,31 +69,50 @@ class SplashScreen extends StatelessWidget {
               colors: [Colors.black, Color.fromARGB(255, 14, 14, 14)],
             ),
           ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text('Study App', style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold, color: Colors.white)),
-                  SizedBox(height: size + 50),
-                ],
-              ),
-              ShaderMask(
-                blendMode: BlendMode.srcIn,
-                shaderCallback: (Rect bounds) => const LinearGradient(
-                  begin: Alignment.topRight,
-                  end: Alignment.bottomLeft,
-                  tileMode: TileMode.repeated,
-                  colors: Theming.gradientColors,
-                ).createShader(Rect.fromCenter(center: bounds.center, width: size, height: size)),
-                child: const Icon(
-                  Icons.school_rounded,
-                  size: size,
+          child: AnimatedBuilder(
+            animation: animation,
+            builder: (context, __) => Stack(
+              alignment: Alignment.center,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Opacity(
+                      opacity: animation.value,
+                      child: Text(
+                        'Study App',
+                        style: TextStyle(
+                          fontSize: 30 + (20 * animation.value),
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: size + 50),
+                  ],
                 ),
-              ),
-            ],
+                ShaderMask(
+                  blendMode: BlendMode.srcIn,
+                  shaderCallback: (Rect bounds) => const LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                    tileMode: TileMode.repeated,
+                    colors: Theming.gradientColors,
+                  ).createShader(
+                    Rect.fromCenter(
+                      center: bounds.center,
+                      width: (size * animation.value),
+                      height: (size * animation.value),
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.school_rounded,
+                    size: (size * animation.value),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

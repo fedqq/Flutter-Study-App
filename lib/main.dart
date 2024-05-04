@@ -1,5 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
-
+import 'package:flutter_application_1/pages/splash_screen.dart';
 import 'package:flutter_application_1/pages/stats_page.dart';
 import 'package:flutter_application_1/pages/subjects_page.dart';
 
@@ -19,13 +18,9 @@ import 'package:flutter_application_1/utils/gradient_widgets.dart';
 import 'utils/theming.dart';
 
 // ignore: constant_identifier_names
-const bool CLEAR = false;
+const CLEAR = false;
 
 void main() {
-  //runApp(MaterialApp(initialRoute: '/home', routes: {
-  // '/splash': (context) => const SplashScreen(),
-  // '/home': (context) => const MyApp(),
-  //}));
   runApp(const MyApp());
 }
 
@@ -43,7 +38,8 @@ class MyApp extends StatelessWidget {
         indicatorColor: const Color.fromARGB(255, 87, 61, 255),
         fontFamily: 'Inter',
       ),
-      home: const NavigationPage(title: 'Study Help App'),
+      initialRoute: '/splash',
+      routes: {'/splash': (context) => const SplashScreen()},
     );
   }
 }
@@ -67,7 +63,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     SaveDataManager.saveData(subjects, tasks, completedTasks);
-    Statistics.save();
+    StudyStatistics.save();
     super.dispose();
   }
 
@@ -82,8 +78,8 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
     var subjectsAsync = await SaveDataManager.loadSubjects();
     var tasksAsync = await SaveDataManager.loadTasks();
     var completedTasksAsync = await SaveDataManager.loadCompletedTasks();
-    Statistics.load();
-    developer.log(completedTasksAsync.toString());
+    StudyStatistics.load();
+
     setState(() {
       subjects = subjectsAsync;
       tasks = tasksAsync;
@@ -100,7 +96,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     SaveDataManager.saveData(subjects, tasks, completedTasks);
-    Statistics.save();
+    StudyStatistics.save();
     super.didChangeAppLifecycleState(state);
   }
 
@@ -114,10 +110,11 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
   @override
   Widget build(BuildContext context) {
     List<Widget> pages = [
-      CalendarPage(tasks: tasks, completedTasks: completedTasks),
-      SubjectsPage(subjects: subjects),
       const StatsPage(),
+      SubjectsPage(subjects: subjects),
+      CalendarPage(tasks: tasks, completedTasks: completedTasks),
     ];
+    
     if (CLEAR) {
       SaveDataManager.clearAll();
     }
@@ -140,7 +137,6 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
         ),
         Scaffold(
           backgroundColor: Colors.transparent,
-          appBar: AppBar(),
           bottomNavigationBar: Container(
             decoration: BoxDecoration(
               boxShadow: [
@@ -159,9 +155,9 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
                 selectedIndex: selectedDest,
                 indicatorColor: const Color.fromARGB(255, 66, 37, 255),
                 destinations: const [
-                  NavigationDestination(icon: Icon(Icons.calendar_today_rounded), label: "Calendar"),
-                  NavigationDestination(icon: Icon(Icons.school_outlined), label: "Study"),
                   NavigationDestination(icon: Icon(Icons.show_chart_rounded), label: "Statistics"),
+                  NavigationDestination(icon: Icon(Icons.school_outlined), label: "Study"),
+                  NavigationDestination(icon: Icon(Icons.calendar_today_rounded), label: "Calendar"),
                 ],
                 backgroundColor: Colors.transparent,
                 onDestinationSelected: selectDestination,

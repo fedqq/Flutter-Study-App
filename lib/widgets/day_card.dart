@@ -40,9 +40,8 @@ class _DayCardState extends State<DayCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
       decoration: BoxDecoration(
-        boxShadow: [BoxShadow(color: Theming.purple.withAlpha(80), spreadRadius: -30, blurRadius: 30)],
+        boxShadow: [BoxShadow(color: Theming.grayGradient.colors[0].withAlpha(80), spreadRadius: -25, blurRadius: 30)],
       ),
       child: GradientOutline(
         gradient: Theming.grayGradient,
@@ -69,33 +68,42 @@ class _DayCardState extends State<DayCard> {
                         widget.tasks[index].completed = true;
                         widget.completeCallback!(widget.tasks[index]);
                       }),
-                      child: GradientOutline(
-                        gradient: Theming.gradientToDarker(widget.color ?? widget.tasks[index].color, delta: 0.1),
-                        innerPadding: 14,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const SizedBox(width: 4.0),
-                            Text(
-                              widget.tasks[index].name,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(width: 14.0),
-                            Icon(widget.tasks[index].getIcon()),
-                            const SizedBox(width: 12.0),
-                            IconButton(
-                              icon: const Icon(Icons.info_rounded),
-                              onPressed: () => showDialog(
-                                context: context,
-                                builder: (_) => TaskPopup(
-                                  task: widget.tasks[index],
-                                  deleteCallback: (task) => setState(
-                                    () => widget.removeCallback(task),
-                                  ),
-                                ),
+                      child: Container(
+                        decoration: BoxDecoration(boxShadow: [
+                          BoxShadow(
+                            color: widget.tasks[index].color.withAlpha(180),
+                            blurRadius: 30,
+                            spreadRadius: -30,
+                          ),
+                        ]),
+                        child: GradientOutline(
+                          gradient: Theming.gradientToDarker(widget.color ?? widget.tasks[index].color, delta: 0.1),
+                          innerPadding: 14,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const SizedBox(width: 4.0),
+                              Text(
+                                widget.tasks[index].name,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 14.0),
+                              Icon(widget.tasks[index].getIcon()),
+                              const SizedBox(width: 12.0),
+                              IconButton(
+                                icon: const Icon(Icons.info_rounded),
+                                onPressed: () => showDialog(
+                                  context: context,
+                                  builder: (_) => TaskPopup(
+                                    task: widget.tasks[index],
+                                    deleteCallback: (task) => setState(
+                                      () => widget.removeCallback(task),
+                                    ),
+                                  ),
+                                ).then((_) => setState(() {})),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

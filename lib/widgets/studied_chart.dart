@@ -27,7 +27,7 @@ class _StudiedChartState extends State<StudiedChart> {
 
   @override
   Widget build(BuildContext context) {
-    List<int> daysData = Statistics.getLastWeek();
+    List<int> daysData = StudyStatistics.getLastWeek();
 
     int getMaxStudied() {
       int max = 0;
@@ -42,7 +42,7 @@ class _StudiedChartState extends State<StudiedChart> {
 
     return LineChart(
       LineChartData(
-        maxY: max(getMaxStudied() + 1, Statistics.getDailyGoal() + 1),
+        maxY: max(getMaxStudied() + 1, StudyStatistics.getDailyGoal() + 1),
         gridData: const FlGridData(verticalInterval: 1),
         titlesData: const FlTitlesData(
           show: false,
@@ -67,13 +67,13 @@ class _StudiedChartState extends State<StudiedChart> {
             spots: List.generate(7, (i) => FlSpot(i.toDouble(), daysData[6 - i].toDouble() * widget.animValue)),
           ),
           LineChartBarData(
-            spots: [FlSpot(0, Statistics.getAverage()), FlSpot(6, Statistics.getAverage())],
+            spots: [FlSpot(0, StudyStatistics.getAverage()), FlSpot(6, StudyStatistics.getAverage())],
             color: Colors.grey,
             dashArray: [10],
             dotData: const FlDotData(show: false),
           ),
           LineChartBarData(
-            spots: [FlSpot(0, Statistics.getDailyGoal()), FlSpot(6, Statistics.getDailyGoal())],
+            spots: [FlSpot(0, StudyStatistics.getDailyGoal()), FlSpot(6, StudyStatistics.getDailyGoal())],
             dotData: const FlDotData(show: false),
           ),
         ],

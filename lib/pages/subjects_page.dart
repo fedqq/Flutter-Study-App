@@ -122,7 +122,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     String res = widget.subjects[currentFocused].toString();
     String dir = (await getTemporaryDirectory()).path;
     File temp = File('$dir/${widget.subjects[currentFocused].name}.txt');
-    developer.log(dir);
+
     temp.writeAsString(res);
     Share.shareXFiles([XFile('$dir/${widget.subjects[currentFocused].name}.txt')]);
   }
@@ -225,26 +225,29 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
-      floatingActionButton: ExpandableFab(
-        controller: controller,
-        children: [
-          ActionButton(
-            onPressed: newSubject,
-            icon: const Icon(Icons.add_rounded),
-          ),
-          ActionButton(
-            onPressed: clearSubjects,
-            icon: const Icon(Icons.delete_forever_rounded),
-          ),
-          ActionButton(
-            onPressed: studyAll,
-            icon: const Icon(Icons.school_rounded),
-          ),
-          ActionButton(
-            onPressed: importSubject,
-            icon: const Icon(Icons.file_upload_rounded),
-          ),
-        ],
+      floatingActionButton: GestureDetector(
+        onTap: () => setState(() => currentFocused = -1),
+        child: ExpandableFab(
+          controller: controller,
+          children: [
+            ActionButton(
+              onPressed: newSubject,
+              icon: const Icon(Icons.add_rounded),
+            ),
+            ActionButton(
+              onPressed: clearSubjects,
+              icon: const Icon(Icons.delete_forever_rounded),
+            ),
+            ActionButton(
+              onPressed: studyAll,
+              icon: const Icon(Icons.school_rounded),
+            ),
+            ActionButton(
+              onPressed: importSubject,
+              icon: const Icon(Icons.file_upload_rounded),
+            ),
+          ],
+        ),
       ),
       body: GestureDetector(
         onTap: () async {

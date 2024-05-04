@@ -66,7 +66,7 @@ class _DoubleInputDialogState extends State<DoubleInputDialog> {
   bool validateInput(InputType input, String? untrimmed) {
     if (!input.exists) return true;
 
-    String value = untrimmed == '' ? '' : untrimmed!.trim();
+    String value = untrimmed == '' || untrimmed == null ? '' : untrimmed.trim();
     bool numericalPass = !(input.numerical && int.tryParse(value) == null);
     bool customValidatePass = input.validate == null ? true : input.validate!(value);
     bool basicValidatePass = validInput(value);
@@ -196,6 +196,7 @@ Future<String?> singleInputDialog(
     title,
     input,
     InputType.notExists(),
+    cancellable: cancellable,
   );
 
   return result == null ? '' : result.first;

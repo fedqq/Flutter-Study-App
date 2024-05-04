@@ -7,8 +7,11 @@ class Theming {
 
   static const purple = Color.fromARGB(255, 135, 0, 193);
   static const blue = Color.fromARGB(255, 34, 0, 253);
+  static const gray = Color.fromARGB(130, 224, 224, 224);
+  static const grayOpaque = Color.fromARGB(100, 146, 146, 146);
 
   static const List<Color> gradientColors = [purple, blue];
+  static const List<Color> grayGradientColors = [gray, grayOpaque];
 
   static Color boxShadowColor = gradientColors[1].withAlpha(60);
 
@@ -21,7 +24,7 @@ class Theming {
   static const Gradient grayGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: <Color>[Color.fromARGB(130, 224, 224, 224), Color.fromARGB(100, 146, 146, 146)],
+    colors: grayGradientColors,
   );
 
   static BoxDecoration gradientDeco =

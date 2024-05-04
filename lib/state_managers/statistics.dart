@@ -1,37 +1,23 @@
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Statistics {
+class StudyStatistics {
   static Map<String, int> dailyStudied = {};
   static String userName = '';
   static int dailyGoal = 0;
-  static String reminderTime = '';
 
   static void load() async {
     final prefs = await SharedPreferences.getInstance();
-    dailyGoal = prefs.getInt('daily-goal') ?? 0;
+    dailyGoal = prefs.getInt('daily-goal') ?? 20;
     final List<String> unparsed = prefs.getStringList('studied-per-day') ?? [];
     for (String day in unparsed) {
       List<String> split = day.split('--');
       dailyStudied[split[0]] = int.parse(split[1]);
     }
     userName = prefs.getString('user-name') ?? '';
-
-    reminderTime = prefs.getString('reminder-time') ?? '18:00';
-  }
-
-  static TimeOfDay getTime() {
-    if (reminderTime == '') reminderTime = '18:00';
-
-    return TimeOfDay(hour: int.parse(reminderTime.split(':')[0]), minute: int.parse(reminderTime.split(':')[1]));
   }
 
   static double getDailyGoal() => dailyGoal.toDouble();
-
-  static void setTime(TimeOfDay time) {
-    reminderTime = '${time.hour}:${NumberFormat('00').format(time.minute)}';
-  }
 
   static void setDailyGoal(int goal) => dailyGoal = goal;
 
@@ -44,7 +30,6 @@ class Statistics {
     }
     prefs.setStringList('studied-per-day', reparsed);
     prefs.setString('user-name', userName);
-    prefs.setString('reminder-time', reminderTime);
   }
 
   static bool study() {

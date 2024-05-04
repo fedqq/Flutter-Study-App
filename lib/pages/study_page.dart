@@ -179,8 +179,8 @@ class _StudyPageState extends State<StudyPage> {
                     onTap: () {
                       setState(() => showingMeaning = !showingMeaning);
                       if (showingMeaning) {
-                        if (Statistics.study()) {
-                          simpleSnackBar(context, 'You reached you daily goal of ${Statistics.dailyGoal} terms!');
+                        if (StudyStatistics.study()) {
+                          simpleSnackBar(context, 'You reached you daily goal of ${StudyStatistics.dailyGoal} terms!');
                         }
                       }
                     },
@@ -206,9 +206,7 @@ class _StudyPageState extends State<StudyPage> {
                             padding: const EdgeInsets.all(45.0),
                             child: LaTexT(
                               laTeXCode: Text(
-                                widget.cards[currentCard].latex && showingMeaning
-                                    ? '\$${getCurrentText()}\$'
-                                    : getCurrentText(),
+                                getCurrentText(),
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(fontSize: 25),
                               ),

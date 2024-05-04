@@ -46,37 +46,33 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
         ) ??
         '';
     if (result == '') return;
-    setState(() => Statistics.dailyGoal = int.parse(result));
+    setState(() => StudyStatistics.dailyGoal = int.parse(result));
   }
 
   void editUserName() async {
     String name = await singleInputDialog(context, 'Change Username', InputType(name: 'Username')) ?? '';
     if (name == '') return;
     setState(() {
-      Statistics.userName = name;
+      StudyStatistics.userName = name;
     });
-  }
-
-  void editReminderTime() async {
-    TimeOfDay? time = await showTimePicker(context: context, initialTime: Statistics.getTime());
-    if (time != null) {
-      setState(() => Statistics.setTime(time));
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (Statistics.userName == '') {
-      Future.delayed(Durations.extralong1, () async {
-        if (showingNameInput) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (StudyStatistics.userName == '') {
+        Future.delayed(Durations.extralong1, () async {
+          if (showingNameInput) return;
 
-        showingNameInput = true;
-        Future<String?> res = singleInputDialog(context, 'Set User Name', InputType(name: 'Name'), cancellable: false);
-        String name = await res ?? '';
-        setState(() => Statistics.userName = name);
-        showingNameInput = false;
-      });
-    }
+          showingNameInput = true;
+          Future<String?> res =
+              singleInputDialog(context, 'Set User Name', InputType(name: 'Name'), cancellable: false);
+          String name = await res ?? '';
+          setState(() => StudyStatistics.userName = name);
+          showingNameInput = false;
+        });
+      }
+    });
 
     controller.forward();
 
@@ -93,7 +89,6 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
             children: [
               ActionButton(onPressed: editUserName, icon: const Icon(Icons.person_rounded)),
               ActionButton(onPressed: setDailyGoal, icon: const Icon(Icons.flag_rounded)),
-              ActionButton(onPressed: editReminderTime, icon: const Icon(Icons.access_time_rounded)),
             ],
           ),
           body: Column(
@@ -114,7 +109,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                       imageFilter:
                           ImageFilter.blur(sigmaX: 8 * (1 - animation.value), sigmaY: 8 * (1 - animation.value)),
                       child: Text(
-                        'Hello\n${Statistics.userName}',
+                        'Hello\n${StudyStatistics.userName}',
                         textAlign: TextAlign.center,
                         overflow: TextOverflow.visible,
                         softWrap: false,
@@ -130,7 +125,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
               FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(
-                  'Today you have studied ${Statistics.getTodayStudied()}\ncards out of ${Statistics.dailyGoal}',
+                  'Today you have studied ${StudyStatistics.getTodayStudied()}\ncards out of ${StudyStatistics.dailyGoal}',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
                 ),
@@ -152,10 +147,6 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                     ),
                   ),
                 ),
-              ),
-              Text(
-                'Daily reminder at: ${Statistics.reminderTime}',
-                style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
               ),
             ],
           ),

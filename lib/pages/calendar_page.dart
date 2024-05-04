@@ -115,8 +115,6 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
       ((task.dueDate.compareTo(DateTime.now()) < 0) ? lateTasks : timelyTasks).add(task);
     }
 
-    developer.log(widget.completedTasks.toString());
-
     List<DateTime> dates = sortByDate(getDateTasks(false));
     List<DateTime> lateDates = sortByDate(getDateTasks(true));
     List<DateTime> completedDates = sortByDate(getDateCompletedTasks());
@@ -128,6 +126,8 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
         if (lateDates.isNotEmpty) overdueController.collapse();
       }
     }
+
+    controller.forward();
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -145,11 +145,17 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
                   physics: const ScrollPhysics(),
                   shrinkWrap: true,
                   itemCount: dates.length,
-                  itemBuilder: (context, index) => DayCard(
-                    date: dates[index],
-                    tasks: getDateTasks(false)[dates[index]] ?? [],
-                    removeCallback: deleteTask,
-                    completeCallback: completeTask,
+                  itemBuilder: (context, index) => AnimatedBuilder(
+                    animation: controller,
+                    builder: (_, __) => Padding(
+                      padding: EdgeInsets.symmetric(vertical: ((1 - animation.value) * 30)),
+                      child: DayCard(
+                        date: dates[index],
+                        tasks: getDateTasks(false)[dates[index]] ?? [],
+                        removeCallback: deleteTask,
+                        completeCallback: completeTask,
+                      ),
+                    ),
                   ),
                 ),
                 const Padding(
