@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 class FlashCard {
   late String name;
   late String meaning;
@@ -6,10 +8,11 @@ class FlashCard {
   FlashCard(this.name, this.meaning, this.learned);
 
   @override
-  String toString() => '$name<>$meaning<>${learned.toString()}}';
+  String toString() => '$name<>$meaning<>${learned.toString()}';
 
   static FlashCard fromString(String str) {
     var split = str.split('<>');
+    developer.log(split.toString());
 
     return FlashCard(split[0], split[1], bool.parse(split[2]));
   }

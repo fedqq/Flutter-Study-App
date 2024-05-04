@@ -28,28 +28,32 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   void pushMain(BuildContext context) {
     Future.delayed(
       Durations.long1,
-      () => Navigator.pushReplacement(
-        context,
-        PageRouteBuilder(
-          transitionDuration: Durations.extralong3,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const begin = Offset(0.0, 1.0);
-            const end = Offset.zero;
+      () {
+        Navigator.pop(context);
 
-            final tween = Tween(begin: begin, end: end);
-            final curvedAnimation = CurvedAnimation(
-              parent: animation,
-              curve: Curves.ease,
-            );
+        return Navigator.push(
+          context,
+          PageRouteBuilder(
+            transitionDuration: Durations.extralong3,
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(0.0, 1.0);
+              const end = Offset.zero;
 
-            return SlideTransition(
-              position: tween.animate(curvedAnimation),
-              child: child,
-            );
-          },
-          pageBuilder: (_, __, ___) => const NavigationPage(title: 'Study Help App'),
-        ),
-      ),
+              final tween = Tween(begin: begin, end: end);
+              final curvedAnimation = CurvedAnimation(
+                parent: animation,
+                curve: Curves.ease,
+              );
+
+              return SlideTransition(
+                position: tween.animate(curvedAnimation),
+                child: child,
+              );
+            },
+            pageBuilder: (_, __, ___) => const NavigationPage(title: 'Study Help App'),
+          ),
+        );
+      },
     );
   }
 

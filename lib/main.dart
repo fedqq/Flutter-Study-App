@@ -61,17 +61,19 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     SaveDataManager.saveData(subjects, tasks, completedTasks);
     StudyStatistics.save();
+
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
   void initState() {
     loadData();
-    super.initState();
+
     WidgetsBinding.instance.addObserver(this);
+    super.initState();
   }
 
   void loadData() async {
@@ -114,7 +116,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
       SubjectsPage(subjects: subjects),
       CalendarPage(tasks: tasks, completedTasks: completedTasks),
     ];
-    
+
     if (CLEAR) {
       SaveDataManager.clearAll();
     }

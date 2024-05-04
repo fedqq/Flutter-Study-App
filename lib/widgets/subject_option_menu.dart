@@ -9,17 +9,20 @@ class SubjectOptionMenu extends StatelessWidget {
   final Function() editSubject;
   final Function() editColor;
   final Function() deleteSubject;
+  final Function() testSubject;
 
   final Function() exportSubject;
   final Animation animation;
 
-  const SubjectOptionMenu(
-      {super.key,
-      required this.editSubject,
-      required this.editColor,
-      required this.deleteSubject,
-      required this.exportSubject,
-      required this.animation,});
+  const SubjectOptionMenu({
+    super.key,
+    required this.editSubject,
+    required this.editColor,
+    required this.deleteSubject,
+    required this.exportSubject,
+    required this.animation,
+    required this.testSubject,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +58,10 @@ class SubjectOptionMenu extends StatelessWidget {
                       IconButton(
                         icon: const Icon(Icons.share_rounded),
                         onPressed: exportSubject,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.quiz_rounded),
+                        onPressed: testSubject,
                       ),
                     ],
                   ),

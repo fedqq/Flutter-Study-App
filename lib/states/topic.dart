@@ -27,8 +27,7 @@ class Topic {
 
     String name = split[0];
     Topic finalTopic = Topic(name);
-    String cards = split[1];
-    if (cards != '') {
+    if (split.length != 1) {
       List<String> cards = split[1].split(';');
       for (String cardString in cards) {
         finalTopic.addCard(FlashCard.fromString(cardString));

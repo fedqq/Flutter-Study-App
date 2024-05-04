@@ -8,8 +8,10 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/subject_page.dart';
 import 'package:flutter_application_1/pages/study_page.dart';
+import 'package:flutter_application_1/pages/test_page.dart';
 import 'package:flutter_application_1/states/flashcard.dart';
 import 'package:flutter_application_1/states/subject.dart';
+import 'package:flutter_application_1/states/test.dart';
 import 'package:flutter_application_1/states/topic.dart';
 import 'package:flutter_application_1/utils/snackbar.dart';
 import 'package:flutter_application_1/utils/expandable_fab.dart';
@@ -66,9 +68,10 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     super.dispose();
   }
 
-  void study(Subject subject) =>
-      Navigator.push(context, MaterialPageRoute(builder: (_) => SubjectPage(subject: subject)))
-          .then((value) => setState(() => currentFocused = -1));
+  void study(Subject subject) {
+    closeMenus();
+    Navigator.push(context, MaterialPageRoute(builder: (_) => SubjectPage(subject: subject)));
+  }
 
   void closeMenus() => setState(() {
         controller.close();
@@ -117,18 +120,40 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     setState(() => widget.subjects[currentFocused].color = newColor);
   }
 
-  void exportSubject() async {
+  void testSubject() async {
+    List<TestCard> cards = [];
+    Subject subject = widget.subjects[currentFocused];
+    for (Topic topic in subject.topics) {
+      for (FlashCard card in topic.cards) {
+        cards.add(TestCard(card.name, card.meaning, '${subject.name} - ${topic.name}'));
+      }
+    }
+    if (cards.isEmpty) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TestPage(
+          cards: cards,
+          testArea: subject.name,
+        ),
+      ),
+    );
+
     closeMenus();
+  }
+
+  void exportSubject() async {
     String res = widget.subjects[currentFocused].toString();
     String dir = (await getTemporaryDirectory()).path;
     File temp = File('$dir/${widget.subjects[currentFocused].name}.txt');
 
     temp.writeAsString(res);
     Share.shareXFiles([XFile('$dir/${widget.subjects[currentFocused].name}.txt')]);
+
+    closeMenus();
   }
 
   void importSubject() async {
-    closeMenus();
     FilePickerResult? result = await FilePicker.platform.pickFiles();
     if (result != null) {
       File file = File(result.files.single.path!);
@@ -145,13 +170,12 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
         widget.subjects.add(subject);
       });
     }
+    closeMenus();
   }
 
   List<String> getSubjectNames() => List.generate(widget.subjects.length, (index) => widget.subjects[index].name);
 
   void editSubject() async {
-    closeMenus();
-
     bool validate(String str) {
       if (getSubjectNames().contains(str)) {
         simpleSnackBar(context, 'Subject named $str already exists');
@@ -175,10 +199,10 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     if (newName == '') return;
 
     setState(() => widget.subjects[currentFocused].name = newName);
+    closeMenus();
   }
 
   void clearSubjects() async {
-    closeMenus();
     bool confirmed = await confirm(
       context,
       title: const Text('Delete All Subjects'),
@@ -190,6 +214,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
         currentFocused = -1;
       });
     }
+    closeMenus();
   }
 
   void studyAll() {
@@ -258,7 +283,12 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
         child: AnimatedBuilder(
           animation: enterController,
           builder: (context, _) => widget.subjects.isEmpty
-              ? const Center(child: Text('No Subjects. Expand the menu and press + to make a new subject. '))
+              ? const Center(
+                  child: Text(
+                    'No Subjects.\nExpand the menu and press + to make a new subject. ',
+                    textAlign: TextAlign.center,
+                  ),
+                )
               : ListView.builder(
                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
                   itemCount: widget.subjects.length,
@@ -298,8 +328,9 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
                                 boxShadow: [
                                   BoxShadow(
                                     color: widget.subjects[index].color.withAlpha((60 * enterAnimation.value).toInt()),
-                                    blurRadius: 10.0 * enterAnimation.value,
-                                    spreadRadius: currentFocused == index ? 0 : -8,
+                                    blurRadius:
+                                        10.0 * (currentFocused == index ? blurAnimation.value : enterAnimation.value),
+                                    spreadRadius: currentFocused == index ? (-8 + 8 * blurAnimation.value) : -8,
                                   ),
                                 ],
                               ),
@@ -311,6 +342,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
                                 editColor: editColor,
                                 deleteSubject: deleteSubject,
                                 exportSubject: exportSubject,
+                                testSubject: testSubject,
                                 animation: blurAnimation,
                               ),
                           ],

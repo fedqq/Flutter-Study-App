@@ -1,3 +1,6 @@
+// ignore: unused_import
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/utils/gradient_widgets.dart';
 
@@ -8,7 +11,6 @@ class ExFabController {
   late void Function(bool) updateState;
   void close() {
     open = false;
-
     updateState(open);
   }
 
@@ -58,10 +60,11 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
 
   @override
   void initState() {
-    super.initState();
     if (widget.controller != null) {
-      widget.controller?.setCallback(set);
+      widget.controller!.setCallback(set);
     }
+
+    super.initState();
     _open = false;
     _controller = AnimationController(
       value: _open ? 1.0 : 0.0,

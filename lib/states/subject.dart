@@ -1,6 +1,9 @@
 import "package:flutter/material.dart";
 import "package:flutter_application_1/states/topic.dart";
 
+// ignore: unused_import
+import 'dart:developer' as developer;
+
 class Subject {
   String name = 'Default';
   List<Topic> topics = [];
@@ -15,7 +18,7 @@ class Subject {
   @override
   String toString() {
     String ret = '${name}__${color.value}///';
-    if (topics.isEmpty) {
+    if (topics.isNotEmpty) {
       for (Topic topic in topics) {
         ret += '${topic.toString()}]';
       }
@@ -31,12 +34,13 @@ class Subject {
     String name;
     String color;
     [name, color] = nameStr.split('__');
+
     if (topicsStr.isEmpty) return Subject(name, Color(int.parse(color)));
     List<String> topicsData = topicsStr.split(']');
     List<Topic> topics = List.generate(topicsData.length - 1, (i) => Topic.fromString(topicsData[i]));
     Subject ret = Subject(name, Color(int.parse(color)));
     ret.topics = topics;
-    
+
     return ret;
   }
 }

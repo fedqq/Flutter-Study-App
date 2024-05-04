@@ -127,7 +127,7 @@ class _DoubleInputDialogState extends State<DoubleInputDialog> {
                   if (!(validFirst && validSecond)) {
                     simpleSnackBar(
                       context,
-                      'Invalid ${!validFirst ? first.name : second.name}. Please remove any special characters and do not leave it empty',
+                      'Invalid ${!validFirst ? first.name : second.name}. Please remove any special characters and do not leave it empty. Make sure that any name inputted does not already exist',
                     );
 
                     return;
@@ -212,7 +212,12 @@ Future<DialogResult?> doubleInputDialog(
     await showDialog<DialogResult>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => DoubleInputDialog(title: title, first: first, second: second),
+      builder: (context) => DoubleInputDialog(
+        title: title,
+        first: first,
+        second: second,
+        cancellable: cancellable,
+      ),
     );
 
 Future<Color?> showColorPicker(BuildContext context, Color color) async {

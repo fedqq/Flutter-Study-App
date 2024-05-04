@@ -20,6 +20,8 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
   late AnimationController controller;
   late Animation<double> animation;
 
+  ExFabController exFabController = ExFabController();
+
   @override
   void dispose() {
     controller.dispose();
@@ -50,7 +52,15 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
   }
 
   void editUserName() async {
-    String name = await singleInputDialog(context, 'Change Username', InputType(name: 'Username')) ?? '';
+    String name = await singleInputDialog(
+          context,
+          'Change Username',
+          InputType(
+            name: 'Username',
+            initialValue: StudyStatistics.userName,
+          ),
+        ) ??
+        '';
     if (name == '') return;
     setState(() {
       StudyStatistics.userName = name;
@@ -59,24 +69,35 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (StudyStatistics.userName == '') {
-        Future.delayed(Durations.extralong1, () async {
-          if (showingNameInput) return;
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) {
+        Future.delayed(
+          Durations.extralong1,
+          () async {
+            if (StudyStatistics.userName == '') {
+              if (showingNameInput) return;
 
-          showingNameInput = true;
-          Future<String?> res =
-              singleInputDialog(context, 'Set User Name', InputType(name: 'Name'), cancellable: false);
-          String name = await res ?? '';
-          setState(() => StudyStatistics.userName = name);
-          showingNameInput = false;
-        });
-      }
-    });
+              showingNameInput = true;
+              Future<String?> res =
+                  singleInputDialog(context, 'Set User Name', InputType(name: 'Name'), cancellable: false);
+              String name = await res ?? '';
+              setState(() => StudyStatistics.userName = name);
+              showingNameInput = false;
+            }
+          },
+        );
+      },
+    );
 
     controller.forward();
 
-    ExFabController exFabController = ExFabController();
+    ExpandableFab fab = ExpandableFab(
+      controller: exFabController,
+      children: [
+        ActionButton(onPressed: editUserName, icon: const Icon(Icons.person_rounded)),
+        ActionButton(onPressed: setDailyGoal, icon: const Icon(Icons.flag_rounded)),
+      ],
+    );
 
     return SafeArea(
       child: GestureDetector(
@@ -84,13 +105,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
         child: Scaffold(
           extendBodyBehindAppBar: true,
           backgroundColor: Colors.transparent,
-          floatingActionButton: ExpandableFab(
-            controller: exFabController,
-            children: [
-              ActionButton(onPressed: editUserName, icon: const Icon(Icons.person_rounded)),
-              ActionButton(onPressed: setDailyGoal, icon: const Icon(Icons.flag_rounded)),
-            ],
-          ),
+          floatingActionButton: fab,
           body: Column(
             children: [
               AnimatedBuilder(

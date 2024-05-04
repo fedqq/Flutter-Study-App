@@ -28,6 +28,16 @@ class _TopicCardState extends State<TopicCard> {
     });
   }
 
+  bool checkExistingTerm(String name) {
+    for (FlashCard card in widget.topic.cards) {
+      if (card.name == name) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   void studyTopic(Topic topic) => Navigator.push(
         context,
         PageRouteBuilder(
@@ -67,7 +77,7 @@ class _TopicCardState extends State<TopicCard> {
     DialogResult result = await doubleInputDialog(
           context,
           'Create New Card',
-          InputType(name: 'Name'),
+          InputType(name: 'Name', validate: checkExistingTerm),
           InputType(name: 'Meaning', nullable: false, latex: true),
           cancellable: true,
         ) ??
