@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/results_page.dart';
+import 'package:flutter_application_1/state_managers/tests_manager.dart';
 import 'package:flutter_application_1/states/test.dart';
 import 'package:flutter_application_1/widgets/test_input.dart';
+import 'package:intl/intl.dart';
 
 class TestPage extends StatefulWidget {
   final List<TestCard> cards;
@@ -13,12 +15,16 @@ class TestPage extends StatefulWidget {
 }
 
 class _TestPageState extends State<TestPage> {
-  Test test = Test({});
+  late Test test;
   List<String> answers = [];
 
   @override
   void initState() {
-    test = Test({for (TestCard card in widget.cards) card: false});
+    test = Test(
+      {for (TestCard card in widget.cards) card: false},
+      DateFormat.yMd().format(DateTime.now()),
+      widget.testArea,
+    );
     answers = [for (var _ in widget.cards) ''];
     super.initState();
   }
@@ -30,6 +36,7 @@ class _TestPageState extends State<TestPage> {
         builder: (_) => ResultsPage(test: test, answers: answers, cards: widget.cards),
       ),
     );
+    TestsManager.addTest(test);
   }
 
   @override

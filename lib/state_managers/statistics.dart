@@ -21,7 +21,7 @@ class StudyStatistics {
 
   static void setDailyGoal(int goal) => dailyGoal = goal;
 
-  static void save() async {
+  static void saveData() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setInt('daily-goal', dailyGoal);
     List<String> reparsed = [];

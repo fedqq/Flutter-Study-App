@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/state_managers/data_manager.dart';
 import 'package:flutter_application_1/pages/calendar_page.dart';
 import 'package:flutter_application_1/state_managers/statistics.dart';
+import 'package:flutter_application_1/state_managers/tests_manager.dart';
 import 'package:flutter_application_1/states/subject.dart';
 
 import 'package:flutter_application_1/states/task.dart';
@@ -62,7 +63,8 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
   @override
   void dispose() {
     SaveDataManager.saveData(subjects, tasks, completedTasks);
-    StudyStatistics.save();
+    TestsManager.saveData();
+    StudyStatistics.saveData();
 
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -81,6 +83,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
     var tasksAsync = await SaveDataManager.loadTasks();
     var completedTasksAsync = await SaveDataManager.loadCompletedTasks();
     StudyStatistics.load();
+    TestsManager.loadData();
 
     setState(() {
       subjects = subjectsAsync;
@@ -98,7 +101,8 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     SaveDataManager.saveData(subjects, tasks, completedTasks);
-    StudyStatistics.save();
+    StudyStatistics.saveData();
+    TestsManager.saveData();
     super.didChangeAppLifecycleState(state);
   }
 

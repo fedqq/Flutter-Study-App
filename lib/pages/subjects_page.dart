@@ -6,6 +6,7 @@ import 'dart:ui';
 import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/all_tests_page.dart';
 import 'package:flutter_application_1/pages/subject_page.dart';
 import 'package:flutter_application_1/pages/study_page.dart';
 import 'package:flutter_application_1/pages/test_page.dart';
@@ -232,8 +233,9 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     );
   }
 
-  void a(int i) {
-    return;
+  void showAllTests() {
+    closeMenus();
+    Navigator.push(context, MaterialPageRoute(builder: (_) => const AllTestsPage()));
   }
 
   @override
@@ -245,6 +247,10 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
       appBar: AppBar(
         scrolledUnderElevation: 0,
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.quiz_rounded),
+          onPressed: showAllTests,
+        ),
         title: Text(
           widget.subjects.length == 1 ? 'Study 1 Subject' : 'Study ${widget.subjects.length} Subjects',
           style: const TextStyle(fontWeight: FontWeight.bold),

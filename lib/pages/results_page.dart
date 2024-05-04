@@ -31,15 +31,22 @@ class _ResultsPageState extends State<ResultsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: ListView.builder(
-        itemCount: widget.test.cards.length,
-        itemBuilder: (context, index) => GradientOutline(
-          gradient:
-              Theming.gradientToDarker(widget.test.cards[widget.cards[index]] ?? false ? Colors.green : Colors.red),
-          child: Row(
-            children: [Text(widget.cards[index].name), const Spacer(), Text(widget.answers[index])],
+      body: ListView(
+        children: [
+          ListView.builder(
+            physics: const ScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: widget.test.cards.length,
+            itemBuilder: (context, index) => GradientOutline(
+              innerPadding: 16,
+              gradient:
+                  Theming.gradientToDarker(widget.test.cards[widget.cards[index]] ?? false ? Colors.green : Colors.red),
+              child: Row(
+                children: [Text(widget.cards[index].name), const Spacer(), Text(widget.answers[index])],
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
