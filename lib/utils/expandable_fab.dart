@@ -6,6 +6,8 @@ import 'package:flutter_application_1/utils/gradient_widgets.dart';
 
 import 'theming.dart';
 
+import 'dart:math' show pi;
+
 class ExFabController {
   bool open = false;
   late void Function(bool) updateState;
@@ -41,16 +43,13 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     return SizedBox.expand(
-      child: Align(
+      child: Stack(
         alignment: Alignment.bottomRight,
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          clipBehavior: Clip.none,
-          children: [
-            ..._buildExpandingActionButtons(),
-            buildButton(),
-          ],
-        ),
+        clipBehavior: Clip.none,
+        children: [
+          ..._buildExpandingActionButtons(),
+          buildButton(),
+        ],
       ),
     );
   }
@@ -145,14 +144,11 @@ class ActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => onPressed!(),
-      child: Align(
-        alignment: Alignment.center,
-        child: GradientOutline(
-          innerPadding: 10,
-          outerPadding: 5,
-          gradient: Theming.grayGradient,
-          child: icon,
-        ),
+      child: GradientOutline(
+        innerPadding: 10,
+        outerPadding: 3,
+        gradient: Theming.grayGradient,
+        child: icon,
       ),
     );
   }
@@ -181,7 +177,7 @@ class ExpandingActionButton extends StatelessWidget {
         return Positioned(
           bottom: 10 + offset.dy,
           child: Transform.rotate(
-            angle: (1.0 - progress.value) * 3.141592653 / 2,
+            angle: (1.0 - progress.value) * pi / 2,
             child: child!,
           ),
         );

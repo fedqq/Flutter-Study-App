@@ -19,8 +19,8 @@ import '../utils/theming.dart';
 class TopicCard extends StatefulWidget {
   final Topic topic;
   final Future Function() testTopic;
-  String area;
-  TopicCard({super.key, required this.topic, required this.testTopic, required this.area});
+  final String area;
+  const TopicCard({super.key, required this.topic, required this.testTopic, required this.area});
 
   @override
   State<TopicCard> createState() => _TopicCardState();
@@ -83,7 +83,7 @@ class _TopicCardState extends State<TopicCard> {
         for (Test test in TestsManager.testsFromArea(widget.area)) {
           test.area = newArea;
         }
-        widget.area = newArea;
+        widget.area.replaceAll(widget.area, newArea);
       });
     }
   }

@@ -265,7 +265,6 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
         ),
       ),
       floatingActionButton: GestureDetector(
-        behavior: HitTestBehavior.translucent,
         onTap: () => setState(() => currentFocused = -1),
         child: ExpandableFab(
           controller: controller,
@@ -290,7 +289,6 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
         ),
       ),
       body: GestureDetector(
-        behavior: HitTestBehavior.translucent,
         child: AnimatedBuilder(
           animation: enterController,
           builder: (context, _) => widget.subjects.isEmpty
@@ -304,7 +302,6 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
                   itemCount: widget.subjects.length,
                   itemBuilder: (context, index) => GestureDetector(
-                    behavior: HitTestBehavior.translucent,
                     onTap: () async {
                       closeMenus();
                       if (currentFocused == -1 ? false : currentFocused != index) {
