@@ -1,4 +1,9 @@
 import "package:flutter/material.dart";
+import "package:flutter_application_1/pages/all_tests_page.dart";
+import "package:flutter_application_1/pages/test_page.dart";
+import "package:flutter_application_1/state_managers/tests_manager.dart";
+import "package:flutter_application_1/states/flashcard.dart";
+import "package:flutter_application_1/states/test.dart";
 import "package:flutter_application_1/states/topic.dart";
 import "package:flutter_application_1/states/subject.dart";
 import "package:flutter_application_1/utils/input_dialogs.dart";
@@ -32,7 +37,32 @@ class _SubjectPageState extends State<SubjectPage> {
     Expanded topicList = Expanded(
       child: ListView.builder(
         itemCount: widget.subject.topics.length,
-        itemBuilder: (context, index) => TopicCard(topic: widget.subject.topics[index]),
+        itemBuilder: (context, index) => TopicCard(
+          topic: widget.subject.topics[index],
+          area: '${widget.subject.name} - ${widget.subject.topics[index].name}',
+          testTopic: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) {
+                List<TestCard> cards = List.generate(widget.subject.topics[index].cards.length, (i) {
+                  FlashCard card = widget.subject.topics[index].cards[i];
+
+                  return TestCard(
+                    card.name,
+                    card.meaning,
+                    '${widget.subject.name} - ${widget.subject.topics[index].name}',
+                  );
+                });
+
+                return TestPage(
+                  cards: cards,
+                  testArea: '${widget.subject.name} - ${widget.subject.topics[index].name}',
+                  subject: widget.subject,
+                );
+              },
+            ),
+          )..then((_) => setState(() {})),
+        ),
       ),
     );
 
@@ -63,8 +93,20 @@ class _SubjectPageState extends State<SubjectPage> {
             child: Column(
               children: [
                 const Align(alignment: Alignment.centerLeft),
-                Text('${widget.subject.name} Topics (${widget.subject.topics.length})',
-                    style: Theme.of(context).textTheme.titleLarge,),
+                Text(
+                  '${widget.subject.name} Topics (${widget.subject.topics.length})',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                if (TestsManager.hasScore(widget.subject.asArea))
+                  TextButton(
+                    child: Text('Your last score on this subject was: ${widget.subject.testScores.last}%'),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => AllTestsPage(area: widget.subject.name),
+                      ),
+                    ),
+                  ),
                 if (widget.subject.topics.isNotEmpty) topicList,
               ],
             ),

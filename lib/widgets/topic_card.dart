@@ -1,8 +1,11 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/all_tests_page.dart';
 import 'package:flutter_application_1/pages/study_page.dart';
+import 'package:flutter_application_1/state_managers/tests_manager.dart';
 import 'package:flutter_application_1/states/flashcard.dart';
+import 'package:flutter_application_1/states/test.dart';
 import 'package:flutter_application_1/states/topic.dart';
 
 // ignore: unused_import
@@ -15,7 +18,9 @@ import '../utils/theming.dart';
 
 class TopicCard extends StatefulWidget {
   final Topic topic;
-  const TopicCard({super.key, required this.topic});
+  final Future Function() testTopic;
+  String area;
+  TopicCard({super.key, required this.topic, required this.testTopic, required this.area});
 
   @override
   State<TopicCard> createState() => _TopicCardState();
@@ -70,7 +75,17 @@ class _TopicCardState extends State<TopicCard> {
           InputType(name: 'Name'),
         ) ??
         '';
-    if (newName != '') setState(() => topic.name = newName);
+    if (newName != '') {
+      setState(() {
+        String subjectName = widget.area.split('-')[0].trim();
+        topic.name = newName;
+        String newArea = '$subjectName - $newName';
+        for (Test test in TestsManager.testsFromArea(widget.area)) {
+          test.area = newArea;
+        }
+        widget.area = newArea;
+      });
+    }
   }
 
   void addCard(Topic topic) async {
@@ -143,7 +158,7 @@ class _TopicCardState extends State<TopicCard> {
               }
             }),
             trailing: SizedBox(
-              width: 120,
+              width: 160,
               height: 40,
               child: Row(
                 children: [
@@ -158,6 +173,10 @@ class _TopicCardState extends State<TopicCard> {
                   IconButton(
                     onPressed: () => addCard(topic),
                     icon: const Icon(Icons.add_rounded),
+                  ),
+                  IconButton(
+                    onPressed: () => widget.testTopic().then((_) => setState(() {})),
+                    icon: const Icon(Icons.question_mark_rounded),
                   ),
                 ],
               ),
@@ -174,7 +193,18 @@ class _TopicCardState extends State<TopicCard> {
                 contentPadding: const EdgeInsets.all(8.0),
                 title: Text(topic.cards[cardIndex].name),
               ),
-            ),
+            )..insert(
+                0,
+                TestsManager.hasScore(widget.area)
+                    ? TextButton(
+                        onPressed: () =>
+                            Navigator.push(context, MaterialPageRoute(builder: (_) => AllTestsPage(area: widget.area))),
+                        child: Text(
+                          'Your last score on this topic was ${TestsManager.testsFromArea(widget.area).last.percentage}%',
+                        ),
+                      )
+                    : const SizedBox(),
+              ),
           ),
         ),
       ),

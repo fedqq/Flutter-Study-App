@@ -39,9 +39,11 @@ class SubjectOptionMenu extends StatelessWidget {
               child: SizedBox(
                 height: 75,
                 child: GradientOutline(
+                  innerPadding: 0,
                   gradient: Theming.grayGradient,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       IconButton(
                         icon: const Icon(Icons.color_lens_rounded),
@@ -60,7 +62,7 @@ class SubjectOptionMenu extends StatelessWidget {
                         onPressed: exportSubject,
                       ),
                       IconButton(
-                        icon: const Icon(Icons.quiz_rounded),
+                        icon: const Icon(Icons.question_mark_rounded),
                         onPressed: testSubject,
                       ),
                     ],

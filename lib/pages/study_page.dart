@@ -122,7 +122,7 @@ class _StudyPageState extends State<StudyPage> {
     });
   }
 
-  Widget buildNavButton(double opacity, void Function() onPressed, String heroTag) {
+  Widget buildNavButton(double opacity, void Function() onPressed, String heroTag, {bool forward = false}) {
     return AnimatedOpacity(
       duration: Durations.short1,
       opacity: opacity,
@@ -135,7 +135,7 @@ class _StudyPageState extends State<StudyPage> {
           foregroundColor: Colors.white,
           elevation: 0,
           hoverElevation: 0,
-          child: const Icon(Icons.arrow_back_ios_rounded),
+          child: Icon(forward ? Icons.arrow_forward_ios_rounded : Icons.arrow_back_ios_rounded),
         ),
       ),
     );
@@ -146,7 +146,7 @@ class _StudyPageState extends State<StudyPage> {
     Row buttons = Row(children: [
       buildNavButton(currentCard == 0 ? 0.2 : 1, goBackward, 'backwardbtn'),
       const Spacer(),
-      buildNavButton(currentCard == cards.length - 1 ? 0.2 : 1, goForward, 'forwardbtn'),
+      buildNavButton(currentCard == cards.length - 1 ? 0.2 : 1, goForward, 'forwardbtn', forward: true),
     ]);
 
     return Scaffold(
@@ -159,13 +159,14 @@ class _StudyPageState extends State<StudyPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    if (widget.renameCallback != null)
-                      IconButton(icon: const Icon(Icons.edit_rounded), onPressed: editTopicName),
-                    SizedBox(
-                      height: 75,
-                      child: Text(
-                        widget.topic.name,
-                        style: const TextStyle(fontSize: 35, height: 2),
+                    InkWell(
+                      onTap: widget.renameCallback != null ? editTopicName : null,
+                      child: SizedBox(
+                        height: 75,
+                        child: Text(
+                          widget.topic.name,
+                          style: const TextStyle(fontSize: 35, height: 2),
+                        ),
                       ),
                     ),
                   ],

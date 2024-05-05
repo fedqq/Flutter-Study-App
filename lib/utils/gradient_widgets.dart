@@ -31,7 +31,7 @@ class GradientOutline extends StatelessWidget {
     super.key,
     required this.child,
     this.gradient = Theming.coloredGradient,
-    this.innerPadding = 0.0,
+    this.innerPadding = 0,
     this.outerPadding = 15,
   });
 

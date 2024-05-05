@@ -10,6 +10,7 @@ import 'package:flutter_application_1/pages/all_tests_page.dart';
 import 'package:flutter_application_1/pages/subject_page.dart';
 import 'package:flutter_application_1/pages/study_page.dart';
 import 'package:flutter_application_1/pages/test_page.dart';
+import 'package:flutter_application_1/state_managers/tests_manager.dart';
 import 'package:flutter_application_1/states/flashcard.dart';
 import 'package:flutter_application_1/states/subject.dart';
 import 'package:flutter_application_1/states/test.dart';
@@ -136,6 +137,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
         builder: (_) => TestPage(
           cards: cards,
           testArea: subject.name,
+          subject: subject,
         ),
       ),
     );
@@ -198,6 +200,10 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
         '';
 
     if (newName == '') return;
+
+    for (Test test in TestsManager.pastTests) {
+      test.area = test.area.replaceAll(widget.subjects[currentFocused].name, newName);
+    }
 
     setState(() => widget.subjects[currentFocused].name = newName);
     closeMenus();

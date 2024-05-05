@@ -85,6 +85,6 @@ class SaveDataManager {
       finalTasks.add(Task.fromString(task));
     }
 
-    return finalTasks;
+    return finalTasks.where((element) => element.dueDate.difference(DateTime.now()) < const Duration(days: 30)).toList();
   }
 }

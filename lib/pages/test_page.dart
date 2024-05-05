@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/results_page.dart';
 import 'package:flutter_application_1/state_managers/tests_manager.dart';
+import 'package:flutter_application_1/states/subject.dart';
 import 'package:flutter_application_1/states/test.dart';
 import 'package:flutter_application_1/widgets/test_input.dart';
+import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 import 'package:intl/intl.dart';
 
 class TestPage extends StatefulWidget {
   final List<TestCard> cards;
   final String testArea;
-  const TestPage({super.key, required this.cards, required this.testArea});
+  final Subject subject;
+  const TestPage({super.key, required this.cards, required this.testArea, required this.subject});
 
   @override
   State<TestPage> createState() => _TestPageState();
@@ -24,19 +27,30 @@ class _TestPageState extends State<TestPage> {
       {for (TestCard card in widget.cards) card: false},
       DateFormat.yMd().format(DateTime.now()),
       widget.testArea,
+      answers,
     );
     answers = [for (var _ in widget.cards) ''];
     super.initState();
   }
 
   void submitAnswers() {
+    int i = 0;
+    for (TestCard card in widget.cards) {
+      if (ratio(answers[i], card.meaning) > 80) {
+        test.cardCorrect[card] = true;
+      }
+      i++;
+    }
+
+    widget.subject.addScore(test.percentage.toInt());
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) => ResultsPage(test: test, answers: answers, cards: widget.cards),
+        builder: (_) => ResultsPage(test: test..answers = answers),
       ),
     );
-    TestsManager.addTest(test);
+    TestsManager.addTest(test..answers = answers);
   }
 
   @override
