@@ -21,7 +21,7 @@ class CalendarPage extends StatefulWidget {
 
 class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderStateMixin {
   List<Task> timelyTasks = [];
-  List<Task> lateTasks = [];
+  List<Task> overdueTasks = [];
   late AnimationController controller;
   late Animation<double> animation;
   late ExpansionTileController overdueController;
@@ -41,9 +41,9 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
     super.initState();
   }
 
-  Map<DateTime, List<Task>> getDateTasks(bool late) {
+  Map<DateTime, List<Task>> getTasksMap(bool late) {
     Map<DateTime, List<Task>> ret = {};
-    for (Task task in (late ? lateTasks : timelyTasks)) {
+    for (Task task in (late ? overdueTasks : timelyTasks)) {
       if (!ret.containsKey(task.dueDate)) {
         ret[task.dueDate] = [task];
       } else {
@@ -54,7 +54,7 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
     return ret;
   }
 
-  Map<DateTime, List<Task>> getDateCompletedTasks() {
+  Map<DateTime, List<Task>> getCompletedTasksMap() {
     Map<DateTime, List<Task>> ret = {};
     for (Task task in widget.completedTasks) {
       if (!ret.containsKey(task.dueDate)) {
@@ -67,7 +67,7 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
     return ret;
   }
 
-  void newTask(BuildContext context) async {
+  void createTask(BuildContext context) async {
     DialogResult result = await doubleInputDialog(
           context,
           'New task',
@@ -110,14 +110,14 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     timelyTasks = [];
-    lateTasks = [];
+    overdueTasks = [];
     for (Task task in widget.tasks) {
-      ((task.dueDate.compareTo(DateTime.now()) < 0) ? lateTasks : timelyTasks).add(task);
+      ((task.dueDate.compareTo(DateTime.now()) < 0) ? overdueTasks : timelyTasks).add(task);
     }
 
-    List<DateTime> dates = sortByDate(getDateTasks(false));
-    List<DateTime> lateDates = sortByDate(getDateTasks(true));
-    List<DateTime> completedDates = sortByDate(getDateCompletedTasks());
+    List<DateTime> dates = sortByDate(getTasksMap(false));
+    List<DateTime> lateDates = sortByDate(getTasksMap(true));
+    List<DateTime> completedDates = sortByDate(getCompletedTasksMap());
 
     void onExpanded({bool second = false}) {
       if (second) {
@@ -133,7 +133,7 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
       backgroundColor: Colors.transparent,
       appBar: AppBar(scrolledUnderElevation: 0),
       floatingActionButton: GradientActionButton(
-        onPressed: () => newTask(context),
+        onPressed: () => createTask(context),
         tooltip: 'New Task',
       ),
       body: Column(
@@ -151,7 +151,7 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
                       padding: EdgeInsets.symmetric(vertical: ((1 - animation.value) * 30)),
                       child: DayCard(
                         date: dates[index],
-                        tasks: getDateTasks(false)[dates[index]] ?? [],
+                        tasks: getTasksMap(false)[dates[index]] ?? [],
                         removeCallback: deleteTask,
                         completeCallback: completeTask,
                       ),
@@ -165,10 +165,10 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
               ],
             ),
           ),
-          if (lateTasks.isNotEmpty)
+          if (overdueTasks.isNotEmpty)
             ExpandingTaskList(
               dates: lateDates,
-              tasks: getDateTasks(true),
+              tasks: getTasksMap(true),
               deleteCallback: deleteTask,
               completeCallback: completeTask,
               outlineColor: Colors.red,
@@ -179,7 +179,7 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
           if (widget.completedTasks.isNotEmpty)
             ExpandingTaskList(
               dates: completedDates,
-              tasks: getDateCompletedTasks(),
+              tasks: getCompletedTasksMap(),
               deleteCallback: deleteCompletedTask,
               outlineColor: Colors.grey,
               title: 'Completed Tasks',

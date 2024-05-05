@@ -159,7 +159,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
                 surfaceTintColor: Colors.transparent,
                 shadowColor: Colors.transparent,
                 selectedIndex: selectedDest,
-                indicatorColor: const Color.fromARGB(255, 66, 37, 255),
+                indicatorColor: Color.alphaBlend(Theming.blue.withAlpha(127), Theming.purple),
                 destinations: const [
                   NavigationDestination(icon: Icon(Icons.show_chart_rounded), label: "Statistics"),
                   NavigationDestination(icon: Icon(Icons.school_outlined), label: "Study"),

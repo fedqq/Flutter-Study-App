@@ -41,13 +41,16 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     return SizedBox.expand(
-      child: Stack(
+      child: Align(
         alignment: Alignment.bottomRight,
-        clipBehavior: Clip.none,
-        children: [
-          ..._buildExpandingActionButtons(),
-          buildButton(),
-        ],
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          clipBehavior: Clip.none,
+          children: [
+            ..._buildExpandingActionButtons(),
+            buildButton(),
+          ],
+        ),
       ),
     );
   }
@@ -140,18 +143,15 @@ class ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Align(
-      alignment: Alignment.center,
-      child: GradientOutline(
-        outerPadding: 5,
-        gradient: Theming.grayGradient,
-        child: IconButton(
-          style: Theming.transparentButtonStyle,
-          onPressed: () => onPressed!(),
-          icon: icon,
-          color: theme.colorScheme.onSecondary,
+    return GestureDetector(
+      onTap: () => onPressed!(),
+      child: Align(
+        alignment: Alignment.center,
+        child: GradientOutline(
+          innerPadding: 10,
+          outerPadding: 5,
+          gradient: Theming.grayGradient,
+          child: icon,
         ),
       ),
     );

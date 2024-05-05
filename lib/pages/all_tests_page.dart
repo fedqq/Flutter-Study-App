@@ -26,7 +26,7 @@ class _AllTestsPageState extends State<AllTestsPage> {
     TextTheme theme = Theme.of(context).textTheme;
     List<Test> tests = [];
 
-    tests = widget.area == '' ? TestsManager.pastTests : TestsManager.testsFromArea(widget.area);
+    tests = TestsManager.testsFromArea(widget.area);
 
     return Scaffold(
       appBar: AppBar(),

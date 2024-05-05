@@ -109,17 +109,19 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
   }
 
   void deleteSubject() async {
-    closeMenus();
     if (await confirm(context, title: Text('Delete ${widget.subjects[currentFocused].name}'))) {
       setState(() => widget.subjects.removeAt(currentFocused));
     }
+
+    closeMenus();
   }
 
   void editColor() async {
-    closeMenus();
     Color? newColor = await showColorPicker(context, widget.subjects[currentFocused].color);
     if (newColor == null) return;
     setState(() => widget.subjects[currentFocused].color = newColor);
+
+    closeMenus();
   }
 
   void testSubject() async {
@@ -254,8 +256,8 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
         scrolledUnderElevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.quiz_rounded),
-          onPressed: showAllTests,
+          icon: const Icon(Icons.history_rounded),
+          onPressed: TestsManager.hasScore('') ? showAllTests : null,
         ),
         title: Text(
           widget.subjects.length == 1 ? 'Study 1 Subject' : 'Study ${widget.subjects.length} Subjects',
@@ -263,6 +265,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
         ),
       ),
       floatingActionButton: GestureDetector(
+        behavior: HitTestBehavior.translucent,
         onTap: () => setState(() => currentFocused = -1),
         child: ExpandableFab(
           controller: controller,
@@ -287,11 +290,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
         ),
       ),
       body: GestureDetector(
-        onTap: () async {
-          await blurController.reverse();
-          closeMenus();
-          setState(() => currentFocused = -1);
-        },
+        behavior: HitTestBehavior.translucent,
         child: AnimatedBuilder(
           animation: enterController,
           builder: (context, _) => widget.subjects.isEmpty
@@ -305,6 +304,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
                   itemCount: widget.subjects.length,
                   itemBuilder: (context, index) => GestureDetector(
+                    behavior: HitTestBehavior.translucent,
                     onTap: () async {
                       closeMenus();
                       if (currentFocused == -1 ? false : currentFocused != index) {
