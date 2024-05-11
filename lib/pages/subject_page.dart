@@ -12,11 +12,12 @@ import "package:flutter_application_1/widgets/topic_card.dart";
 // ignore: unused_import
 import 'dart:developer' as developer;
 
-import "../utils/gradient_widgets.dart";
-
 class SubjectPage extends StatefulWidget {
   final Subject subject;
-  const SubjectPage({super.key, required this.subject});
+  const SubjectPage({
+    super.key,
+    required this.subject,
+  });
 
   @override
   State<SubjectPage> createState() => _SubjectPageState();
@@ -66,40 +67,22 @@ class _SubjectPageState extends State<SubjectPage> {
       ),
     );
 
-    Color bgColor = Theme.of(context).scaffoldBackgroundColor;
-    Color gradientColor = Color.alphaBlend(bgColor.withAlpha(220), widget.subject.color);
-
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(title: Text(widget.subject.name)),
-      floatingActionButton: GradientActionButton(
-        onPressed: newTopic,
-        tooltip: 'New Topic',
-      ),
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [bgColor, gradientColor],
-                ),
-              ),
-            ),
-          ),
-          Center(
-            child: Column(
-              children: [
-                const Align(alignment: Alignment.centerLeft),
-                Text(
-                  '${widget.subject.name} Topics (${widget.subject.topics.length})',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                if (TestsManager.hasScore(widget.subject.asArea))
-                  TextButton(
-                    child: Text('Your last score on this subject was: ${widget.subject.testScores.last}%'),
+      appBar: AppBar(
+        title: Text(
+          '${widget.subject.name} Topics (${widget.subject.topics.length})',
+        ),
+        actions: [
+          if (TestsManager.hasScore(widget.subject.asArea))
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  FilledButton.tonal(
+                    child: const Text(
+                      'View past tests',
+                      textAlign: TextAlign.center,
+                    ),
                     onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -107,6 +90,21 @@ class _SubjectPageState extends State<SubjectPage> {
                       ),
                     ),
                   ),
+                ],
+              ),
+            ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: newTopic,
+        tooltip: 'New Topic',
+        child: const Icon(Icons.add_rounded),
+      ),
+      body: Stack(
+        children: [
+          Center(
+            child: Column(
+              children: [
                 if (widget.subject.topics.isNotEmpty) topicList,
               ],
             ),

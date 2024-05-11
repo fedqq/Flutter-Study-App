@@ -25,3 +25,4 @@ Features To Be Added:
 - Tests
 - Customization
 - Light theme
+- Exfab labels

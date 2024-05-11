@@ -11,7 +11,6 @@ import 'package:flutter_application_1/states/topic.dart';
 // ignore: unused_import
 import 'dart:developer' as developer;
 
-import 'package:flutter_application_1/utils/gradient_widgets.dart';
 import 'package:flutter_application_1/utils/input_dialogs.dart';
 
 import '../utils/theming.dart';
@@ -112,100 +111,104 @@ class _TopicCardState extends State<TopicCard> {
   Widget build(BuildContext context) {
     Topic topic = widget.topic;
 
-    return Container(
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Theming.boxShadowColor,
-            blurRadius: 10,
-            spreadRadius: -10,
+    return Card(
+      margin: const EdgeInsets.all(14.0),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(25))),
+      shadowColor: Colors.transparent,
+      child: ListTileTheme(
+        contentPadding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
+        minLeadingWidth: 10,
+        child: ExpansionTile(
+          subtitle: Stack(
+            children: [
+              Container(
+                width: 450,
+                height: 5,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(Theming.radius),
+                  color: const Color.fromARGB(255, 51, 51, 51),
+                ),
+              ),
+              Container(
+                width: learnedPercentage() * 450,
+                height: 5,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(Theming.radius),
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: GradientOutline(
-        child: ListTileTheme(
-          contentPadding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
-          minLeadingWidth: 10,
-          child: ExpansionTile(
-            subtitle: Stack(
-              children: [
-                Container(
-                  width: 450,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(Theming.radius),
-                    color: const Color.fromARGB(255, 51, 51, 51),
+          controlAffinity: ListTileControlAffinity.leading,
+          shape: const Border(),
+          onExpansionChanged: (expanded) => setState(() {
+            final controller = ExpansionTileController.maybeOf(context);
+            if (expanded) {
+              controller?.collapse();
+            } else {
+              controller?.expand();
+            }
+          }),
+          trailing: SizedBox(
+            child: PopupMenuButton(
+              itemBuilder: (BuildContext context) => [
+                PopupMenuItem(
+                  onTap: () => widget.testTopic().then((_) => setState(() {})),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Icon(Icons.question_mark_rounded),
+                      Text('Test on topic'),
+                    ],
                   ),
                 ),
-                Container(
-                  width: learnedPercentage() * 450,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(Theming.radius),
-                    gradient: Theming.coloredGradient,
+                PopupMenuItem(
+                  onTap: () => topic.cards.isNotEmpty ? studyTopic(topic) : null,
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Icon(Icons.school_rounded),
+                      Text('Open cards'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  onTap: () => addCard(topic),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Icon(Icons.add_rounded),
+                      Text('New card'),
+                    ],
                   ),
                 ),
               ],
             ),
-            controlAffinity: ListTileControlAffinity.leading,
-            shape: const Border(),
-            onExpansionChanged: (expanded) => setState(() {
-              final controller = ExpansionTileController.maybeOf(context);
-              if (expanded) {
-                controller?.collapse();
-              } else {
-                controller?.expand();
-              }
-            }),
-            trailing: SizedBox(
-              width: 160,
-              height: 40,
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () => topic.cards.isNotEmpty ? studyTopic(topic) : null,
-                    icon: const Icon(Icons.school_rounded),
-                  ),
-                  IconButton(
-                    onPressed: () => renameTopic(topic),
-                    icon: const Icon(Icons.edit_rounded),
-                  ),
-                  IconButton(
-                    onPressed: () => addCard(topic),
-                    icon: const Icon(Icons.add_rounded),
-                  ),
-                  IconButton(
-                    onPressed: () => widget.testTopic().then((_) => setState(() {})),
-                    icon: const Icon(Icons.question_mark_rounded),
-                  ),
-                ],
-              ),
-            ),
-            title: Text(
-              topic.name,
-              textAlign: TextAlign.center,
-            ),
-            childrenPadding: const EdgeInsets.all(0),
-            children: List.generate(
-              topic.cards.length,
-              (cardIndex) => ListTile(
-                minVerticalPadding: 0,
-                contentPadding: const EdgeInsets.all(8.0),
-                title: Text(topic.cards[cardIndex].name),
-              ),
-            )..insert(
-                0,
-                TestsManager.hasScore(widget.area)
-                    ? TextButton(
-                        onPressed: () =>
-                            Navigator.push(context, MaterialPageRoute(builder: (_) => AllTestsPage(area: widget.area))),
-                        child: Text(
-                          'Your last score on this topic was ${TestsManager.testsFromArea(widget.area).last.percentage}%',
-                        ),
-                      )
-                    : const SizedBox(),
-              ),
           ),
+          title: Text(
+            topic.name,
+            textAlign: TextAlign.center,
+          ),
+          childrenPadding: const EdgeInsets.all(0),
+          children: List.generate(
+            topic.cards.length,
+            (cardIndex) => ListTile(
+              minVerticalPadding: 0,
+              contentPadding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 18),
+              title: Text(topic.cards[cardIndex].name),
+            ),
+          )..insert(
+              0,
+              TestsManager.hasScore(widget.area)
+                  ? TextButton(
+                      onPressed: () =>
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => AllTestsPage(area: widget.area))),
+                      child: Text(
+                        'Your last score on this topic was ${TestsManager.testsFromArea(widget.area).last.percentage}%',
+                      ),
+                    )
+                  : const SizedBox(),
+            ),
         ),
       ),
     );

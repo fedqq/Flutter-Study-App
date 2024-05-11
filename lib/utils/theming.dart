@@ -21,12 +21,6 @@ class Theming {
     colors: gradientColors,
   );
 
-  static const Gradient grayGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: grayGradientColors,
-  );
-
   static BoxDecoration gradientDeco =
       BoxDecoration(gradient: coloredGradient, borderRadius: BorderRadius.circular(radius));
 
@@ -38,8 +32,6 @@ class Theming {
     ),
     borderRadius: BorderRadius.circular(radius - padding),
   );
-
-  static BoxDecoration grayDeco = BoxDecoration(gradient: grayGradient, borderRadius: BorderRadius.circular(radius));
 
   static const BoxDecoration transparent = BoxDecoration(color: Colors.transparent);
 

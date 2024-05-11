@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/states/test.dart';
-import 'package:flutter_application_1/utils/gradient_widgets.dart';
-import 'package:flutter_application_1/utils/theming.dart';
+import 'package:flutter_application_1/utils/outlined_card.dart';
+import 'package:latext/latext.dart';
 
 class ResultCard extends StatefulWidget {
   final bool? correct;
@@ -27,27 +27,44 @@ class _ResultCardState extends State<ResultCard> {
   Widget build(BuildContext context) {
     bool correct = widget.correct ?? false;
 
-    return GradientOutline(
-      innerPadding: 16,
-      gradient: Theming.gradientToDarker(correct ? Colors.green : Colors.red),
-      child: Row(
-        children: [
-          Text(widget.card.name),
-          const SizedBox(width: 50),
-          Text(widget.card.origin),
-          const Spacer(),
-          if (!correct) Text(widget.answer, style: const TextStyle(color: Colors.red)),
-          const SizedBox(width: 50),
-          Text(widget.card.meaning),
-          if ((!correct) && widget.editable)
-            IconButton(
-              icon: const Icon(Icons.check_rounded),
-              onPressed: () => setState(() {
-                widget.markCorrect();
-                correct = true;
-              }),
+    return OutlinedCard(
+      color: correct ? Colors.green : Colors.red,
+      margin: const EdgeInsets.all(8.0),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              children: [
+                Text(widget.card.name, overflow: TextOverflow.ellipsis),
+                Text(widget.card.origin, overflow: TextOverflow.ellipsis),
+              ],
             ),
-        ],
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              children: [
+                if (!correct)
+                  LaTexT(
+                    laTeXCode:
+                        Text(widget.answer, style: const TextStyle(color: Colors.red), overflow: TextOverflow.ellipsis),
+                  ),
+                LaTexT(laTeXCode: Text(widget.card.meaning, overflow: TextOverflow.ellipsis)),
+                if ((!correct) && widget.editable)
+                  IconButton(
+                    icon: const Icon(Icons.check_rounded),
+                    onPressed: () => setState(
+                      () {
+                        widget.markCorrect();
+                        correct = true;
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

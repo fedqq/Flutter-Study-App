@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/state_managers/statistics.dart';
 import 'package:intl/intl.dart';
 
-import '../utils/theming.dart';
-
 class StudiedChart extends StatefulWidget {
   final double animValue;
   const StudiedChart({super.key, required this.animValue});
@@ -40,6 +38,19 @@ class _StudiedChartState extends State<StudiedChart> {
       return max;
     }
 
+    Color col = Theme.of(context).colorScheme.inversePrimary;
+    int r, g, b;
+    [r, g, b] = [col.red, col.green, col.blue];
+
+    double value = max(widget.animValue, 0.7);
+
+    Color res = Color.fromARGB(
+      255,
+      255 - ((255 - r) * value).toInt(),
+      255 - ((255 - g) * value).toInt(),
+      255 - ((255 - b) * value).toInt(),
+    );
+
     return LineChart(
       LineChartData(
         maxY: max(getMaxStudied() + 1, StudyStatistics.getDailyGoal() + 1),
@@ -47,24 +58,28 @@ class _StudiedChartState extends State<StudiedChart> {
         titlesData: const FlTitlesData(
           show: false,
         ),
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        backgroundColor: Colors.transparent,
+        borderData: FlBorderData(show: false),
         lineBarsData: [
           LineChartBarData(
             belowBarData: BarAreaData(
               gradient: LinearGradient(
-                colors: [Theming.blue.withAlpha(200), Theming.blue.withAlpha(30)],
+                colors: [
+                  res,
+                  res.withAlpha(30),
+                ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
               show: true,
             ),
-            color: Theming.blue,
+            color: res,
             barWidth: 5,
             isStrokeCapRound: true,
             isCurved: true,
             preventCurveOverShooting: true,
             dotData: const FlDotData(show: false),
-            spots: List.generate(7, (i) => FlSpot(i.toDouble(), daysData[6 - i].toDouble() * widget.animValue)),
+            spots: List.generate(7, (i) => FlSpot(i.toDouble(), daysData[6 - i] * (min(widget.animValue, 0.8) + 0.2))),
           ),
           LineChartBarData(
             spots: [FlSpot(0, StudyStatistics.getAverage()), FlSpot(6, StudyStatistics.getAverage())],

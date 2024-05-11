@@ -1,10 +1,8 @@
 // ignore: unused_import
 import 'dart:developer' as developer;
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/utils/gradient_widgets.dart';
-
-import 'theming.dart';
 
 import 'dart:math' show pi;
 
@@ -27,9 +25,10 @@ class ExFabController {
 }
 
 class ExpandableFab extends StatefulWidget {
-  final List<Widget> children;
+  final List<ActionButton> children;
   final ExFabController? controller;
-  const ExpandableFab({super.key, required this.children, this.controller});
+  final void Function()? onPress;
+  const ExpandableFab({super.key, required this.children, this.controller, this.onPress});
 
   @override
   State<ExpandableFab> createState() => _ExpandableFabState();
@@ -37,19 +36,26 @@ class ExpandableFab extends StatefulWidget {
 
 class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  late final Animation<double> _expandAnimation;
+  late final Animation<double> animation;
   bool _open = false;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox.expand(
-      child: Stack(
-        alignment: Alignment.bottomRight,
-        clipBehavior: Clip.none,
-        children: [
-          ..._buildExpandingActionButtons(),
-          buildButton(),
-        ],
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (_, __) => BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 8 * animation.value, sigmaY: 8 * animation.value),
+        child: SizedBox(
+          width: double.infinity,
+          height: double.infinity,
+          child: Stack(
+            alignment: Alignment.bottomRight,
+            children: [
+              ..._buildExpandingActionButtons(),
+              buildButton(),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -73,7 +79,7 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
       duration: const Duration(milliseconds: 250),
       vsync: this,
     );
-    _expandAnimation = CurvedAnimation(
+    animation = CurvedAnimation(
       curve: Curves.fastOutSlowIn,
       reverseCurve: Curves.easeOutQuad,
       parent: _controller,
@@ -91,25 +97,13 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
     });
   }
 
-  Widget buildButton() {
-    return GestureDetector(
-      onTap: toggle,
-      child: AnimatedContainer(
-        duration: Durations.short1,
-        decoration: _open ? Theming.gradientDeco : Theming.innerDeco,
-        width: 56,
-        height: 56,
-        child: AnimatedContainer(
-          width: _open ? 50 : 56,
-          height: _open ? 50 : 56,
-          margin: _open ? EdgeInsets.all(Theming.padding) : null,
-          duration: Durations.short3,
-          decoration: _open ? Theming.innerDeco : Theming.innerDeco.copyWith(gradient: Theming.coloredGradient),
-          child: Center(child: AnimatedIcon(icon: AnimatedIcons.menu_close, progress: _controller)),
-        ),
-      ),
-    );
-  }
+  Widget buildButton() => FloatingActionButton(
+        onPressed: () {
+          toggle();
+          if (widget.onPress != null) widget.onPress!();
+        },
+        child: AnimatedIcon(icon: AnimatedIcons.menu_close, progress: _controller),
+      );
 
   List<Widget> _buildExpandingActionButtons() {
     final children = <Widget>[];
@@ -119,7 +113,7 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
       children.add(
         ExpandingActionButton(
           index: i.toDouble(),
-          progress: _expandAnimation,
+          progress: animation,
           child: widget.children[i],
         ),
       );
@@ -135,21 +129,18 @@ class ActionButton extends StatelessWidget {
     super.key,
     required this.onPressed,
     required this.icon,
+    required this.name,
   });
 
   final VoidCallback? onPressed;
   final Widget icon;
+  final String name;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => onPressed!(),
-      child: GradientOutline(
-        innerPadding: 10,
-        outerPadding: 3,
-        gradient: Theming.grayGradient,
-        child: icon,
-      ),
+    return IconButton(
+      onPressed: onPressed,
+      icon: icon,
     );
   }
 }
@@ -165,20 +156,36 @@ class ExpandingActionButton extends StatelessWidget {
 
   final double index;
   final Animation<double> progress;
-  final Widget child;
+  final ActionButton child;
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: progress,
-      builder: (context, child) {
+      builder: (context, _) {
         final offset = Offset(0, ((index + 1) * 60) * progress.value);
 
         return Positioned(
           bottom: 10 + offset.dy,
-          child: Transform.rotate(
-            angle: (1.0 - progress.value) * pi / 2,
-            child: child!,
+          child: Opacity(
+            opacity: progress.value,
+            child: Row(
+              children: [
+                Text(child.name),
+                const SizedBox(width: 10),
+                Transform.rotate(
+                  angle: (1.0 - progress.value) * pi / 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SizedBox(
+                      height: 40,
+                      width: 40,
+                      child: child,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },

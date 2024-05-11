@@ -8,8 +8,6 @@ import 'package:flutter_application_1/utils/input_dialogs.dart';
 // ignore: unused_import
 import 'dart:developer' as developer;
 
-import '../utils/gradient_widgets.dart';
-
 class CalendarPage extends StatefulWidget {
   final List<Task> tasks;
   final List<Task> completedTasks;
@@ -131,10 +129,14 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(scrolledUnderElevation: 0),
-      floatingActionButton: GradientActionButton(
+      appBar: AppBar(
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.transparent,
+      ),
+      floatingActionButton: FloatingActionButton(
         onPressed: () => createTask(context),
         tooltip: 'New Task',
+        child: const Icon(Icons.add_rounded),
       ),
       body: Column(
         children: [
@@ -154,6 +156,7 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
                         tasks: getTasksMap(false)[dates[index]] ?? [],
                         removeCallback: deleteTask,
                         completeCallback: completeTask,
+                        progress: animation.value,
                       ),
                     ),
                   ),

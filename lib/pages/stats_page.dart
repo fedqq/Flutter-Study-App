@@ -6,8 +6,6 @@ import 'package:flutter_application_1/state_managers/statistics.dart';
 import 'package:flutter_application_1/utils/input_dialogs.dart';
 import 'package:flutter_application_1/widgets/studied_chart.dart';
 
-import '../utils/theming.dart';
-
 class StatsPage extends StatefulWidget {
   const StatsPage({super.key});
 
@@ -94,8 +92,8 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
     ExpandableFab fab = ExpandableFab(
       controller: exFabController,
       children: [
-        ActionButton(onPressed: editUserName, icon: const Icon(Icons.person_rounded)),
-        ActionButton(onPressed: setDailyGoal, icon: const Icon(Icons.flag_rounded)),
+        ActionButton(onPressed: editUserName, icon: const Icon(Icons.person_rounded), name: 'Change Username'),
+        ActionButton(onPressed: setDailyGoal, icon: const Icon(Icons.flag_rounded), name: 'Change Daily Goal'),
       ],
     );
 
@@ -103,8 +101,8 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
       child: GestureDetector(
         onTap: () => setState(() => exFabController.close()),
         child: Scaffold(
-          extendBodyBehindAppBar: true,
           backgroundColor: Colors.transparent,
+          extendBodyBehindAppBar: true,
           floatingActionButton: fab,
           body: Column(
             children: [
@@ -112,12 +110,6 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                 animation: animation,
                 builder: (context, __) => Container(
                   margin: const EdgeInsets.fromLTRB(80.0, 30, 80, 50),
-                  decoration: BoxDecoration(boxShadow: [
-                    BoxShadow(
-                      color: Theming.purple.withAlpha((120 * animation.value).toInt()),
-                      blurRadius: 60 * animation.value,
-                    ),
-                  ]),
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     child: ImageFiltered(
@@ -150,16 +142,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                   padding: const EdgeInsets.fromLTRB(52, 20, 52, 50),
                   child: AnimatedBuilder(
                     animation: animation,
-                    builder: (_, __) => Container(
-                      decoration: BoxDecoration(boxShadow: [
-                        BoxShadow(
-                          color: Theming.blue.withAlpha((80 * animation.value).toInt()),
-                          spreadRadius: 10,
-                          blurRadius: 60 * animation.value,
-                        ),
-                      ]),
-                      child: StudiedChart(animValue: animation.value),
-                    ),
+                    builder: (_, __) => StudiedChart(animValue: animation.value),
                   ),
                 ),
               ),

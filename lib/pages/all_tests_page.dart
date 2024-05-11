@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/results_page.dart';
 import 'package:flutter_application_1/state_managers/tests_manager.dart';
 import 'package:flutter_application_1/states/test.dart';
-import 'package:flutter_application_1/utils/gradient_widgets.dart';
-import 'package:flutter_application_1/utils/theming.dart';
 
 class AllTestsPage extends StatefulWidget {
   final String area;
@@ -13,7 +11,22 @@ class AllTestsPage extends StatefulWidget {
   State<AllTestsPage> createState() => _AllTestsPageState();
 }
 
-class _AllTestsPageState extends State<AllTestsPage> {
+class _AllTestsPageState extends State<AllTestsPage> with SingleTickerProviderStateMixin {
+  late AnimationController controller;
+  late Animation<double> animation;
+
+  @override
+  void initState() {
+    controller = AnimationController(vsync: this, value: 0, duration: Durations.extralong4);
+
+    animation = CurvedAnimation(
+      curve: Curves.easeInOut,
+      parent: controller,
+    );
+
+    super.initState();
+  }
+
   void openTestPage(BuildContext context, int index) => Navigator.push(
         context,
         MaterialPageRoute(
@@ -28,24 +41,32 @@ class _AllTestsPageState extends State<AllTestsPage> {
 
     tests = TestsManager.testsFromArea(widget.area);
 
+    controller.forward();
+
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(title: Text('Past Tests (${TestsManager.pastTests.length})')),
       body: ListView.builder(
         itemCount: tests.length,
         itemBuilder: (context, index) => InkWell(
           onTap: () => openTestPage(context, index),
-          child: GradientOutline(
-            gradient: Theming.grayGradient,
-            innerPadding: 20,
-            child: Row(
-              children: [
-                Text(
-                  tests[index].area,
-                  style: theme.titleLarge!.copyWith(fontWeight: FontWeight.w800),
+          child: AnimatedBuilder(
+            animation: animation,
+            builder: (_, __) => Card(
+              margin: const EdgeInsets.all(8.0),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(25))),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      tests[index].area,
+                      style: theme.titleMedium!,
+                    ),
+                    Text(tests[index].date),
+                  ],
                 ),
-                const Spacer(),
-                Text(tests[index].date),
-              ],
+              ),
             ),
           ),
         ),

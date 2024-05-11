@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/states/task.dart';
-import 'package:flutter_application_1/utils/gradient_widgets.dart';
 import 'package:flutter_application_1/widgets/day_card.dart';
-
-import '../utils/theming.dart';
 
 class ExpandingTaskList extends StatefulWidget {
   final List<DateTime> dates;
@@ -33,28 +30,30 @@ class ExpandingTaskList extends StatefulWidget {
 class _ExpandingTaskListState extends State<ExpandingTaskList> {
   @override
   Widget build(BuildContext context) {
-    return GradientOutline(
-      innerPadding: 8.0,
-      gradient: Theming.grayGradient,
-      child: ExpansionTile(
-        controlAffinity: ListTileControlAffinity.leading,
-        shape: const Border(),
-        title: Text(widget.title),
-        children: [
-          SizedBox(
-            height: 250,
-            child: ListView.builder(
-              itemCount: widget.dates.length,
-              itemBuilder: (context, index) => DayCard(
-                date: widget.dates[index],
-                tasks: widget.tasks[widget.dates[index]] ?? [],
-                color: widget.outlineColor,
-                removeCallback: widget.deleteCallback,
-                completeCallback: widget.completeCallback,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Card(
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(25))),
+        child: ExpansionTile(
+          controlAffinity: ListTileControlAffinity.leading,
+          shape: const Border(),
+          title: Text(widget.title),
+          children: [
+            SizedBox(
+              height: 250,
+              child: ListView.builder(
+                itemCount: widget.dates.length,
+                itemBuilder: (context, index) => DayCard(
+                  date: widget.dates[index],
+                  tasks: widget.tasks[widget.dates[index]] ?? [],
+                  color: widget.outlineColor,
+                  removeCallback: widget.deleteCallback,
+                  completeCallback: widget.completeCallback,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

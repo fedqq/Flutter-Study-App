@@ -42,6 +42,8 @@ dependencies:
   latext: ^0.4.0
   url_launcher: ^6.2.6
   fuzzywuzzy: ^1.1.6
+  pdf: ^3.10.8
+  blobs: ^2.0.0
 
 dev_dependencies:
   flutter_test:
@@ -64,6 +66,8 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  assets:
+    - assets/
 
   # To add assets to your application, add an assets section, like this:
   # assets:
@@ -97,20 +101,6 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
 
   fonts:
-    - family: Inter
+    - family: Product Sans
       fonts:
-        - asset: fonts/Inter-Regular.ttf
-        - asset: fonts/Inter-Black.ttf
-          weight: 800
-        - asset: fonts/Inter-Bold.ttf
-          weight: 700
-        - asset: fonts/Inter-ExtraBold.ttf
-          weight: 800
-        - asset: fonts/Inter-ExtraLight.ttf
-          weight: 100
-        - asset: fonts/Inter-Light.ttf
-          weight: 200
-        - asset: fonts/Inter-Medium.ttf
-          weight: 400
-        - asset: fonts/Inter-SemiBold.ttf
-          weight: 700
+        - asset: fonts/ProductSans-Regular.ttf

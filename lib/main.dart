@@ -1,3 +1,8 @@
+import 'dart:math';
+import 'dart:ui';
+
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/pages/splash_screen.dart';
 import 'package:flutter_application_1/pages/stats_page.dart';
 import 'package:flutter_application_1/pages/subjects_page.dart';
@@ -10,13 +15,10 @@ import 'package:flutter_application_1/state_managers/tests_manager.dart';
 import 'package:flutter_application_1/states/subject.dart';
 
 import 'package:flutter_application_1/states/task.dart';
+import 'package:blobs/blobs.dart';
 
 // ignore: unused_import
 import 'dart:developer' as developer;
-
-import 'package:flutter_application_1/utils/gradient_widgets.dart';
-
-import 'utils/theming.dart';
 
 // ignore: constant_identifier_names
 const CLEAR = false;
@@ -34,10 +36,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Study App',
       theme: ThemeData(
-        colorScheme: const ColorScheme.dark(),
+        colorScheme:
+            ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 33, 150, 243), brightness: Brightness.dark),
         useMaterial3: true,
-        indicatorColor: const Color.fromARGB(255, 87, 61, 255),
-        fontFamily: 'Inter',
+        fontFamily: 'Product Sans',
       ),
       initialRoute: '/splash',
       routes: {'/splash': (context) => const SplashScreen()},
@@ -125,54 +127,88 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
       SaveDataManager.clearAll();
     }
 
-    Color bgColor = Theme.of(context).scaffoldBackgroundColor;
-    HSLColor hslBg = HSLColor.fromColor(bgColor);
+    Scaffold scaffold = Scaffold(
+      backgroundColor: Colors.transparent,
+      bottomNavigationBar: NavigationBar(
+        labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+        indicatorColor: Theme.of(context).colorScheme.primaryContainer,
+        elevation: 10,
+        selectedIndex: selectedDest,
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.bar_chart_outlined),
+            label: "Statistics",
+            selectedIcon: Icon(Icons.bar_chart_rounded),
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.school_outlined),
+            label: "Study",
+            selectedIcon: Icon(Icons.school_rounded),
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.calendar_today_outlined),
+            label: "Calendar",
+            selectedIcon: Icon(Icons.calendar_today_rounded),
+          ),
+        ],
+        onDestinationSelected: selectDestination,
+      ),
+      body: PageView(controller: pageController, onPageChanged: pageChanged, padEnds: false, children: pages),
+    );
 
     return Stack(
       children: [
-        Positioned.fill(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [bgColor, hslBg.withLightness(hslBg.lightness - 0.03).toColor()],
-              ),
-            ),
+        Positioned.fill(child: Container(color: Theme.of(context).scaffoldBackgroundColor)),
+        const GrainyBackground(),
+        const Positioned.fill(
+          child: Opacity(
+            opacity: .80,
+            child: Image(image: AssetImage('assets/noise.png'), repeat: ImageRepeat.repeat),
           ),
         ),
-        Scaffold(
-          backgroundColor: Colors.transparent,
-          bottomNavigationBar: Container(
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  color: Theming.boxShadowColor,
-                  spreadRadius: -10,
-                  blurRadius: 30,
-                ),
-              ],
-            ),
-            child: GradientOutline(
-              child: NavigationBar(
-                elevation: 10,
-                surfaceTintColor: Colors.transparent,
-                shadowColor: Colors.transparent,
-                selectedIndex: selectedDest,
-                indicatorColor: Color.alphaBlend(Theming.blue.withAlpha(127), Theming.purple),
-                destinations: const [
-                  NavigationDestination(icon: Icon(Icons.show_chart_rounded), label: "Statistics"),
-                  NavigationDestination(icon: Icon(Icons.school_outlined), label: "Study"),
-                  NavigationDestination(icon: Icon(Icons.calendar_today_rounded), label: "Calendar"),
-                ],
-                backgroundColor: Colors.transparent,
-                onDestinationSelected: selectDestination,
-              ),
-            ),
-          ),
-          body: PageView(controller: pageController, onPageChanged: pageChanged, padEnds: false, children: pages),
-        ),
+        scaffold,
       ],
+    );
+  }
+}
+
+class GrainyBackground extends StatelessWidget {
+  const GrainyBackground({super.key});
+
+  double getX(double width) => Random().nextInt(width.toInt()).toDouble() % width;
+
+  double getY(double height) => Random().nextInt(height.toInt()).toDouble() % height;
+
+  @override
+  Widget build(BuildContext context) {
+    return ImageFiltered(
+      imageFilter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
+      child: Center(
+        child: LayoutBuilder(
+          builder: (context, constraints) => Stack(
+            alignment: Alignment.topLeft,
+            children: [
+              ...List.generate(
+                Random().nextInt(10) + 20,
+                (index) {
+                  double size = Random().nextInt(600).toDouble();
+
+                  return Positioned(
+                    top: getX(constraints.maxHeight) - size / 2,
+                    left: getY(constraints.maxWidth) - size / 2,
+                    child: Blob.animatedRandom(
+                      duration: Durations.short1,
+                      styles:
+                          BlobStyles(color: Theme.of(context).colorScheme.surfaceTint.withAlpha(Random().nextInt(8))),
+                      size: size + 30,
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

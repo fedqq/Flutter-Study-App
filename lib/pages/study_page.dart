@@ -8,11 +8,8 @@ import "package:flutter_application_1/states/topic.dart";
 import 'dart:developer' as developer;
 
 import "package:flutter_application_1/utils/snackbar.dart";
-import "package:flutter_application_1/utils/gradient_widgets.dart";
 import "package:flutter_application_1/utils/input_dialogs.dart";
 import "package:latext/latext.dart";
-
-import "../utils/theming.dart";
 
 class StudyPage extends StatefulWidget {
   final List<FlashCard> cards;
@@ -123,19 +120,20 @@ class _StudyPageState extends State<StudyPage> {
   }
 
   Widget buildNavButton(double opacity, void Function() onPressed, String heroTag, {bool forward = false}) {
-    return AnimatedOpacity(
-      duration: Durations.short1,
-      opacity: opacity,
-      child: GradientOutline(
-        gradient: Theming.grayGradient,
-        child: FloatingActionButton(
-          heroTag: heroTag,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: AnimatedOpacity(
+        opacity: opacity,
+        duration: Durations.short1,
+        child: IconButton.filledTonal(
           onPressed: onPressed,
-          backgroundColor: Colors.transparent,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          hoverElevation: 0,
-          child: Icon(forward ? Icons.arrow_forward_ios_rounded : Icons.arrow_back_ios_rounded),
+          style: const ButtonStyle(
+            padding: MaterialStatePropertyAll(EdgeInsets.all(13.0)),
+            shape: MaterialStatePropertyAll(
+              RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+            ),
+          ),
+          icon: Icon(forward ? Icons.arrow_forward_ios_rounded : Icons.arrow_back_ios_rounded),
         ),
       ),
     );
@@ -153,8 +151,28 @@ class _StudyPageState extends State<StudyPage> {
       appBar: AppBar(),
       body: Stack(
         children: [
+          Positioned.fill(
+            top: 0,
+            child: Column(
+              children: [
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  height: 5,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.all(Radius.circular(10)),
+                    child: LinearProgressIndicator(
+                      value: (StudyStatistics.dailyStudied[StudyStatistics.getNowString()] ?? 0) /
+                          ((StudyStatistics.dailyGoal == 0) ? 20 : StudyStatistics.dailyGoal),
+                    ),
+                  ),
+                ),
+                const Spacer(),
+              ],
+            ),
+          ),
           Column(
             children: [
+              const SizedBox(height: 10),
               Center(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -187,21 +205,17 @@ class _StudyPageState extends State<StudyPage> {
                     },
                     child: AnimatedContainer(
                       duration: Durations.long1,
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            color: !cards[currentCard].learned
-                                ? Theming.boxShadowColor
-                                : const Color.fromARGB(80, 30, 253, 0),
-                            spreadRadius: 0,
-                            blurRadius: 20,
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(
+                            color: cards[currentCard].learned
+                                ? const Color.fromARGB(80, 30, 253, 0)
+                                : Theme.of(context).colorScheme.primaryContainer,
+                            width: 5,
                           ),
-                        ],
-                      ),
-                      child: GradientOutline(
-                        gradient: cards[currentCard].learned
-                            ? Theming.gradientToDarker(const Color.fromARGB(80, 30, 253, 0))
-                            : Theming.coloredGradient,
+                          borderRadius: const BorderRadius.all(Radius.circular(35)),
+                        ),
+                        elevation: 1,
                         child: Center(
                           child: Padding(
                             padding: const EdgeInsets.all(45.0),
@@ -219,32 +233,25 @@ class _StudyPageState extends State<StudyPage> {
                   ),
                 ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    onPressed: editCard,
-                    icon: const Icon(Icons.mode_edit_rounded),
-                  ),
-                  SizedBox(
-                    height: 75,
-                    child: GradientOutline(
-                      gradient: Theming.grayGradient,
-                      child: FilledButton.tonal(
-                        style: Theming.transparentButtonStyle,
-                        onPressed: learnCard,
-                        child: Text(
-                          cards[currentCard].learned ? 'Mark as unlearned' : 'Mark as learned',
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 30),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      onPressed: editCard,
+                      icon: const Icon(Icons.mode_edit_rounded),
                     ),
-                  ),
-                  IconButton(
-                    onPressed: deleteCard,
-                    icon: const Icon(Icons.delete_forever_rounded),
-                  ),
-                ],
+                    FilledButton(
+                      onPressed: learnCard,
+                      child: Text(cards[currentCard].learned ? 'Mark as unlearned' : 'Mark as learned'),
+                    ),
+                    IconButton(
+                      onPressed: deleteCard,
+                      icon: const Icon(Icons.delete_forever_rounded),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
