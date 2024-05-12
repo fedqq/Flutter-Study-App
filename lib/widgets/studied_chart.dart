@@ -64,10 +64,7 @@ class _StudiedChartState extends State<StudiedChart> {
           LineChartBarData(
             belowBarData: BarAreaData(
               gradient: LinearGradient(
-                colors: [
-                  res,
-                  res.withAlpha(30),
-                ],
+                colors: [res, res.withAlpha(30)],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),

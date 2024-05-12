@@ -1,21 +1,18 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/pages/splash_screen.dart';
 import 'package:flutter_application_1/pages/stats_page.dart';
 import 'package:flutter_application_1/pages/subjects_page.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/state_managers/data_manager.dart';
 import 'package:flutter_application_1/pages/calendar_page.dart';
 import 'package:flutter_application_1/state_managers/statistics.dart';
 import 'package:flutter_application_1/state_managers/tests_manager.dart';
 import 'package:flutter_application_1/states/subject.dart';
-
 import 'package:flutter_application_1/states/task.dart';
 import 'package:blobs/blobs.dart';
+import 'package:window_rounded_corners/window_rounded_corners.dart';
 
 // ignore: unused_import
 import 'dart:developer' as developer;
@@ -32,6 +29,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    WindowCorners.init();
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Study App',
@@ -129,29 +128,41 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
 
     Scaffold scaffold = Scaffold(
       backgroundColor: Colors.transparent,
-      bottomNavigationBar: NavigationBar(
-        labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-        indicatorColor: Theme.of(context).colorScheme.primaryContainer,
-        elevation: 10,
-        selectedIndex: selectedDest,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.bar_chart_outlined),
-            label: "Statistics",
-            selectedIcon: Icon(Icons.bar_chart_rounded),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(8.0),
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(WindowCorners.getCorners().bottomLeft),
+            bottomRight: Radius.circular(WindowCorners.getCorners().bottomRight),
+            topLeft: Radius.circular(WindowCorners.getCorners().bottomLeft),
+            topRight: Radius.circular(WindowCorners.getCorners().bottomRight),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.school_outlined),
-            label: "Study",
-            selectedIcon: Icon(Icons.school_rounded),
+          child: NavigationBar(
+            labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+            indicatorColor: Theme.of(context).colorScheme.primaryContainer,
+            shadowColor: Colors.transparent,
+            elevation: 10,
+            selectedIndex: selectedDest,
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.bar_chart_outlined),
+                label: "Statistics",
+                selectedIcon: Icon(Icons.bar_chart_rounded),
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.school_outlined),
+                label: "Study",
+                selectedIcon: Icon(Icons.school_rounded),
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.calendar_today_outlined),
+                label: "Calendar",
+                selectedIcon: Icon(Icons.calendar_today_rounded),
+              ),
+            ],
+            onDestinationSelected: selectDestination,
           ),
-          NavigationDestination(
-            icon: Icon(Icons.calendar_today_outlined),
-            label: "Calendar",
-            selectedIcon: Icon(Icons.calendar_today_rounded),
-          ),
-        ],
-        onDestinationSelected: selectDestination,
+        ),
       ),
       body: PageView(controller: pageController, onPageChanged: pageChanged, padEnds: false, children: pages),
     );

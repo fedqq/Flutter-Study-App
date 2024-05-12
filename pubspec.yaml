@@ -44,6 +44,7 @@ dependencies:
   fuzzywuzzy: ^1.1.6
   pdf: ^3.10.8
   blobs: ^2.0.0
+  window_rounded_corners: ^0.0.3
 
 dev_dependencies:
   flutter_test:

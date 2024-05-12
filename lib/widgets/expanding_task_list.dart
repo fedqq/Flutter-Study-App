@@ -28,6 +28,15 @@ class ExpandingTaskList extends StatefulWidget {
 }
 
 class _ExpandingTaskListState extends State<ExpandingTaskList> {
+  void deleteAll() {
+    for (List<Task> tasks in widget.tasks.values) {
+      for (Task task in tasks) {
+        widget.deleteCallback(task);
+      }
+      tasks.clear();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -41,14 +50,31 @@ class _ExpandingTaskListState extends State<ExpandingTaskList> {
           children: [
             SizedBox(
               height: 250,
-              child: ListView.builder(
-                itemCount: widget.dates.length,
-                itemBuilder: (context, index) => DayCard(
-                  date: widget.dates[index],
-                  tasks: widget.tasks[widget.dates[index]] ?? [],
-                  color: widget.outlineColor,
-                  removeCallback: widget.deleteCallback,
-                  completeCallback: widget.completeCallback,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.all(Radius.circular(25)),
+                child: ListView(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: FilledButton(onPressed: deleteAll, child: const Text('Delete All')),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ListView.builder(
+                        physics: const ScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: widget.dates.length,
+                        itemBuilder: (context, index) => DayCard(
+                          date: widget.dates[index],
+                          tasks: widget.tasks[widget.dates[index]] ?? [],
+                          color: widget.outlineColor,
+                          removeCallback: widget.deleteCallback,
+                          completeCallback: widget.completeCallback,
+                          positionInList: index == 0 ? 0 : (index == widget.dates.length - 1 ? 2 : 1),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

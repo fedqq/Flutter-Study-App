@@ -113,8 +113,9 @@ class _TopicCardState extends State<TopicCard> {
 
     return Card(
       margin: const EdgeInsets.all(14.0),
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(25))),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
       shadowColor: Colors.transparent,
+      elevation: 3,
       child: ListTileTheme(
         contentPadding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
         minLeadingWidth: 10,

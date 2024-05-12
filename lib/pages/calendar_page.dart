@@ -157,6 +157,7 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
                         removeCallback: deleteTask,
                         completeCallback: completeTask,
                         progress: animation.value,
+                        positionInList: index == 0 ? 0 : (index == dates.length - 1 ? 2 : 1),
                       ),
                     ),
                   ),

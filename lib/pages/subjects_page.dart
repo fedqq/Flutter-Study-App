@@ -11,6 +11,7 @@ import 'package:flutter_application_1/pages/subject_page.dart';
 import 'package:flutter_application_1/pages/study_page.dart';
 import 'package:flutter_application_1/pages/test_page.dart';
 import 'package:flutter_application_1/state_managers/exporter.dart';
+import 'package:flutter_application_1/state_managers/statistics.dart';
 import 'package:flutter_application_1/state_managers/tests_manager.dart';
 import 'package:flutter_application_1/states/flashcard.dart';
 import 'package:flutter_application_1/states/subject.dart';
@@ -118,9 +119,11 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
   }
 
   void deleteSubject() async {
-    if (await confirm(context, title: Text('Delete ${widget.subjects[currentFocused].name}'))) {
-      setState(() => widget.subjects.removeAt(currentFocused));
-    }
+    if (!await confirm(context, title: Text('Delete ${widget.subjects[currentFocused].name}'))) return;
+
+    String area = widget.subjects[currentFocused].asArea.trim();
+    setState(() => widget.subjects.removeAt(currentFocused));
+    TestsManager.pastTests.removeWhere((element) => element.area.trim() == area);
 
     closeMenus();
   }

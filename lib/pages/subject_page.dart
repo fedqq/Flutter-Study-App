@@ -80,7 +80,7 @@ class _SubjectPageState extends State<SubjectPage> {
                 children: [
                   FilledButton.tonal(
                     child: const Text(
-                      'View past tests',
+                      'Past tests',
                       textAlign: TextAlign.center,
                     ),
                     onPressed: () => Navigator.push(
