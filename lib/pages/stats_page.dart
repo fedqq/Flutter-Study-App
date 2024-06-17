@@ -1,6 +1,14 @@
+import 'dart:developer' as dev;
+import 'dart:io';
 import 'dart:math';
 
+import 'package:archive/archive_io.dart';
+import 'package:dynamic_color/dynamic_color.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:studyappcs/state_managers/exporter.dart';
 import 'package:studyappcs/state_managers/statistics.dart';
 import 'package:studyappcs/state_managers/tests_manager.dart';
@@ -8,6 +16,7 @@ import 'package:studyappcs/states/subject.dart';
 import 'package:studyappcs/states/test.dart';
 import 'package:studyappcs/utils/expandable_fab.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
+import 'package:studyappcs/utils/snackbar.dart';
 import 'package:studyappcs/widgets/studied_chart.dart';
 
 class StatsPage extends StatefulWidget {
@@ -45,7 +54,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
     super.initState();
   }
 
-  void setDailyGoal() async {
+  void editDailyGoal() async {
     String result = await singleInputDialog(
           context,
           'Choose Daily Goal',
@@ -91,36 +100,45 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
         ),
       );
 
+  Future<File> makeBackup({backup = false}) async {
+    widget.saveCallback();
+    var path = await getDatabasesPath();
+    var resPath = (await getApplicationDocumentsDirectory()).path;
+    ZipFileEncoder encoder = ZipFileEncoder();
+    encoder.create("$resPath\\studyapp_backup.zip");
+    await encoder.addFile(File("$path\\maindata_db.db"));
+    await encoder.addFile(File("$path\\stats_db.db"));
+    await encoder.addFile(File("$path\\tests.db"));
+    await encoder.close();
+    return File("$resPath\\studyapp_backup${!backup ? DateTime.now().millisecondsSinceEpoch : ""}.zip");
+  }
+
+  void chooseAccentColor() async {
+    Color col = await showColorPicker(context, StudyStatistics.color) ?? Colors.black;
+    if (col == Colors.black) return;
+    StudyStatistics.color = col;
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (1 == 2) {
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) {
-          Future.delayed(
-            Durations.extralong1,
-            () async {
-              if (StudyStatistics.userName == '') {
-                if (showingNameInput) return;
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) {
+        Future.delayed(
+          Durations.extralong1,
+          () async {
+            if (StudyStatistics.userName == '') {
+              if (showingNameInput) return;
 
-                showingNameInput = true;
-                Future<String?> res =
-                    singleInputDialog(context, 'Set User Name', Input(name: 'Name'), cancellable: false);
-                String name = await res ?? '';
-                setState(() => StudyStatistics.userName = name);
-                showingNameInput = false;
-              }
-            },
-          );
-        },
-      );
-    }
-
-    ExpandableFab fab = ExpandableFab(
-      controller: exFabController,
-      children: [
-        ActionButton(onPressed: editUserName, icon: const Icon(Icons.person_rounded), name: 'Change Username'),
-        ActionButton(onPressed: setDailyGoal, icon: const Icon(Icons.flag_rounded), name: 'Change Daily Goal'),
-      ],
+              showingNameInput = true;
+              Future<String?> res =
+                  singleInputDialog(context, 'Set User Name', Input(name: 'Name'), cancellable: false);
+              String name = await res ?? '';
+              setState(() => StudyStatistics.userName = name);
+              showingNameInput = false;
+            }
+          },
+        );
+      },
     );
 
     double getRecentAverage() {
@@ -155,11 +173,11 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
       animation: animation,
       builder: (context, __) {
         double elevation = 2 * animation.value;
-        double margin = 18 - 10 * animation.value;
 
         return Scaffold(
-          floatingActionButton: fab,
-          appBar: AppBar(toolbarHeight: kToolbarHeight / 3),
+          appBar: AppBar(
+            actions: [IconButton(onPressed: showThemeOptions, icon: const Icon(Icons.settings_rounded))],
+          ),
           body: ListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
             children: [
@@ -183,7 +201,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                 ),
               ),
               Card(
-                margin: EdgeInsets.all(margin),
+                margin: const EdgeInsets.all(8),
                 elevation: elevation,
                 child: AspectRatio(
                   aspectRatio: 1,
@@ -194,7 +212,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                 ),
               ),
               Card(
-                margin: EdgeInsets.all(margin),
+                margin: const EdgeInsets.all(8),
                 elevation: elevation,
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -209,20 +227,14 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
               SizedBox(
                 height: 80,
                 child: Card(
-                  margin: EdgeInsets.all(margin),
+                  margin: const EdgeInsets.all(8),
                   elevation: elevation,
                   child: ListView(
                     padding: const EdgeInsets.all(12.0),
                     scrollDirection: Axis.horizontal,
                     children: [
-                      buildButton('Export Data', () {
-                        widget.saveCallback();
-                        //TODO Export Everything
-                      }),
-                      buildButton('Import Data', () {
-                        //TODO Import Everything
-                        "";
-                      }),
+                      buildButton('Export Data', exportData),
+                      buildButton('Import Data', importData),
                       buildButton(
                         'Data to PDF',
                         () {
@@ -236,7 +248,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
               ),
               if (TestsManager.pastTests.isNotEmpty)
                 Card(
-                  margin: EdgeInsets.all(margin),
+                  margin: const EdgeInsets.all(8),
                   elevation: elevation,
                   child: Column(
                     children: [
@@ -251,5 +263,127 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
         );
       },
     );
+  }
+
+  void showThemeOptions() {
+    showModalBottomSheet<dynamic>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextButton.icon(
+                onPressed: editUserName,
+                label: const Row(
+                  children: [
+                    Text("Edit Username"),
+                  ],
+                ),
+                icon: const Icon(Icons.arrow_forward_rounded),
+                iconAlignment: IconAlignment.end,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextButton.icon(
+                onPressed: editDailyGoal,
+                label: const Row(
+                  children: [
+                    Text("Edit Daily Goal"),
+                  ],
+                ),
+                icon: const Icon(Icons.arrow_forward_rounded),
+                iconAlignment: IconAlignment.end,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                      child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: FilledButton(onPressed: useDeviceAccentColor, child: const Text("Use Device Accent Color")),
+                  )),
+                  InkWell(
+                    onTap: chooseAccentColor,
+                    child: Container(
+                        decoration: BoxDecoration(color: StudyStatistics.color, shape: BoxShape.circle),
+                        child: const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Icon(Icons.edit_rounded),
+                        )),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+                padding: const EdgeInsets.all(8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("Light Mode"),
+                    Switch(value: StudyStatistics.lightness, onChanged: (b) => StudyStatistics.lightness = b)
+                  ],
+                )),
+          ],
+        );
+      },
+    );
+  }
+
+  void useDeviceAccentColor() async {
+    StudyStatistics.color = await DynamicColorPlugin.getAccentColor() ?? Colors.blue;
+  }
+
+  void exportData() async => Share.shareXFiles([XFile((await makeBackup()).path)]);
+
+  void importData() async {
+    String dbPath = await getDatabasesPath();
+
+    void loadFromDirectory(String pathToDir) async {
+      File("$dbPath\\maindata_db.db").writeAsBytesSync(File("$pathToDir\\maindata_db.db").readAsBytesSync());
+      File("$dbPath\\stats_db.db").writeAsBytesSync(File("$pathToDir\\stats_db.db").readAsBytesSync());
+      File("$dbPath\\tests.db").writeAsBytesSync(File("$pathToDir\\tests.db").readAsBytesSync());
+    }
+
+    Future clearData() async {
+      File("$dbPath\\maindata_db.db").writeAsStringSync('');
+      File("$dbPath\\stats_db.db").writeAsStringSync('');
+      File("$dbPath\\tests.db").writeAsStringSync('');
+    }
+
+    await makeBackup(backup: true);
+    try {
+      String path =
+          (await FilePicker.platform.pickFiles(allowMultiple: false, allowedExtensions: ['.zip']))?.paths[0] ?? "";
+      if (path == "") {
+        return;
+      }
+
+      String unzippedPath = "${(await getApplicationDocumentsDirectory()).path}\\unzip\\";
+      extractFileToDisk(path, unzippedPath);
+      clearData();
+      loadFromDirectory(unzippedPath);
+      StudyStatistics.load();
+      widget.loadCallback();
+      TestsManager.load();
+    } catch (e) {
+      // ignore: use_build_context_synchronously
+      simpleSnackBar(context, "Error importing data. ");
+      String unzippedPath = "${(await getApplicationDocumentsDirectory()).path}\\backupunzip\\";
+      extractFileToDisk("${(await getApplicationDocumentsDirectory()).path}\\studyapp_backup.zip", unzippedPath);
+      clearData();
+      loadFromDirectory(unzippedPath);
+      StudyStatistics.load();
+      widget.loadCallback();
+      TestsManager.load();
+      dev.log(e.toString());
+    }
   }
 }

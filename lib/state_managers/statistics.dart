@@ -1,7 +1,7 @@
 import 'dart:developer' as dev;
 import 'dart:math';
 
-import 'package:home_widget/home_widget.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -12,6 +12,9 @@ class StudyStatistics {
   static String userName = '';
   static int dailyGoal = 0;
   static int streak = 0;
+  static bool _light = false;
+  static Color _accentColor = Colors.blue;
+  static late void Function(void Function()) updateTheme;
 
   static int calculateStreak() {
     if ((dailyStudied[getNowString()] ?? 0) < dailyGoal) return 0;
@@ -21,12 +24,29 @@ class StudyStatistics {
     return lastStreak + 1;
   }
 
+  static set lightness(bool b) {
+    _light = b;
+    updateTheme(() {});
+  }
+
+  static bool get lightness => _light;
+
+  static set color(Color color) {
+    _accentColor = color;
+    updateTheme(() {});
+  }
+
+  static Color get color => _accentColor;
+
   static Future load() async {
     final db = await getStatsBase();
     final data = await db.rawQuery('SELECT * FROM stats');
     if (data.isNotEmpty) {
       userName = data[0]['name'] as String;
       dailyGoal = data[0]['goal'] as int;
+      lightness = (data[0]['lightness'] as int) == 0 ? false : true;
+      color = Color(data[0]['color'] as int);
+      updateTheme(() {});
     }
 
     dailyStreak = {};
@@ -47,7 +67,7 @@ class StudyStatistics {
     final database = openDatabase(
       '$path/stats_db.db',
       onCreate: (db, version) {
-        db.execute('CREATE TABLE stats(name TEXT, goal INT, code INT PRIMARY KEY, latestDate TEXT)');
+        db.execute('CREATE TABLE stats(name TEXT, goal INT, code INT PRIMARY KEY, color INT, lightness INT)');
         db.execute('CREATE TABLE studied(date TEXT PRIMARY KEY, studied INT)');
         db.execute('CREATE TABLE streaks(date TEXT PRIMARY KEY, streak INT)');
       },
@@ -63,16 +83,11 @@ class StudyStatistics {
   static void saveData() async {
     final db = await getStatsBase();
 
-    HomeWidget.saveWidgetData('lastdate', getNowString());
-    HomeWidget.saveWidgetData('laststreak', dailyStreak[getNowString()] ?? 0);
-    dev.log(await HomeWidget.getWidgetData('lastdate'));
-    HomeWidget.updateWidget(
-        name: "StatisticsWidget",
-        androidName: "TodayStatsWidget",
-        qualifiedAndroidName: "com.example.studyappcs.TodayStatsWidget");
-
-    await db.insert('stats', {'name': userName, 'goal': dailyGoal, 'code': 1, 'latestDate': getNowString()},
+    await db.insert(
+        'stats', {'name': userName, 'goal': dailyGoal, 'code': 1, 'color': color.value, 'lightness': lightness ? 1 : 0},
         conflictAlgorithm: ConflictAlgorithm.replace);
+
+    dev.log(color.value.toString());
 
     dailyStreak.forEach((date, value) async => await db.insert(
           'streaks',

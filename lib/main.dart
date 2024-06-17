@@ -2,7 +2,6 @@
 import 'dart:developer' as developer;
 import 'dart:io' show Platform;
 
-import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:studyappcs/pages/calendar_page.dart';
@@ -30,61 +29,30 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    FutureBuilder<Color?>(
-      future: DynamicColorPlugin.getAccentColor(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          final color = snapshot.data;
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: 'Study App',
-            theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: color ?? Colors.accents[0]),
-              brightness: Brightness.dark,
-              useMaterial3: true,
-              fontFamily: 'Product Sans',
-            ),
-            initialRoute: '/splash',
-            routes: {'/splash': (context) => const SplashScreen()},
-          );
-        } else {
-          return const CircularProgressIndicator();
-        }
-      },
-    );
+  State<MyApp> createState() => _MyAppState();
+}
 
+class _MyAppState extends State<MyApp> {
+  @override
+  Widget build(BuildContext context) {
+    StudyStatistics.updateTheme = setState;
+    StudyStatistics.load();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Study App',
       theme: ThemeData(
-        brightness: Brightness.dark,
-        useMaterial3: true,
-        fontFamily: 'Product Sans',
-      ),
+          useMaterial3: true,
+          fontFamily: 'Product Sans',
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: StudyStatistics.color,
+            brightness: StudyStatistics.lightness ? Brightness.light : Brightness.dark,
+          )),
       initialRoute: '/splash',
       routes: {'/splash': (context) => const SplashScreen()},
-    );
-
-    return DynamicColorBuilder(
-      builder: (light, dark) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Study App',
-          theme: ThemeData(
-            brightness: Brightness.dark,
-            useMaterial3: true,
-            fontFamily: 'Product Sans',
-            colorScheme: dark,
-          ),
-          initialRoute: '/splash',
-          routes: {'/splash': (context) => const SplashScreen()},
-        );
-      },
     );
   }
 }

@@ -17,7 +17,7 @@ class TestsManager {
     return await database;
   }
 
-  static Future loadData() async {
+  static Future load() async {
     final db = await getDatabase(erase: false);
     final data = await db.rawQuery('SELECT * FROM tests');
     for (var entry in data) {

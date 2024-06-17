@@ -62,7 +62,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     StudyStatistics.load();
-    TestsManager.loadData();
+    TestsManager.load();
     animationController.forward().then((_) => pushMain(context));
 
     const double size = 250;

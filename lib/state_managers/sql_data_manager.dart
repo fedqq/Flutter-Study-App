@@ -30,6 +30,10 @@ abstract class SQLManager {
     await db.execute('DELETE FROM donetask');
     await db.execute('DELETE FROM subjects');
 
+    for (Subject subject in subjects) {
+      await db.insert('subjects', subject.toMap());
+    }
+
     for (Task task in tasks) {
       await db.insert('tasks', task.toMap());
     }
