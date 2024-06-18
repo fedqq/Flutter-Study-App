@@ -30,7 +30,7 @@ class _DoubleInputDialogState extends State<DoubleInputDialog> {
       padding: const EdgeInsets.all(8.0),
       child: TextFormField(
         keyboardType: type.numerical ? TextInputType.number : TextInputType.name,
-        initialValue: type.initialValue,
+        initialValue: type.value,
         onChanged: onChanged,
         autofocus: true,
         decoration: InputDecoration(
@@ -41,14 +41,16 @@ class _DoubleInputDialogState extends State<DoubleInputDialog> {
     );
   }
 
-  bool validateInput(Input input, String? untrimmed) {
+  bool validateInput(final Input input) {
     if (!input.exists) return true;
 
-    String value = untrimmed == '' || untrimmed == null ? '' : untrimmed.trim();
+    String value = input.value?.trim() ?? '';
     bool numericalPass = !(input.numerical && int.tryParse(value) == null);
     bool customValidatePass = input.validate == null ? true : input.validate!(value);
     bool basicValidatePass = validInput(value);
     bool emptyPass = input.nullable ? true : value.isNotEmpty;
+
+    developer.log('$numericalPass, $customValidatePass, $basicValidatePass, $emptyPass');
 
     return numericalPass && customValidatePass && basicValidatePass && emptyPass;
   }
@@ -58,17 +60,17 @@ class _DoubleInputDialogState extends State<DoubleInputDialog> {
     Input first = widget.first;
     Input second = widget.second;
 
-    String? firstStr = first.initialValue;
-    String? secondStr = second.initialValue;
-
     return AlertDialog(
       contentPadding: const EdgeInsets.all(24.0),
       title: Text(widget.title),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          buildInputField(first, (str) => firstStr = str),
-          buildInputField(second, (str) => secondStr = str),
+          buildInputField(first, (str) {
+            first.value = str;
+            developer.log('current: ${first.value}, correct: $str');
+          }),
+          buildInputField(second, (str) => second.value = str),
         ],
       ),
       actions: [
@@ -85,8 +87,8 @@ class _DoubleInputDialogState extends State<DoubleInputDialog> {
               FilledButton(
                 child: const Text('Confirm'),
                 onPressed: () {
-                  bool validFirst = validateInput(first, firstStr);
-                  bool validSecond = validateInput(second, secondStr);
+                  bool validFirst = validateInput(first);
+                  bool validSecond = validateInput(second);
                   if (!(validFirst && validSecond)) {
                     simpleSnackBar(
                       context,
@@ -95,7 +97,7 @@ class _DoubleInputDialogState extends State<DoubleInputDialog> {
 
                     return;
                   }
-                  Navigator.of(context).pop(DialogResult(firstStr ?? '', secondStr ?? ''));
+                  Navigator.of(context).pop(DialogResult(first.value ?? '', second.value ?? ''));
                 },
               ),
             ],
@@ -110,7 +112,7 @@ class Input {
   final String? name;
   final bool exists;
   final bool numerical;
-  final String? initialValue;
+  String? value;
   final bool nullable;
   final bool Function(String)? validate;
 
@@ -119,7 +121,7 @@ class Input {
     this.exists = true,
     this.name,
     this.numerical = false,
-    this.initialValue,
+    this.value,
     this.nullable = false,
   });
 
@@ -146,7 +148,7 @@ class DialogResult {
   static DialogResult empty() => DialogResult('', '');
 }
 
-Future<String?> singleInputDialog(
+Future<String> singleInputDialog(
   BuildContext context,
   String title,
   Input input, {

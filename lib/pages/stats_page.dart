@@ -56,11 +56,10 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
 
   void editDailyGoal() async {
     String result = await singleInputDialog(
-          context,
-          'Choose Daily Goal',
-          Input(name: 'Goal', numerical: true, validate: (str) => (int.tryParse(str) ?? 0) > 0),
-        ) ??
-        '';
+      context,
+      'Choose Daily Goal',
+      Input(name: 'Goal', numerical: true, validate: (str) => (int.tryParse(str) ?? 0) > 0),
+    );
     if (result == '') return;
     setState(() => StudyStatistics.dailyGoal = int.parse(result));
     exFabController.close();
@@ -68,14 +67,13 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
 
   void editUserName() async {
     String name = await singleInputDialog(
-          context,
-          'Change Username',
-          Input(
-            name: 'Username',
-            initialValue: StudyStatistics.userName,
-          ),
-        ) ??
-        '';
+      context,
+      'Change Username',
+      Input(
+        name: 'Username',
+        value: StudyStatistics.userName,
+      ),
+    );
     if (name == '') return;
     setState(() {
       StudyStatistics.userName = name;

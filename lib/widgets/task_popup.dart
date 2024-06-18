@@ -16,8 +16,8 @@ class _TaskPopupState extends State<TaskPopup> {
     DialogResult result = await doubleInputDialog(
           context,
           'Edit Task',
-          Input(name: 'Name', initialValue: widget.task.name),
-          Input(name: 'Desc', nullable: true, initialValue: widget.task.desc),
+          Input(name: 'Name', value: widget.task.name),
+          Input(name: 'Desc', nullable: true, value: widget.task.desc),
         ) ??
         DialogResult.empty();
 

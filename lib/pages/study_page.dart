@@ -68,22 +68,20 @@ class _StudyPageState extends State<StudyPage> {
   void editCard() async {
     if (showingMeaning) {
       String newMeaning = await singleInputDialog(
-            context,
-            'New meaning for ${cards[currentCard].name}',
-            Input(name: 'Meaning', initialValue: cards[currentCard].meaning),
-          ) ??
-          '';
+        context,
+        'New meaning for ${cards[currentCard].name}',
+        Input(name: 'Meaning', value: cards[currentCard].meaning),
+      );
       if (newMeaning == '') return;
       setState(() {
         cards[currentCard].meaning = newMeaning;
       });
     } else {
       String newName = await singleInputDialog(
-            context,
-            'Rename ${cards[currentCard].name}',
-            Input(name: 'Name', initialValue: cards[currentCard].name),
-          ) ??
-          '';
+        context,
+        'Rename ${cards[currentCard].name}',
+        Input(name: 'Name', value: cards[currentCard].name),
+      );
       if (newName == '') return;
       setState(() {
         cards[currentCard].name = newName;
@@ -110,7 +108,7 @@ class _StudyPageState extends State<StudyPage> {
   }
 
   void editTopicName() async {
-    String newName = await singleInputDialog(context, 'Rename ${widget.topic.name}', Input(name: 'Name')) ?? '';
+    String newName = await singleInputDialog(context, 'Rename ${widget.topic.name}', Input(name: 'Name'));
     if (newName == '') return;
     setState(() {
       widget.topic.name = newName;

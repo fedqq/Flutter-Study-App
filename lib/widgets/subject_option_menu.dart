@@ -8,7 +8,6 @@ class SubjectOptionMenu extends StatelessWidget {
   final Function() editColor;
   final Function() deleteSubject;
   final Function() testSubject;
-  final Function() exportSubject;
   final int index;
   final Animation animation;
 
@@ -17,7 +16,6 @@ class SubjectOptionMenu extends StatelessWidget {
     required this.editSubject,
     required this.editColor,
     required this.deleteSubject,
-    required this.exportSubject,
     required this.animation,
     required this.testSubject,
     required this.index,
@@ -53,10 +51,6 @@ class SubjectOptionMenu extends StatelessWidget {
                     IconButton(
                       icon: const Icon(Icons.delete_rounded),
                       onPressed: deleteSubject,
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.share_rounded),
-                      onPressed: exportSubject,
                     ),
                     IconButton(
                       icon: const Icon(Icons.question_mark_rounded),

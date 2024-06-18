@@ -2,11 +2,9 @@
 
 // ignore: unused_import
 import 'dart:developer' as developer;
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:confirm_dialog/confirm_dialog.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:studyappcs/pages/all_tests_page.dart';
 import 'package:studyappcs/pages/study_page.dart';
@@ -20,7 +18,6 @@ import 'package:studyappcs/states/topic.dart';
 import 'package:studyappcs/utils/expandable_fab.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
 import 'package:studyappcs/utils/snackbar.dart';
-import 'package:studyappcs/widgets/export_sheet.dart';
 import 'package:studyappcs/widgets/subject_card.dart';
 import 'package:studyappcs/widgets/subject_option_menu.dart';
 
@@ -102,13 +99,13 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
   void newSubject() async {
     closeMenus();
 
-    String? name = await singleInputDialog(
+    String name = await singleInputDialog(
       context,
       'New Subject Name',
       Input(name: 'Name', validate: validateSubjectName),
     );
 
-    if (name == null) return;
+    if (name == '') return;
 
     Color? newColor = await showColorPicker(context, Colors.blue);
     if (newColor == null) {
@@ -160,34 +157,6 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     closeMenus();
   }
 
-  void exportSubject() {
-    showPrintOrExport(context, widget.subjects[currentFocused]);
-    closeMenus();
-  }
-
-  void importSubject() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-    if (result != null) {
-      File file = File(result.files.single.path!);
-      String res = await file.readAsString();
-      Subject subject;
-      try {
-        subject = Subject.fromString(res);
-      } catch (e) {
-        simpleSnackBar(context, 'Invalid Format. ');
-
-        return;
-      }
-      while (getSubjectNames().contains(subject.name)) {
-        subject.name += ' 2';
-      }
-      setState(() {
-        widget.subjects.add(subject);
-      });
-    }
-    closeMenus();
-  }
-
   List<String> getSubjectNames() => List.generate(widget.subjects.length, (index) => widget.subjects[index].name);
 
   void editSubject() async {
@@ -198,8 +167,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
             name: 'Name',
             validate: validateSubjectName,
           ),
-        ) ??
-        '';
+        );
 
     if (newName == '') return;
 
@@ -277,7 +245,6 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
           ActionButton(onPressed: studyAll, icon: const Icon(Icons.school_rounded), name: 'Study All'),
           ActionButton(onPressed: testAll, icon: const Icon(Icons.question_mark_rounded), name: 'Test All'),
         ],
-        ActionButton(onPressed: importSubject, icon: const Icon(Icons.file_upload_rounded), name: 'Import Subject'),
       ],
     );
 
@@ -356,7 +323,6 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
                         editSubject: editSubject,
                         editColor: editColor,
                         deleteSubject: deleteSubject,
-                        exportSubject: exportSubject,
                         testSubject: testSubject,
                         animation: blurAnimation,
                         index: currentFocused,

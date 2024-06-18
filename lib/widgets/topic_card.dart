@@ -71,8 +71,7 @@ class _TopicCardState extends State<TopicCard> {
           context,
           'Rename ${topic.name}',
           Input(name: 'Name'),
-        ) ??
-        '';
+        );
     if (newName != '') {
       setState(() {
         String subjectName = widget.area.split('-')[0].trim();

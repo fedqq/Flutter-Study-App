@@ -25,7 +25,7 @@ class SubjectPage extends StatefulWidget {
 
 class _SubjectPageState extends State<SubjectPage> {
   void newTopic() async {
-    final String topicName = await singleInputDialog(context, 'New Topic Name', Input(name: 'Name')) ?? '';
+    final String topicName = await singleInputDialog(context, 'New Topic Name', Input(name: 'Name'));
 
     if (topicName == '') return;
     Topic topic = Topic(topicName);
