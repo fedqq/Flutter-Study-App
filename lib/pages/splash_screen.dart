@@ -1,9 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:studyappcs/main.dart';
-import 'package:studyappcs/state_managers/statistics.dart';
-import 'package:studyappcs/state_managers/tests_manager.dart';
+import 'package:studyappcs/pages/login_page.dart';
+import 'package:studyappcs/state_managers/firestore_manager.dart';
 
-import '../utils/theming.dart';
+import '../utils/utils.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -59,13 +60,23 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     );
   }
 
+  void beginLoad() async {
+    if (FirebaseAuth.instance.currentUser == null) {
+      animationController.dispose();
+      Navigator.pop(context);
+      Navigator.push(context, MaterialPageRoute(builder: (_) => const Loginpage()));
+      return;
+    }
+    FirestoreManager.loadData().then((_) => pushMain(context));
+  }
+
   @override
   Widget build(BuildContext context) {
-    StudyStatistics.load();
-    TestsManager.load();
-    animationController.forward().then((_) => pushMain(context));
+    animationController.forward();
 
     const double size = 250;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => beginLoad());
 
     return Scaffold(
       body: SizedBox.expand(

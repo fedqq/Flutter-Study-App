@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "878168536455",
+    "project_id": "study-app-cs",
+    "storage_bucket": "study-app-cs.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:878168536455:android:afd4cd0809335e4c42cf22",
+        "android_client_info": {
+          "package_name": "com.example.studyappcs"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4mOnPUe5c_Nlg0Xxnf-73l_QuPzTZk5w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:878168536455:android:3517a5eed33959b942cf22",
+        "android_client_info": {
+          "package_name": "com.federico.studyappcs"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4mOnPUe5c_Nlg0Xxnf-73l_QuPzTZk5w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

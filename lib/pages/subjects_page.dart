@@ -10,6 +10,7 @@ import 'package:studyappcs/pages/all_tests_page.dart';
 import 'package:studyappcs/pages/study_page.dart';
 import 'package:studyappcs/pages/subject_page.dart';
 import 'package:studyappcs/pages/test_page.dart';
+import 'package:studyappcs/state_managers/firestore_manager.dart';
 import 'package:studyappcs/state_managers/tests_manager.dart';
 import 'package:studyappcs/states/flashcard.dart';
 import 'package:studyappcs/states/subject.dart';
@@ -17,7 +18,7 @@ import 'package:studyappcs/states/test.dart';
 import 'package:studyappcs/states/topic.dart';
 import 'package:studyappcs/utils/expandable_fab.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
-import 'package:studyappcs/utils/snackbar.dart';
+import 'package:studyappcs/utils/utils.dart';
 import 'package:studyappcs/widgets/subject_card.dart';
 import 'package:studyappcs/widgets/subject_option_menu.dart';
 
@@ -113,6 +114,11 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     }
 
     final subject = Subject(name, newColor);
+
+    FirestoreManager.subjectCollection
+        .doc(subject.name)
+        .set({'name': subject.name, 'scores': [], 'color': newColor.value});
+
     setState(() => widget.subjects.add(subject));
   }
 
@@ -123,6 +129,19 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     setState(() => widget.subjects.removeAt(currentFocused));
     TestsManager.pastTests.removeWhere((element) => element.area.trim() == area);
 
+    var subjects = await FirestoreManager.subjectDocs;
+    try {
+      subjects.docs.firstWhere((a) => a['name'] == area).reference.delete();
+    } catch (e) {
+      simpleSnackBar(context, 'An error occured, but your subject was deleted');
+    }
+
+    var cards = await FirestoreManager.cardDocs;
+    cards.docs.where((a) => a['subject'] == area).forEach((a) => a.reference.delete());
+
+    var tests = await FirestoreManager.testDocs;
+    tests.docs.where((a) => (a['area'] as String).contains(area)).forEach((a) => a.reference.delete());
+
     closeMenus();
   }
 
@@ -130,6 +149,10 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     Color? newColor = await showColorPicker(context, widget.subjects[currentFocused].color);
     if (newColor == null) return;
     setState(() => widget.subjects[currentFocused].color = newColor);
+
+    String name = widget.subjects[currentFocused].name;
+    var subjects = await FirestoreManager.subjectDocs;
+    subjects.docs.firstWhere((a) => a['name'] == name).data().update('color', (_) => newColor.value);
 
     closeMenus();
   }
@@ -161,13 +184,13 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
 
   void editSubject() async {
     String newName = await singleInputDialog(
-          context,
-          'Rename ${widget.subjects[currentFocused].name}',
-          Input(
-            name: 'Name',
-            validate: validateSubjectName,
-          ),
-        );
+      context,
+      'Rename ${widget.subjects[currentFocused].name}',
+      Input(
+        name: 'Name',
+        validate: validateSubjectName,
+      ),
+    );
 
     if (newName == '') return;
 
@@ -175,16 +198,32 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
       test.area = test.area.replaceAll(widget.subjects[currentFocused].name, newName);
     }
 
+    String oldName = widget.subjects[currentFocused].name;
+    var subjects = await FirestoreManager.subjectDocs;
+    subjects.docs.firstWhere((a) => a.data()['name'] == oldName).reference.set({'name': newName}, merge);
+
+    var cards = await FirestoreManager.cardDocs;
+    cards.docs
+        .where((a) => a.data()['subject'] == oldName)
+        .forEach((a) => a.reference.set({'subject': newName}, merge));
+
     setState(() => widget.subjects[currentFocused].name = newName);
     closeMenus();
   }
 
   void clearSubjects() async {
+    var cardsCollection = FirestoreManager.cardCollection;
+    var subjects = await cardsCollection.get();
+    for (var a in subjects.docs) {
+      a.reference.delete();
+    }
+
     bool confirmed = await confirm(
       context,
       title: const Text('Delete All Subjects'),
       content: const Text('Are you sure you would like to delete all subjects? This action cannot be undone. '),
     );
+
     if (confirmed) {
       setState(() {
         widget.subjects.clear();

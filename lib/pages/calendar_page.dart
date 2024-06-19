@@ -3,6 +3,7 @@
 import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
+import 'package:studyappcs/state_managers/firestore_manager.dart';
 import 'package:studyappcs/states/task.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
 import 'package:studyappcs/widgets/day_card.dart';
@@ -97,19 +98,43 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
     if (newColor == null) return;
 
     setState(() => widget.tasks.add(Task(name, date, false, newColor, desc)));
+
+    var tasksCollection = FirestoreManager.taskCollection;
+    tasksCollection.doc(name).set({
+      'name': name,
+      'desc': desc,
+      'date': date.millisecondsSinceEpoch,
+      'color': newColor.value,
+      'completed': false,
+    });
   }
 
-  void deleteTask(Task task) => setState(() => widget.tasks.remove(task));
+  void deleteTask(Task task) async {
+    var taskDocs = await FirestoreManager.taskDocs;
+    taskDocs.docs.firstWhere((a) => a['name'] == task.name && a['date'] == task.dueDate).reference.delete();
+    setState(() => widget.tasks.remove(task));
+  }
 
-  void deleteCompletedTask(Task task) => setState(() => widget.completedTasks.remove(task));
+  void deleteCompletedTask(Task task) async {
+    var taskDocs = await FirestoreManager.taskDocs;
+    taskDocs.docs.firstWhere((a) => a['name'] == task.name && a['date'] == task.dueDate).reference.delete();
+    setState(() => widget.completedTasks.remove(task));
+  }
 
   List<DateTime> sortByDate(Map<DateTime, List<Task>> list) =>
       list.keys.toList()..sort((first, second) => first.compareTo(second));
 
-  void completeTask(Task task) => setState(() {
-        widget.tasks.remove(task);
-        widget.completedTasks.add(task);
-      });
+  void completeTask(Task task) async {
+    var taskDocs = await FirestoreManager.taskDocs;
+    taskDocs.docs
+        .firstWhere((a) => a['name'] == task.name && a['date'] == task.dueDate.millisecondsSinceEpoch)
+        .reference
+        .set({'completed': true}, merge);
+    setState(() {
+      widget.tasks.remove(task);
+      widget.completedTasks.add(task);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

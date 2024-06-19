@@ -4,11 +4,12 @@ import "dart:ui";
 
 import "package:confirm_dialog/confirm_dialog.dart";
 import "package:flutter/material.dart";
+import "package:studyappcs/state_managers/firestore_manager.dart";
 import "package:studyappcs/state_managers/statistics.dart";
 import "package:studyappcs/states/flashcard.dart";
 import "package:studyappcs/states/topic.dart";
 import "package:studyappcs/utils/input_dialogs.dart";
-import "package:studyappcs/utils/snackbar.dart";
+import "package:studyappcs/utils/utils.dart";
 
 class StudyPage extends StatefulWidget {
   final List<FlashCard> cards;
@@ -61,11 +62,20 @@ class _StudyPageState extends State<StudyPage> {
     showingMeaning = false;
   }
 
-  void learnCard() => setState(() {
-        cards[currentCard].learned = !cards[currentCard].learned;
-      });
+  void learnCard() async {
+    var cardDocs = await FirestoreManager.cardDocs;
+    var card = cards[currentCard];
+    cardDocs.docs
+        .firstWhere((a) => a['name'] == card.name && a['meaning'] == card.meaning)
+        .reference
+        .set({'learned': !card.learned}, merge);
+    setState(() => cards[currentCard].learned = !cards[currentCard].learned);
+  }
 
   void editCard() async {
+    String oldName = cards[currentCard].name;
+    String oldMeaning = cards[currentCard].meaning;
+
     if (showingMeaning) {
       String newMeaning = await singleInputDialog(
         context,
@@ -87,22 +97,27 @@ class _StudyPageState extends State<StudyPage> {
         cards[currentCard].name = newName;
       });
     }
+
+    String newName = cards[currentCard].name;
+    String newMeaning = cards[currentCard].meaning;
+
+    var cardDocs = await FirestoreManager.cardDocs;
+    cardDocs.docs
+        .where((a) => a['name'] == oldName && a['meaning'] == oldMeaning)
+        .forEach((a) => a.reference.set({'name': newName, 'meaning': newMeaning}, merge));
   }
 
   void deleteCard() async {
+    if (cards.length == 1) return;
     bool delete = await confirm(
       context,
       title: Text('Are you sure you would like to delete ${cards[currentCard].name}?'),
       content: const Text('This action cannot be undone. '),
     );
     if (delete) {
-      if (cards.length == 1) {
-        widget.cards.removeAt(0);
-        // ignore: use_build_context_synchronously
-        Navigator.pop(context);
-
-        return;
-      }
+      var card = cards[currentCard];
+      var cardDocs = await FirestoreManager.cardDocs;
+      cardDocs.docs.firstWhere((a) => a['name'] == card.name && a['meaning'] == card.meaning).reference.delete();
       setState(() => widget.cards.removeAt(currentCard));
     }
   }
@@ -110,6 +125,13 @@ class _StudyPageState extends State<StudyPage> {
   void editTopicName() async {
     String newName = await singleInputDialog(context, 'Rename ${widget.topic.name}', Input(name: 'Name'));
     if (newName == '') return;
+
+    var cardDocs = await FirestoreManager.cardDocs;
+    for (var card in cardDocs.docs) {
+      if (card['topic'] == widget.topic.name) {
+        card.reference.set({'topic': newName}, merge);
+      }
+    }
     setState(() {
       widget.topic.name = newName;
       widget.renameCallback!(newName);

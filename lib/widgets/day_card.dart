@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:studyappcs/state_managers/firestore_manager.dart';
+import 'package:studyappcs/states/task.dart';
 import 'package:studyappcs/utils/outlined_card.dart';
 import 'package:studyappcs/widgets/task_popup.dart';
-import 'package:studyappcs/states/task.dart';
-import 'package:intl/intl.dart';
 
-import '../utils/theming.dart';
+import '../utils/utils.dart';
 
 class DayCard extends StatefulWidget {
   final DateTime date;
@@ -43,11 +44,20 @@ class _DayCardState extends State<DayCard> {
 
   Widget buildTaskCard(int index) => InkWell(
         borderRadius: BorderRadius.circular(Theming.radius + Theming.padding),
-        onLongPress: () => setState(() {
+        onLongPress: () async {
           if (widget.completeCallback == null) return;
-          widget.tasks[index].completed = true;
-          widget.completeCallback!(widget.tasks[index]);
-        }),
+
+          var taskDocs = await FirestoreManager.cardDocs;
+          taskDocs.docs
+              .firstWhere((a) => a['name'] == widget.tasks[index].name && a['desc'] == widget.tasks[index].desc)
+              .reference
+              .set({'completed': true}, merge);
+
+          setState(() {
+            widget.tasks[index].completed = true;
+            widget.completeCallback!(widget.tasks[index]);
+          });
+        },
         child: OutlinedCard(
           color: widget.color ?? widget.tasks[index].color,
           elevation: 10,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:studyappcs/state_managers/firestore_manager.dart';
 import 'package:studyappcs/states/test.dart';
 import 'package:studyappcs/widgets/result_card.dart';
 
@@ -53,7 +54,22 @@ class _ResultsPageState extends State<ResultsPage> {
               card: cards[index],
               answer: widget.test.answers[index],
               editable: widget.editable,
-              markCorrect: () => setState(() => widget.test.scored[cards[index]] = true),
+              markCorrect: () async {
+                var testDocs = await FirestoreManager.testDocs;
+
+                var cardsDocs = await testDocs.docs
+                    .firstWhere((a) => a['id'] == widget.test.id)
+                    .reference
+                    .collection('testcards')
+                    .get();
+
+                cardsDocs.docs
+                    .firstWhere((a) => a['name'] == cards[index].name && a['meaning'] == cards[index])
+                    .reference
+                    .set({'answer': cards[index].meaning}, merge);
+
+                setState(() => widget.test.scored[cards[index]] = true);
+              },
               borderRadius: getRadius(index),
             ),
           ),

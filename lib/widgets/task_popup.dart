@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:studyappcs/utils/input_dialogs.dart';
+import 'package:studyappcs/state_managers/firestore_manager.dart';
 import 'package:studyappcs/states/task.dart';
+import 'package:studyappcs/utils/input_dialogs.dart';
 
 class TaskPopup extends StatefulWidget {
   final Task task;
@@ -22,6 +23,13 @@ class _TaskPopupState extends State<TaskPopup> {
         DialogResult.empty();
 
     if (result.first == '') return;
+
+    var taskDocs = await FirestoreManager.taskDocs;
+    taskDocs.docs.firstWhere((a) => a['name'] == widget.task.name && a['desc'] == widget.task.desc).reference.set({
+      'name': result.first,
+      'desc': result.second,
+    }, merge);
+
     setState(() {
       widget.task.name = result.first;
       widget.task.desc = result.second;
@@ -30,7 +38,13 @@ class _TaskPopupState extends State<TaskPopup> {
 
   void editColor() async {
     Color? color = await showColorPicker(context, widget.task.color);
-    if (color != null) setState(() => widget.task.color = color);
+    if (color == null) return;
+    setState(() => widget.task.color = color);
+    var taskDocs = await FirestoreManager.taskDocs;
+    taskDocs.docs
+        .firstWhere((a) => a['name'] == widget.task.name && a['desc'] == widget.task.desc)
+        .reference
+        .set({'color': color.value}, merge);
   }
 
   void delete() {

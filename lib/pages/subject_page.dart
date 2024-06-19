@@ -4,6 +4,7 @@ import 'dart:developer' as developer;
 import "package:flutter/material.dart";
 import "package:studyappcs/pages/all_tests_page.dart";
 import "package:studyappcs/pages/test_page.dart";
+import "package:studyappcs/state_managers/firestore_manager.dart";
 import "package:studyappcs/state_managers/tests_manager.dart";
 import "package:studyappcs/states/flashcard.dart";
 import "package:studyappcs/states/subject.dart";
@@ -29,7 +30,15 @@ class _SubjectPageState extends State<SubjectPage> {
 
     if (topicName == '') return;
     Topic topic = Topic(topicName);
-
+    topic.addCard(FlashCard('First Card', 'First Card Meaning', false));
+    var cardCollection = FirestoreManager.cardCollection;
+    cardCollection.doc('First Card').set({
+      'name': 'First Card',
+      'Meaning': 'First Card Meaning',
+      'learned': false,
+      'subject': widget.subject,
+      'topic': topic.name,
+    });
     setState(() => widget.subject.addTopic(topic));
   }
 
@@ -58,6 +67,7 @@ class _SubjectPageState extends State<SubjectPage> {
               },
             ),
           )..then((_) => setState(() {})),
+          subject: widget.subject.name,
         ),
       ),
     );

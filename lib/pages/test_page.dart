@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 import 'package:intl/intl.dart';
 import 'package:studyappcs/pages/results_page.dart';
+import 'package:studyappcs/state_managers/firestore_manager.dart';
 import 'package:studyappcs/state_managers/tests_manager.dart';
 import 'package:studyappcs/states/subject.dart';
 import 'package:studyappcs/states/test.dart';
@@ -23,12 +24,8 @@ class _TestPageState extends State<TestPage> {
 
   @override
   void initState() {
-    test = Test(
-      {for (TestCard card in widget.cards) card: false},
-      DateFormat.yMd().format(DateTime.now()),
-      widget.testArea,
-      answers,
-    );
+    test = Test({for (TestCard card in widget.cards) card: false}, DateFormat.yMd().format(DateTime.now()),
+        widget.testArea, answers, TestsManager.id);
     answers = [for (var _ in widget.cards) ''];
     super.initState();
   }
@@ -51,6 +48,23 @@ class _TestPageState extends State<TestPage> {
       ),
     );
     TestsManager.addTest(test..answers = answers);
+
+    var testDocs = FirestoreManager.testCollection;
+    var doc = testDocs.doc();
+    doc.set({'area': test.area, 'date': test.date});
+    var collection = doc.collection('testcards');
+    i = 0;
+    for (var card in test.scored.keys) {
+      collection.doc().set(
+        {
+          'name': card.name,
+          'meaning': card.meaning,
+          'given': answers[i],
+          'origin': card.origin,
+          'id': TestsManager.nextID,
+        },
+      );
+    }
   }
 
   @override

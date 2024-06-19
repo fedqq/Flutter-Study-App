@@ -1,31 +1,28 @@
 // ignore: unused_import
 import 'dart:developer' as developer;
-import 'dart:io' show Platform;
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:studyappcs/firebase_options.dart';
 import 'package:studyappcs/pages/calendar_page.dart';
 import 'package:studyappcs/pages/splash_screen.dart';
 import 'package:studyappcs/pages/stats_page.dart';
 import 'package:studyappcs/pages/subjects_page.dart';
-import 'package:studyappcs/state_managers/sql_data_manager.dart';
+import 'package:studyappcs/state_managers/firestore_manager.dart';
 import 'package:studyappcs/state_managers/statistics.dart';
-import 'package:studyappcs/state_managers/tests_manager.dart';
 import 'package:studyappcs/states/subject.dart';
 import 'package:studyappcs/states/task.dart';
-import 'package:studyappcs/utils/snackbar.dart';
+import 'package:studyappcs/utils/utils.dart';
 import 'package:window_rounded_corners/window_rounded_corners.dart';
 
 // ignore: constant_identifier_names
 const CLEAR = false;
 
-void main() {
-  sqfliteFfiInit();
-  if (Platform.isWindows) {
-    databaseFactory = databaseFactoryFfi;
-  }
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   WindowCorners.init();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
@@ -40,7 +37,6 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     StudyStatistics.updateTheme = setState;
-    StudyStatistics.load();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Study App',
@@ -80,7 +76,6 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
 
   @override
   void initState() {
-    loadData();
     WidgetsBinding.instance.addObserver(this);
     super.initState();
   }
@@ -89,9 +84,10 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
     List<Subject> subjectsRes = [];
     List<Task> tasksRes = [];
     List<Task> completedTasksRes = [];
-    subjectsRes = await SQLManager.loadSubjects();
-    completedTasksRes = await SQLManager.loadCompletedTasks();
-    tasksRes = await SQLManager.loadTasks();
+
+    subjectsRes = FirestoreManager.subjectsList;
+    tasksRes = FirestoreManager.tasksList;
+    completedTasksRes = FirestoreManager.compTasksList;
 
     setState(() {
       subjects = subjectsRes;
@@ -109,9 +105,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
   }
 
   Future saveData() async {
-    await SQLManager.saveData(subjects, tasks, completedTasks);
-    StudyStatistics.saveData();
-    TestsManager.saveData();
+    await FirestoreManager.saveData();
   }
 
   @override
@@ -127,6 +121,29 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
     });
   }
 
+  Future authlogin({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      snackbar('Succesfully logged in. ');
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        snackbar('No user found for that email.');
+      } else if (e.code == 'wrong-password') {
+        snackbar('Wrong password provided for that user.');
+      } else {
+        snackbar(e.message ?? '');
+      }
+    } catch (e) {
+      snackbar(e.toString());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     List<Widget> pages = [
@@ -136,7 +153,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
     ];
 
     if (CLEAR) {
-      SQLManager.clearAll();
+      //TODO Clear All
     }
 
     double left = WindowCorners.getCorners().bottomLeft - 8;

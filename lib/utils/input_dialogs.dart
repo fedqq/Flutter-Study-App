@@ -3,7 +3,7 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
-import 'package:studyappcs/utils/snackbar.dart';
+import 'package:studyappcs/utils/utils.dart';
 
 class DoubleInputDialog extends StatefulWidget {
   final String title;

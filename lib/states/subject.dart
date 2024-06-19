@@ -22,8 +22,4 @@ class Subject {
   void addScore(int score) {
     testScores.add(score);
   }
-
-  String scoresToString() => testScores.join(',');
-
-  Map<String, Object?> toMap() => {'name': name, 'color': color.value, 'scores': scoresToString()};
 }

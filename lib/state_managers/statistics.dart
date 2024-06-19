@@ -1,10 +1,7 @@
-import 'dart:developer' as dev;
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class StudyStatistics {
   static Map<String, int> dailyStudied = {};
@@ -38,69 +35,9 @@ class StudyStatistics {
 
   static Color get color => _accentColor;
 
-  static Future load() async {
-    final db = await getStatsBase();
-    final data = await db.rawQuery('SELECT * FROM stats');
-    if (data.isNotEmpty) {
-      userName = data[0]['name'] as String;
-      dailyGoal = data[0]['goal'] as int;
-      lightness = (data[0]['lightness'] as int) == 0 ? false : true;
-      color = Color(data[0]['color'] as int);
-      updateTheme(() {});
-    }
-
-    dailyStreak = {};
-
-    final streaks = await db.rawQuery('SELECT * FROM streaks');
-    for (Map entry in streaks) {
-      dailyStreak[entry['date'] as String] = entry['streak'] as int;
-    }
-
-    final studied = await db.rawQuery('SELECT * FROM studied');
-    for (Map entry in studied) {
-      dailyStreak[entry['date'] as String] = entry['studied'] as int;
-    }
-  }
-
-  static Future<Database> getStatsBase() async {
-    final path = await getDatabasesPath();
-    final database = openDatabase(
-      '$path/stats_db.db',
-      onCreate: (db, version) {
-        db.execute('CREATE TABLE stats(name TEXT, goal INT, code INT PRIMARY KEY, color INT, lightness INT)');
-        db.execute('CREATE TABLE studied(date TEXT PRIMARY KEY, studied INT)');
-        db.execute('CREATE TABLE streaks(date TEXT PRIMARY KEY, streak INT)');
-      },
-      version: 1,
-    );
-    return await database;
-  }
-
   static double getDailyGoal() => dailyGoal.toDouble();
 
   static void setDailyGoal(int goal) => dailyGoal = goal;
-
-  static void saveData() async {
-    final db = await getStatsBase();
-
-    await db.insert(
-        'stats', {'name': userName, 'goal': dailyGoal, 'code': 1, 'color': color.value, 'lightness': lightness ? 1 : 0},
-        conflictAlgorithm: ConflictAlgorithm.replace);
-
-    dev.log(color.value.toString());
-
-    dailyStreak.forEach((date, value) async => await db.insert(
-          'streaks',
-          {'date': date, 'streak': value},
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        ));
-
-    dailyStudied.forEach((date, value) async => await db.insert(
-          'studied',
-          {'date': date, 'studied': value},
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        ));
-  }
 
   static int get maxStreak {
     int highest = 0;

@@ -1,22 +1,14 @@
-import 'dart:developer' as dev;
-import 'dart:io';
 import 'dart:math';
 
-import 'package:archive/archive_io.dart';
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:studyappcs/state_managers/exporter.dart';
+import 'package:studyappcs/state_managers/firestore_manager.dart';
 import 'package:studyappcs/state_managers/statistics.dart';
 import 'package:studyappcs/state_managers/tests_manager.dart';
 import 'package:studyappcs/states/subject.dart';
 import 'package:studyappcs/states/test.dart';
-import 'package:studyappcs/utils/expandable_fab.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
-import 'package:studyappcs/utils/snackbar.dart';
 import 'package:studyappcs/widgets/studied_chart.dart';
 
 class StatsPage extends StatefulWidget {
@@ -33,8 +25,6 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
   bool showingNameInput = false;
   late AnimationController controller;
   late Animation<double> animation;
-
-  ExFabController exFabController = ExFabController();
 
   @override
   void dispose() {
@@ -61,8 +51,10 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
       Input(name: 'Goal', numerical: true, validate: (str) => (int.tryParse(str) ?? 0) > 0),
     );
     if (result == '') return;
+
+    FirestoreManager.goal = result;
+
     setState(() => StudyStatistics.dailyGoal = int.parse(result));
-    exFabController.close();
   }
 
   void editUserName() async {
@@ -75,10 +67,8 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
       ),
     );
     if (name == '') return;
-    setState(() {
-      StudyStatistics.userName = name;
-    });
-    exFabController.close();
+    FirestoreManager.username = name;
+    setState(() => StudyStatistics.userName = name);
   }
 
   Widget buildButton(String text, void Function() callback) => Padding(
@@ -98,23 +88,11 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
         ),
       );
 
-  Future<File> makeBackup({backup = false}) async {
-    widget.saveCallback();
-    var path = await getDatabasesPath();
-    var resPath = (await getApplicationDocumentsDirectory()).path;
-    ZipFileEncoder encoder = ZipFileEncoder();
-    encoder.create("$resPath\\studyapp_backup.zip");
-    await encoder.addFile(File("$path\\maindata_db.db"));
-    await encoder.addFile(File("$path\\stats_db.db"));
-    await encoder.addFile(File("$path\\tests.db"));
-    await encoder.close();
-    return File("$resPath\\studyapp_backup${!backup ? DateTime.now().millisecondsSinceEpoch : ""}.zip");
-  }
-
   void chooseAccentColor() async {
     Color col = await showColorPicker(context, StudyStatistics.color) ?? Colors.black;
     if (col == Colors.black) return;
     StudyStatistics.color = col;
+    FirestoreManager.color = col.value;
   }
 
   @override
@@ -231,8 +209,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                     padding: const EdgeInsets.all(12.0),
                     scrollDirection: Axis.horizontal,
                     children: [
-                      buildButton('Export Data', exportData),
-                      buildButton('Import Data', importData),
+                      buildButton('Resync Data', resyncData),
                       buildButton(
                         'Data to PDF',
                         () {
@@ -261,6 +238,10 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
         );
       },
     );
+  }
+
+  void resyncData() {
+    //TODO Resync Data
   }
 
   void showThemeOptions() {
@@ -321,14 +302,20 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
               ),
             ),
             Padding(
-                padding: const EdgeInsets.all(8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text("Light Mode"),
-                    Switch(value: StudyStatistics.lightness, onChanged: (b) => StudyStatistics.lightness = b)
-                  ],
-                )),
+              padding: const EdgeInsets.all(8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text("Light Mode"),
+                  Switch(
+                      value: StudyStatistics.lightness,
+                      onChanged: (b) {
+                        StudyStatistics.lightness = b;
+                        FirestoreManager.lightness = b;
+                      })
+                ],
+              ),
+            ),
           ],
         );
       },
@@ -336,52 +323,8 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
   }
 
   void useDeviceAccentColor() async {
-    StudyStatistics.color = await DynamicColorPlugin.getAccentColor() ?? Colors.blue;
-  }
-
-  void exportData() async => Share.shareXFiles([XFile((await makeBackup()).path)]);
-
-  void importData() async {
-    String dbPath = await getDatabasesPath();
-
-    void loadFromDirectory(String pathToDir) async {
-      File("$dbPath\\maindata_db.db").writeAsBytesSync(File("$pathToDir\\maindata_db.db").readAsBytesSync());
-      File("$dbPath\\stats_db.db").writeAsBytesSync(File("$pathToDir\\stats_db.db").readAsBytesSync());
-      File("$dbPath\\tests.db").writeAsBytesSync(File("$pathToDir\\tests.db").readAsBytesSync());
-    }
-
-    Future clearData() async {
-      File("$dbPath\\maindata_db.db").writeAsStringSync('');
-      File("$dbPath\\stats_db.db").writeAsStringSync('');
-      File("$dbPath\\tests.db").writeAsStringSync('');
-    }
-
-    await makeBackup(backup: true);
-    try {
-      String path =
-          (await FilePicker.platform.pickFiles(allowMultiple: false, allowedExtensions: ['.zip']))?.paths[0] ?? "";
-      if (path == "") {
-        return;
-      }
-
-      String unzippedPath = "${(await getApplicationDocumentsDirectory()).path}\\unzip\\";
-      extractFileToDisk(path, unzippedPath);
-      clearData();
-      loadFromDirectory(unzippedPath);
-      StudyStatistics.load();
-      widget.loadCallback();
-      TestsManager.load();
-    } catch (e) {
-      // ignore: use_build_context_synchronously
-      simpleSnackBar(context, "Error importing data. ");
-      String unzippedPath = "${(await getApplicationDocumentsDirectory()).path}\\backupunzip\\";
-      extractFileToDisk("${(await getApplicationDocumentsDirectory()).path}\\studyapp_backup.zip", unzippedPath);
-      clearData();
-      loadFromDirectory(unzippedPath);
-      StudyStatistics.load();
-      widget.loadCallback();
-      TestsManager.load();
-      dev.log(e.toString());
-    }
+    Color color = await DynamicColorPlugin.getAccentColor() ?? Colors.blue;
+    StudyStatistics.color = color;
+    FirestoreManager.color = color.value;
   }
 }

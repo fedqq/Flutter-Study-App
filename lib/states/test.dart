@@ -4,15 +4,6 @@ class TestCard {
   String origin;
 
   TestCard(this.name, this.meaning, this.origin);
-
-  @override
-  String toString() => '$name||$meaning||$origin';
-
-  static TestCard fromString(String str) {
-    List<String> data = str.split('||');
-
-    return TestCard(data[0], data[1], data[2]);
-  }
 }
 
 class Test {
@@ -20,7 +11,8 @@ class Test {
   final String date;
   String area;
   List<String> answers;
-  Test(this.scored, this.date, this.area, this.answers);
+  final int id;
+  Test(this.scored, this.date, this.area, this.answers, this.id);
 
   int get percentage {
     return 100 * correct ~/ totalAmount;

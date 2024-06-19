@@ -6,19 +6,21 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:studyappcs/pages/all_tests_page.dart';
 import 'package:studyappcs/pages/study_page.dart';
+import 'package:studyappcs/state_managers/firestore_manager.dart';
 import 'package:studyappcs/state_managers/tests_manager.dart';
 import 'package:studyappcs/states/flashcard.dart';
 import 'package:studyappcs/states/test.dart';
 import 'package:studyappcs/states/topic.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
 
-import '../utils/theming.dart';
+import '../utils/utils.dart';
 
 class TopicCard extends StatefulWidget {
   final Topic topic;
   final Future Function() testTopic;
   final String area;
-  const TopicCard({super.key, required this.topic, required this.testTopic, required this.area});
+  final String subject;
+  const TopicCard({super.key, required this.topic, required this.testTopic, required this.area, required this.subject});
 
   @override
   State<TopicCard> createState() => _TopicCardState();
@@ -68,10 +70,10 @@ class _TopicCardState extends State<TopicCard> {
 
   void renameTopic(Topic topic) async {
     String newName = await singleInputDialog(
-          context,
-          'Rename ${topic.name}',
-          Input(name: 'Name'),
-        );
+      context,
+      'Rename ${topic.name}',
+      Input(name: 'Name'),
+    );
     if (newName != '') {
       setState(() {
         String subjectName = widget.area.split('-')[0].trim();
@@ -99,6 +101,10 @@ class _TopicCardState extends State<TopicCard> {
     if (name == '') return;
     String meaning = result.second;
     if (meaning != '') setState(() => topic.cards.add(FlashCard(name, meaning, false)));
+    var cardCollection = FirestoreManager.cardCollection;
+    cardCollection
+        .doc(name)
+        .set({'name': name, 'meaning': meaning, 'subject': widget.subject, 'topic': topic.name, 'learned': false});
   }
 
   double learnedPercentage() => widget.topic.cards.isNotEmpty
