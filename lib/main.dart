@@ -153,10 +153,6 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
       CalendarPage(tasks: tasks, completedTasks: completedTasks),
     ];
 
-    if (CLEAR) {
-      //TODO Clear All
-    }
-
     double left = WindowCorners.getCorners().bottomLeft - 8;
     double right = WindowCorners.getCorners().bottomRight - 8;
 

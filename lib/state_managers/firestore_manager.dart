@@ -57,11 +57,8 @@ abstract class FirestoreManager {
   static DocSnapshotType subjectNamed(String n) async =>
       (await subjectCollection.where('name', isEqualTo: n).get()).docs.first;
 
-  static Future<void> loadData() async {
-    var currentUser = _user;
-
-    final prefs = (await currentUser.get()).data() as Map<String, dynamic>?;
-    //name, goal, color, lightness, streaks, studied
+  static Future<void> _loadPrefs() async {
+    final prefs = (await _user.get()).data() as Map<String, dynamic>?;
     if (prefs == null) return;
     String name = prefs['username'] as String;
     int goal = prefs['goal'] as int;
@@ -76,54 +73,21 @@ abstract class FirestoreManager {
     StudyStatistics.dailyGoal = goal;
     StudyStatistics.dailyStreak = streaks;
     StudyStatistics.dailyStudied = studied;
+  }
 
+  static Future<void> loadData() async {
     List<Subject> subjects = [];
 
-    final subjectsCol = await subjectDocs;
-    for (var snapshot in subjectsCol.docs) {
-      final data = snapshot.data();
-      String name = data['name'] as String;
-      List<int> scores = (data['scores'] as List).cast<int>();
-      Color subjectColor = Color(data['color'] as int);
-      String teacher = (data['teacher'] as String?) ?? '';
-      String classroom = (data['classroom'] as String?) ?? '';
-      Subject subject = Subject(name, subjectColor, teacher, classroom);
-      subject.testScores = scores;
-      subjects.add(subject);
-    }
+    await _loadPrefs();
+    await _loadSubjects(subjects);
+    await _loadCards(subjects);
+    await _loadTasks();
+    await _loadTests();
 
-    final cardsCol = await cardDocs;
-    for (var snapshot in cardsCol.docs) {
-      final data = snapshot.data();
-      String subjectName = data['subject'] as String;
-      String topicName = data['topic'] as String;
-      String name = data['name'] as String;
-      String meaning = data['meaning'] as String;
-      bool learned = data['learned'] as bool;
-      FlashCard card = FlashCard(name, meaning, learned);
+    subjectsList = subjects;
+  }
 
-      Subject realSubject = subjects.firstWhere((s) => s.name == subjectName);
-
-      realSubject.topics
-          .firstWhere((t) => t.name == topicName, orElse: () => realSubject.addTopic(Topic(topicName)))
-          .addCard(card);
-    }
-
-    List<Task> completedTasks = [];
-    List<Task> tasks = [];
-
-    final tasksCol = await taskDocs;
-    for (var snapshot in tasksCol.docs) {
-      final data = snapshot.data();
-      String name = data['name'] as String;
-      String desc = data['desc'] as String;
-      bool completed = data['completed'] as bool;
-      Color taskColor = Color(data['color'] as int);
-      DateTime dueDate = DateTime.fromMillisecondsSinceEpoch(data['date'] as int);
-
-      (completed ? completedTasks : tasks).add(Task(name, dueDate, completed, taskColor, desc));
-    }
-
+  static Future<void> _loadTests() async {
     List<Test> tests = [];
     final testsCol = await testDocs;
     for (var snapshot in testsCol.docs) {
@@ -148,10 +112,60 @@ abstract class FirestoreManager {
       tests.add(Test(scored, date, area, answers, id));
     }
     TestsManager.pastTests = tests;
+  }
 
-    subjectsList = subjects;
+  static Future<void> _loadTasks() async {
+    List<Task> completedTasks = [];
+    List<Task> tasks = [];
+
+    final tasksCol = await taskDocs;
+    for (var snapshot in tasksCol.docs) {
+      final data = snapshot.data();
+      String name = data['name'] as String;
+      String desc = data['desc'] as String;
+      bool completed = data['completed'] as bool;
+      Color taskColor = Color(data['color'] as int);
+      DateTime dueDate = DateTime.fromMillisecondsSinceEpoch(data['date'] as int);
+
+      (completed ? completedTasks : tasks).add(Task(name, dueDate, completed, taskColor, desc));
+    }
+
     tasksList = tasks;
     compTasksList = completedTasks;
+  }
+
+  static Future<void> _loadCards(List<Subject> subjects) async {
+    final cardsCol = await cardDocs;
+    for (var snapshot in cardsCol.docs) {
+      final data = snapshot.data();
+      String subjectName = data['subject'] as String;
+      String topicName = data['topic'] as String;
+      String name = data['name'] as String;
+      String meaning = data['meaning'] as String;
+      bool learned = data['learned'] as bool;
+      FlashCard card = FlashCard(name, meaning, learned);
+
+      Subject realSubject = subjects.firstWhere((s) => s.name == subjectName);
+
+      realSubject.topics
+          .firstWhere((t) => t.name == topicName, orElse: () => realSubject.addTopic(Topic(topicName)))
+          .addCard(card);
+    }
+  }
+
+  static Future<void> _loadSubjects(List<Subject> subjects) async {
+    final subjectsCol = await subjectDocs;
+    for (var snapshot in subjectsCol.docs) {
+      final data = snapshot.data();
+      String name = data['name'] as String;
+      List<int> scores = (data['scores'] as List).cast<int>();
+      Color subjectColor = Color(data['color'] as int);
+      String teacher = (data['teacher'] as String?) ?? '';
+      String classroom = (data['classroom'] as String?) ?? '';
+      Subject subject = Subject(name, subjectColor, teacher, classroom);
+      subject.testScores = scores;
+      subjects.add(subject);
+    }
   }
 
   static Future<void> saveData() async {

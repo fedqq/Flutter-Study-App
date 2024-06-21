@@ -31,10 +31,6 @@ class _ExpandingTaskListState extends State<ExpandingTaskList> {
   void deleteAll() async {
     if (widget.tasks.isEmpty) return;
 
-    //bool completed = widget.tasks.values.first.first.completed;
-    //var taskDocs = await FirestoreManager.taskDocs;
-    //taskDocs.docs.where((a) => a['completed'] == completed).forEach((a) => a.reference.delete());
-
     for (List<Task> tasks in widget.tasks.values) {
       for (Task task in tasks) {
         widget.deleteCallback(task);

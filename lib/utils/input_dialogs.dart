@@ -47,10 +47,9 @@ class _DoubleInputDialogState extends State<DoubleInputDialog> {
     String value = input.value?.trim() ?? '';
     bool numericalPass = !(input.numerical && int.tryParse(value) == null);
     bool customValidatePass = input.validate == null ? true : input.validate!(value);
-    bool basicValidatePass = validInput(value);
     bool emptyPass = input.nullable ? true : value.isNotEmpty;
 
-    return numericalPass && customValidatePass && basicValidatePass && emptyPass;
+    return numericalPass && customValidatePass && emptyPass;
   }
 
   @override
@@ -123,18 +122,6 @@ class Input {
   });
 
   static Input notExists() => Input(exists: false);
-}
-
-bool validInput(String str) {
-  List<String> invalid = ['<', '>', '///', '__', ']', ';', '|'];
-
-  for (String c in invalid) {
-    if (str.contains(c)) {
-      return false;
-    }
-  }
-
-  return true;
 }
 
 class DialogResult {

@@ -38,7 +38,7 @@ class _LoginpageState extends State<Loginpage> {
 
   Future<String?> _signupUser(SignupData data) async {
     if (data.name == '' || data.password == '' || data.additionalSignupData?['username'] == '') {
-      return 'Please do not leave fields empty  . ';
+      return 'Please do not leave fields empty';
     }
     try {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -79,6 +79,7 @@ class _LoginpageState extends State<Loginpage> {
             await FirestoreManager.loadData();
             setState(() => loading = false);
             Navigator.pushReplacement(
+              // ignore: use_build_context_synchronously
               context,
               PageRouteBuilder(
                 transitionDuration: Durations.extralong3,
@@ -103,7 +104,7 @@ class _LoginpageState extends State<Loginpage> {
           },
           onRecoverPassword: (_) => null,
         ),
-        if (loading) const Center(child: CircularProgressIndicator()),
+        if (loading) const Center(child: CircularProgressIndicator(strokeCap: StrokeCap.round)),
       ],
     );
   }

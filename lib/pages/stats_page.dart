@@ -213,7 +213,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
                       children: [
-                        buildButton('Resync Data', resyncData),
+                        //TODO: Find another button to put here
                         buildButton(
                           'Data to PDF',
                           () {
@@ -243,10 +243,6 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
         );
       },
     );
-  }
-
-  void resyncData() {
-    //TODO Resync Data
   }
 
   void showThemeOptions() {

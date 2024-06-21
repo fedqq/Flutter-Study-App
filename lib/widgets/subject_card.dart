@@ -16,6 +16,9 @@ class _SubjectCardState extends State<SubjectCard> {
   @override
   Widget build(BuildContext context) {
     Subject subject = widget.subject;
+    String classroom, teacher;
+    List<String> arr = [subject.teacher, subject.classroom];
+    [teacher, classroom] = arr;
 
     return Card(
       elevation: 5,
@@ -39,10 +42,9 @@ class _SubjectCardState extends State<SubjectCard> {
               child: Column(
                 children: [
                   Text(subject.name, style: Theme.of(context).textTheme.headlineMedium),
-                  if (!(subject.teacher == '' && subject.classroom == '')) ...[
+                  if (!(teacher == '' && classroom == '')) ...[
                     const SizedBox(height: 10),
-                    Text([subject.teacher, subject.classroom].where((a) => a != '').join(' - '),
-                        style: Theme.of(context).textTheme.bodyLarge)
+                    Text(arr.where((a) => a != '').join(' - '), style: Theme.of(context).textTheme.bodyLarge)
                   ],
                 ],
               ),

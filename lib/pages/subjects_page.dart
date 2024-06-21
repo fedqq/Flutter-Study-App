@@ -337,7 +337,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
           builder: (context, _) => widget.subjects.isEmpty
               ? const Center(
                   child: Text(
-                    'No Subjects.\nExpand the menu and press + to make a new subject. ',
+                    'No Subjects.\nExpand the menu and\npress + to make a new subject. ',
                     textAlign: TextAlign.center,
                   ),
                 )
@@ -352,18 +352,17 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
                       itemBuilder: (context, index) => InkWell(
                         onTap: () async {
                           closeMenus();
-                          if (currentFocused == -1 ? false : currentFocused != index) {
-                            await blurController.reverse(from: 1);
-                            setState(() => currentFocused = -1);
-                          } else {
-                            study(widget.subjects[index]);
+                          if (currentFocused != -1 && currentFocused != index) {
+                            blurController.reverse(from: 1).then((_) => setState(() => currentFocused = -1));
+                            return;
                           }
+                          study(widget.subjects[index]);
                         },
-                        onLongPress: () => setState(() {
+                        onLongPress: () {
                           closeMenus();
-                          currentFocused = index;
                           blurController.forward(from: 0);
-                        }),
+                          setState(() => currentFocused = index);
+                        },
                         child: AnimatedBuilder(
                           animation: blurController,
                           builder: (_, __) => ImageFiltered(

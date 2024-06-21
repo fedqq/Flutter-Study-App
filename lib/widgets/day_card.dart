@@ -49,7 +49,9 @@ class _DayCardState extends State<DayCard> {
 
           var taskDocs = await FirestoreManager.taskDocs;
           taskDocs.docs
-              .firstWhere((a) => (a['name'] == widget.tasks[index].name) && (a['desc'] == widget.tasks[index].desc))
+              .firstWhere((a) =>
+                  (a['name'] == widget.tasks[index].name) &&
+                  (a['date'] == widget.tasks[index].dueDate.millisecondsSinceEpoch))
               .reference
               .update({'completed': true});
 
