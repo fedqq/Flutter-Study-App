@@ -25,10 +25,10 @@ class _TaskPopupState extends State<TaskPopup> {
     if (result.first == '') return;
 
     var taskDocs = await FirestoreManager.taskDocs;
-    taskDocs.docs.firstWhere((a) => a['name'] == widget.task.name && a['desc'] == widget.task.desc).reference.set({
+    taskDocs.docs.firstWhere((a) => a['name'] == widget.task.name && a['desc'] == widget.task.desc).reference.update({
       'name': result.first,
       'desc': result.second,
-    }, merge);
+    });
 
     setState(() {
       widget.task.name = result.first;
@@ -44,7 +44,7 @@ class _TaskPopupState extends State<TaskPopup> {
     taskDocs.docs
         .firstWhere((a) => a['name'] == widget.task.name && a['desc'] == widget.task.desc)
         .reference
-        .set({'color': color.value}, merge);
+        .update({'color': color.value});
   }
 
   void delete() {

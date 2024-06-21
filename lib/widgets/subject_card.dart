@@ -36,7 +36,16 @@ class _SubjectCardState extends State<SubjectCard> {
           ),
           Expanded(
             child: Center(
-              child: Text(subject.name, style: Theme.of(context).textTheme.headlineMedium),
+              child: Column(
+                children: [
+                  Text(subject.name, style: Theme.of(context).textTheme.headlineMedium),
+                  if (!(subject.teacher == '' && subject.classroom == '')) ...[
+                    const SizedBox(height: 10),
+                    Text([subject.teacher, subject.classroom].where((a) => a != '').join(' - '),
+                        style: Theme.of(context).textTheme.bodyLarge)
+                  ],
+                ],
+              ),
             ),
           ),
         ]),

@@ -66,7 +66,7 @@ class _ResultsPageState extends State<ResultsPage> {
                 cardsDocs.docs
                     .firstWhere((a) => a['name'] == cards[index].name && a['meaning'] == cards[index])
                     .reference
-                    .set({'answer': cards[index].meaning}, merge);
+                    .update({'answer': cards[index].meaning});
 
                 setState(() => widget.test.scored[cards[index]] = true);
               },

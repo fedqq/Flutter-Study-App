@@ -1,7 +1,9 @@
 import 'dart:math';
 
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:studyappcs/state_managers/exporter.dart';
 import 'package:studyappcs/state_managers/firestore_manager.dart';
 import 'package:studyappcs/state_managers/statistics.dart';
@@ -71,11 +73,13 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
     setState(() => StudyStatistics.userName = name);
   }
 
-  Widget buildButton(String text, void Function() callback) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5.0),
-        child: FilledButton.tonal(
-          onPressed: callback,
-          child: Text(text),
+  Widget buildButton(String text, void Function() callback) => Expanded(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 5.0),
+          child: FilledButton.tonal(
+            onPressed: callback,
+            child: Text(text),
+          ),
         ),
       );
 
@@ -136,7 +140,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
       int total = 0;
       int length = tests.length;
       for (var element in tests) {
-        total += element.totalAmount;
+        total += element.percentage;
       }
       return total / length;
     }
@@ -205,19 +209,20 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                 child: Card(
                   margin: const EdgeInsets.all(8),
                   elevation: elevation,
-                  child: ListView(
-                    padding: const EdgeInsets.all(12.0),
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      buildButton('Resync Data', resyncData),
-                      buildButton(
-                        'Data to PDF',
-                        () {
-                          widget.saveCallback();
-                          Exporter.printEverything(widget.subjects);
-                        },
-                      ),
-                    ],
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        buildButton('Resync Data', resyncData),
+                        buildButton(
+                          'Data to PDF',
+                          () {
+                            widget.saveCallback();
+                            Exporter.printEverything(widget.subjects);
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -258,9 +263,21 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
               child: TextButton.icon(
                 onPressed: editUserName,
                 label: const Row(
-                  children: [
-                    Text("Edit Username"),
-                  ],
+                  children: [Text("Edit Username")],
+                ),
+                icon: const Icon(Icons.arrow_forward_rounded),
+                iconAlignment: IconAlignment.end,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextButton.icon(
+                onPressed: () {
+                  FirebaseAuth.instance.signOut();
+                  SystemNavigator.pop();
+                },
+                label: const Row(
+                  children: [Text("Sign Out (Closes the app)")],
                 ),
                 icon: const Icon(Icons.arrow_forward_rounded),
                 iconAlignment: IconAlignment.end,
@@ -271,9 +288,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
               child: TextButton.icon(
                 onPressed: editDailyGoal,
                 label: const Row(
-                  children: [
-                    Text("Edit Daily Goal"),
-                  ],
+                  children: [Text("Edit Daily Goal")],
                 ),
                 icon: const Icon(Icons.arrow_forward_rounded),
                 iconAlignment: IconAlignment.end,
@@ -323,8 +338,8 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
   }
 
   void useDeviceAccentColor() async {
-    Color color = await DynamicColorPlugin.getAccentColor() ?? Colors.blue;
-    StudyStatistics.color = color;
-    FirestoreManager.color = color.value;
+    Color? color = (await DynamicColorPlugin.getCorePalette())?.toColorScheme().primary;
+    StudyStatistics.color = color ?? Colors.red;
+    FirestoreManager.color = StudyStatistics.color.value;
   }
 }

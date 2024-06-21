@@ -47,11 +47,11 @@ class _DayCardState extends State<DayCard> {
         onLongPress: () async {
           if (widget.completeCallback == null) return;
 
-          var taskDocs = await FirestoreManager.cardDocs;
+          var taskDocs = await FirestoreManager.taskDocs;
           taskDocs.docs
-              .firstWhere((a) => a['name'] == widget.tasks[index].name && a['desc'] == widget.tasks[index].desc)
+              .firstWhere((a) => (a['name'] == widget.tasks[index].name) && (a['desc'] == widget.tasks[index].desc))
               .reference
-              .set({'completed': true}, merge);
+              .update({'completed': true});
 
           setState(() {
             widget.tasks[index].completed = true;
@@ -79,7 +79,9 @@ class _DayCardState extends State<DayCard> {
                     builder: (_) => TaskPopup(
                       task: widget.tasks[index],
                       deleteCallback: (task) => setState(
-                        () => widget.removeCallback(task),
+                        () {
+                          widget.removeCallback(task);
+                        },
                       ),
                     ),
                   ).then((_) => setState(() {})),

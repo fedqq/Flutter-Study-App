@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:studyappcs/state_managers/firestore_manager.dart';
 import 'package:studyappcs/states/task.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
+import 'package:studyappcs/utils/utils.dart';
 import 'package:studyappcs/widgets/day_card.dart';
 import 'package:studyappcs/widgets/expanding_task_list.dart';
 
@@ -111,13 +112,23 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
 
   void deleteTask(Task task) async {
     var taskDocs = await FirestoreManager.taskDocs;
-    taskDocs.docs.firstWhere((a) => a['name'] == task.name && a['date'] == task.dueDate).reference.delete();
+    try {
+      taskDocs.docs
+          .firstWhere((a) => a['name'] == task.name && a['date'] == task.dueDate.millisecondsSinceEpoch)
+          .reference
+          .delete();
+    } catch (e) {
+      simpleSnackBar(context, 'An unexpected error occured: ${e.toString()}');
+    }
     setState(() => widget.tasks.remove(task));
   }
 
   void deleteCompletedTask(Task task) async {
     var taskDocs = await FirestoreManager.taskDocs;
-    taskDocs.docs.firstWhere((a) => a['name'] == task.name && a['date'] == task.dueDate).reference.delete();
+    taskDocs.docs
+        .firstWhere((a) => a['name'] == task.name && a['date'] == task.dueDate.millisecondsSinceEpoch)
+        .reference
+        .delete();
     setState(() => widget.completedTasks.remove(task));
   }
 
@@ -129,7 +140,7 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
     taskDocs.docs
         .firstWhere((a) => a['name'] == task.name && a['date'] == task.dueDate.millisecondsSinceEpoch)
         .reference
-        .set({'completed': true}, merge);
+        .update({'completed': true});
     setState(() {
       widget.tasks.remove(task);
       widget.completedTasks.add(task);

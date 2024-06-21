@@ -8,6 +8,7 @@ class SubjectOptionMenu extends StatelessWidget {
   final Function() editColor;
   final Function() deleteSubject;
   final Function() testSubject;
+  final Function() editInfo;
   final int index;
   final Animation animation;
 
@@ -19,6 +20,7 @@ class SubjectOptionMenu extends StatelessWidget {
     required this.animation,
     required this.testSubject,
     required this.index,
+    required this.editInfo,
   });
 
   @override
@@ -55,6 +57,10 @@ class SubjectOptionMenu extends StatelessWidget {
                     IconButton(
                       icon: const Icon(Icons.question_mark_rounded),
                       onPressed: testSubject,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.edit_location_alt_rounded),
+                      onPressed: editInfo,
                     ),
                   ],
                 ),

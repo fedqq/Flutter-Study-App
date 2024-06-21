@@ -109,15 +109,22 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     if (name == '') return;
 
     Color? newColor = await showColorPicker(context, Colors.blue);
-    if (newColor == null) {
-      return;
-    }
+    if (newColor == null) return;
 
-    final subject = Subject(name, newColor);
+    DialogResult? res = await doubleInputDialog(context, 'Choose teacher and classroom',
+        Input(name: 'Teacher', nullable: true), Input(name: 'Classroom', nullable: true));
 
-    FirestoreManager.subjectCollection
-        .doc(subject.name)
-        .set({'name': subject.name, 'scores': [], 'color': newColor.value});
+    if (res == null) return;
+
+    final subject = Subject(name, newColor, res.first, res.second);
+
+    FirestoreManager.subjectCollection.doc(subject.name).set({
+      'name': subject.name,
+      'scores': [],
+      'color': newColor.value,
+      'teacher': subject.teacher,
+      'classroom': subject.classroom
+    });
 
     setState(() => widget.subjects.add(subject));
   }
@@ -129,15 +136,13 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     setState(() => widget.subjects.removeAt(currentFocused));
     TestsManager.pastTests.removeWhere((element) => element.area.trim() == area);
 
-    var subjects = await FirestoreManager.subjectDocs;
-    try {
-      subjects.docs.firstWhere((a) => a['name'] == area).reference.delete();
-    } catch (e) {
-      simpleSnackBar(context, 'An error occured, but your subject was deleted');
-    }
+    var subject = await FirestoreManager.subjectNamed(area);
+    subject.reference.delete();
 
-    var cards = await FirestoreManager.cardDocs;
-    cards.docs.where((a) => a['subject'] == area).forEach((a) => a.reference.delete());
+    var cards = await FirestoreManager.cardsFromSubject(area);
+    for (var a in cards) {
+      a.reference.delete();
+    }
 
     var tests = await FirestoreManager.testDocs;
     tests.docs.where((a) => (a['area'] as String).contains(area)).forEach((a) => a.reference.delete());
@@ -151,8 +156,9 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     setState(() => widget.subjects[currentFocused].color = newColor);
 
     String name = widget.subjects[currentFocused].name;
-    var subjects = await FirestoreManager.subjectDocs;
-    subjects.docs.firstWhere((a) => a['name'] == name).data().update('color', (_) => newColor.value);
+
+    var subject = await FirestoreManager.subjectNamed(name);
+    subject.reference.update({'color': newColor.value});
 
     closeMenus();
   }
@@ -199,37 +205,60 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     }
 
     String oldName = widget.subjects[currentFocused].name;
-    var subjects = await FirestoreManager.subjectDocs;
-    subjects.docs.firstWhere((a) => a.data()['name'] == oldName).reference.set({'name': newName}, merge);
 
-    var cards = await FirestoreManager.cardDocs;
-    cards.docs
-        .where((a) => a.data()['subject'] == oldName)
-        .forEach((a) => a.reference.set({'subject': newName}, merge));
+    var subject = await FirestoreManager.subjectNamed(oldName);
+    subject.reference.update({'name': newName});
+
+    var docs = await FirestoreManager.cardsFromSubject(oldName);
+    for (var card in docs) {
+      card.reference.update({'subject': newName});
+    }
 
     setState(() => widget.subjects[currentFocused].name = newName);
     closeMenus();
   }
 
-  void clearSubjects() async {
-    var cardsCollection = FirestoreManager.cardCollection;
-    var subjects = await cardsCollection.get();
-    for (var a in subjects.docs) {
-      a.reference.delete();
-    }
+  void editSubjectInfo() async {
+    DialogResult? res = await doubleInputDialog(context, 'Choose teacher and classroom',
+        Input(name: 'Teacher', nullable: true), Input(name: 'Classroom', nullable: true));
 
+    if (res == null) return;
+
+    setState(() {
+      widget.subjects[currentFocused].teacher = res.first;
+      widget.subjects[currentFocused].classroom = res.second;
+    });
+
+    var subject = await FirestoreManager.subjectNamed(widget.subjects[currentFocused].name);
+    subject.reference.update({'teacher': res.first, 'classroom': res.second});
+  }
+
+  void clearSubjects() async {
     bool confirmed = await confirm(
       context,
       title: const Text('Delete All Subjects'),
       content: const Text('Are you sure you would like to delete all subjects? This action cannot be undone. '),
     );
 
-    if (confirmed) {
-      setState(() {
-        widget.subjects.clear();
-        currentFocused = -1;
-      });
+    if (!confirmed) return;
+
+    var cardsCollection = FirestoreManager.cardCollection;
+    var cards = await cardsCollection.get();
+    for (var a in cards.docs) {
+      a.reference.delete();
     }
+
+    var subjectCollection = FirestoreManager.subjectCollection;
+    var subjects = await subjectCollection.get();
+    for (var a in subjects.docs) {
+      a.reference.delete();
+    }
+
+    setState(() {
+      widget.subjects.clear();
+      currentFocused = -1;
+    });
+
     closeMenus();
   }
 
@@ -365,6 +394,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
                         testSubject: testSubject,
                         animation: blurAnimation,
                         index: currentFocused,
+                        editInfo: editSubjectInfo,
                       ),
                   ],
                 ),

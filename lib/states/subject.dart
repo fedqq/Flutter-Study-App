@@ -9,8 +9,10 @@ class Subject {
   List<Topic> topics = [];
   Color color = Colors.blue;
   List<int> testScores = [];
+  String teacher;
+  String classroom;
 
-  Subject(this.name, this.color);
+  Subject(this.name, this.color, this.teacher, this.classroom);
 
   Topic addTopic(Topic topic) {
     topics.add(topic);

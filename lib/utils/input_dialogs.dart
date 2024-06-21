@@ -50,8 +50,6 @@ class _DoubleInputDialogState extends State<DoubleInputDialog> {
     bool basicValidatePass = validInput(value);
     bool emptyPass = input.nullable ? true : value.isNotEmpty;
 
-    developer.log('$numericalPass, $customValidatePass, $basicValidatePass, $emptyPass');
-
     return numericalPass && customValidatePass && basicValidatePass && emptyPass;
   }
 
@@ -68,7 +66,6 @@ class _DoubleInputDialogState extends State<DoubleInputDialog> {
         children: [
           buildInputField(first, (str) {
             first.value = str;
-            developer.log('current: ${first.value}, correct: $str');
           }),
           buildInputField(second, (str) => second.value = str),
         ],
@@ -82,7 +79,7 @@ class _DoubleInputDialogState extends State<DoubleInputDialog> {
               if (widget.cancellable)
                 TextButton(
                   child: const Text('Cancel'),
-                  onPressed: () => Navigator.of(context).pop(DialogResult.empty()),
+                  onPressed: () => Navigator.of(context).pop(null),
                 ),
               FilledButton(
                 child: const Text('Confirm'),

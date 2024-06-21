@@ -10,11 +10,11 @@ import 'package:studyappcs/states/test.dart';
 import 'package:studyappcs/states/topic.dart';
 
 typedef SnapshotType = Future<QuerySnapshot<Map<String, dynamic>>>;
+typedef DocSnapshotType = Future<QueryDocumentSnapshot<Map<String, dynamic>>>;
 typedef CollectionType = CollectionReference<Map<String, dynamic>>;
-SetOptions merge = SetOptions(merge: true);
 
 abstract class FirestoreManager {
-  static DocumentReference getUser() {
+  static DocumentReference get _user {
     User? user = FirebaseAuth.instance.currentUser;
     final db = FirebaseFirestore.instance;
     CollectionReference users = db.collection('users');
@@ -22,10 +22,10 @@ abstract class FirestoreManager {
     return currentUser;
   }
 
-  static CollectionType get subjectCollection => getUser().collection('subjects');
-  static CollectionType get cardCollection => getUser().collection('cards');
-  static CollectionType get taskCollection => getUser().collection('tasks');
-  static CollectionType get testCollection => getUser().collection('tests');
+  static CollectionType get subjectCollection => _user.collection('subjects');
+  static CollectionType get cardCollection => _user.collection('cards');
+  static CollectionType get taskCollection => _user.collection('tasks');
+  static CollectionType get testCollection => _user.collection('tests');
 
   static SnapshotType get subjectDocs async => await subjectCollection.get();
   static SnapshotType get cardDocs async => await cardCollection.get();
@@ -36,17 +36,29 @@ abstract class FirestoreManager {
   static List<Task> tasksList = [];
   static List<Task> compTasksList = [];
 
-  static void _userpref(Map<String, dynamic> v) => getUser().set(v, merge);
+  static void _userpref(Map<String, dynamic> v) => _user.update(v);
 
   static set goal(String goal) => _userpref({'goal': int.tryParse(goal)});
   static set username(String name) => _userpref({'username': name});
   static set color(int color) => _userpref({'color': color});
   static set lightness(bool l) => _userpref({'lightness': l});
-  static set streaks(Map s) => getUser().set({'streaks': s}, merge);
-  static set studied(Map s) => getUser().set({'studied': s}, merge);
+  static set streaks(Map s) => _user.update({'streaks': s});
+  static set studied(Map s) => _user.update({'studied': s});
+
+  static Future<List<QueryDocumentSnapshot>> cardsFromSubject(String s) async =>
+      (await cardCollection.where('subject', isEqualTo: s).get()).docs;
+
+  static Future<List<QueryDocumentSnapshot>> cardsFromTopic(String t) async =>
+      (await cardCollection.where('topic', isEqualTo: t).get()).docs;
+
+  static DocSnapshotType cardNamed(String n) async =>
+      (await cardCollection.where('name', isEqualTo: n).get()).docs.first;
+
+  static DocSnapshotType subjectNamed(String n) async =>
+      (await subjectCollection.where('name', isEqualTo: n).get()).docs.first;
 
   static Future<void> loadData() async {
-    var currentUser = getUser();
+    var currentUser = _user;
 
     final prefs = (await currentUser.get()).data() as Map<String, dynamic>?;
     //name, goal, color, lightness, streaks, studied
@@ -73,7 +85,9 @@ abstract class FirestoreManager {
       String name = data['name'] as String;
       List<int> scores = (data['scores'] as List).cast<int>();
       Color subjectColor = Color(data['color'] as int);
-      Subject subject = Subject(name, subjectColor);
+      String teacher = (data['teacher'] as String?) ?? '';
+      String classroom = (data['classroom'] as String?) ?? '';
+      Subject subject = Subject(name, subjectColor, teacher, classroom);
       subject.testScores = scores;
       subjects.add(subject);
     }
@@ -87,6 +101,7 @@ abstract class FirestoreManager {
       String meaning = data['meaning'] as String;
       bool learned = data['learned'] as bool;
       FlashCard card = FlashCard(name, meaning, learned);
+
       Subject realSubject = subjects.firstWhere((s) => s.name == subjectName);
 
       realSubject.topics
@@ -140,7 +155,7 @@ abstract class FirestoreManager {
   }
 
   static Future<void> saveData() async {
-    var currentUser = getUser();
+    var currentUser = _user;
 
     currentUser.set({
       'username': StudyStatistics.userName,

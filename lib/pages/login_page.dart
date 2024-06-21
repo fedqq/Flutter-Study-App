@@ -13,6 +13,7 @@ class Loginpage extends StatefulWidget {
 }
 
 class _LoginpageState extends State<Loginpage> {
+  bool loading = false;
   void snackbar(String s) => simpleSnackBar(context, s);
 
   Future<String?> _authUser(LoginData data) async {
@@ -36,41 +37,74 @@ class _LoginpageState extends State<Loginpage> {
   }
 
   Future<String?> _signupUser(SignupData data) async {
-    return '';
+    if (data.name == '' || data.password == '' || data.additionalSignupData?['username'] == '') {
+      return 'Please do not leave fields empty  . ';
+    }
+    try {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: data.name ?? '',
+        password: data.password ?? '',
+      );
+      FirestoreManager.username = data.additionalSignupData?['username'] ?? '';
+      return null;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') {
+        return 'An account with this email already exists.';
+      } else if (e.code == 'invalid-email') {
+        return 'Please enter a valid e-mail.';
+      } else if (e.code == 'operation-not-allowed') {
+        return 'An unknown error occured. Please try again later.';
+      } else if (e.code == 'weak-password') {
+        return 'Password too weak.';
+      } else {
+        return e.message ?? '';
+      }
+    } catch (e) {
+      return e.toString();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return FlutterLogin(
-      title: 'Study App CS',
-      onLogin: _authUser,
-      onSignup: _signupUser,
-      onSubmitAnimationCompleted: () async {
-        await FirestoreManager.loadData();
-        Navigator.pushReplacement(
-          context,
-          PageRouteBuilder(
-            transitionDuration: Durations.extralong3,
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              const begin = Offset(0.0, 1.0);
-              const end = Offset.zero;
+    return Stack(
+      children: [
+        FlutterLogin(
+          title: 'Study App CS',
+          onLogin: _authUser,
+          onSignup: _signupUser,
+          hideForgotPasswordButton: true,
+          additionalSignupFields: const [UserFormField(keyName: 'Username')],
+          onSubmitAnimationCompleted: () async {
+            setState(() => loading = true);
+            await FirestoreManager.loadData();
+            setState(() => loading = false);
+            Navigator.pushReplacement(
+              context,
+              PageRouteBuilder(
+                transitionDuration: Durations.extralong3,
+                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                  const begin = Offset(0.0, 1.0);
+                  const end = Offset.zero;
 
-              final tween = Tween(begin: begin, end: end);
-              final curvedAnimation = CurvedAnimation(
-                parent: animation,
-                curve: Curves.ease,
-              );
+                  final tween = Tween(begin: begin, end: end);
+                  final curvedAnimation = CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.ease,
+                  );
 
-              return SlideTransition(
-                position: tween.animate(curvedAnimation),
-                child: child,
-              );
-            },
-            pageBuilder: (_, __, ___) => const NavigationPage(title: 'Study Help App'),
-          ),
-        );
-      },
-      onRecoverPassword: (_) => null,
+                  return SlideTransition(
+                    position: tween.animate(curvedAnimation),
+                    child: child,
+                  );
+                },
+                pageBuilder: (_, __, ___) => const NavigationPage(title: 'Study Help App'),
+              ),
+            );
+          },
+          onRecoverPassword: (_) => null,
+        ),
+        if (loading) const Center(child: CircularProgressIndicator()),
+      ],
     );
   }
 }

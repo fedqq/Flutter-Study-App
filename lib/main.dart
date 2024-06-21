@@ -77,6 +77,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
+    loadData();
     super.initState();
   }
 

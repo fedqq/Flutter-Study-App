@@ -63,18 +63,17 @@ class _StudyPageState extends State<StudyPage> {
   }
 
   void learnCard() async {
-    var cardDocs = await FirestoreManager.cardDocs;
     var card = cards[currentCard];
-    cardDocs.docs
-        .firstWhere((a) => a['name'] == card.name && a['meaning'] == card.meaning)
-        .reference
-        .set({'learned': !card.learned}, merge);
+
+    var doc = await FirestoreManager.cardNamed(card.name);
+
+    doc.reference.update({'learned': !card.learned});
+
     setState(() => cards[currentCard].learned = !cards[currentCard].learned);
   }
 
   void editCard() async {
     String oldName = cards[currentCard].name;
-    String oldMeaning = cards[currentCard].meaning;
 
     if (showingMeaning) {
       String newMeaning = await singleInputDialog(
@@ -83,9 +82,7 @@ class _StudyPageState extends State<StudyPage> {
         Input(name: 'Meaning', value: cards[currentCard].meaning),
       );
       if (newMeaning == '') return;
-      setState(() {
-        cards[currentCard].meaning = newMeaning;
-      });
+      setState(() => cards[currentCard].meaning = newMeaning);
     } else {
       String newName = await singleInputDialog(
         context,
@@ -101,10 +98,8 @@ class _StudyPageState extends State<StudyPage> {
     String newName = cards[currentCard].name;
     String newMeaning = cards[currentCard].meaning;
 
-    var cardDocs = await FirestoreManager.cardDocs;
-    cardDocs.docs
-        .where((a) => a['name'] == oldName && a['meaning'] == oldMeaning)
-        .forEach((a) => a.reference.set({'name': newName, 'meaning': newMeaning}, merge));
+    var doc = await FirestoreManager.cardNamed(oldName);
+    doc.reference.update({'name': newName, 'meaning': newMeaning});
   }
 
   void deleteCard() async {
@@ -116,8 +111,10 @@ class _StudyPageState extends State<StudyPage> {
     );
     if (delete) {
       var card = cards[currentCard];
-      var cardDocs = await FirestoreManager.cardDocs;
-      cardDocs.docs.firstWhere((a) => a['name'] == card.name && a['meaning'] == card.meaning).reference.delete();
+
+      var doc = await FirestoreManager.cardNamed(card.name);
+      doc.reference.delete();
+
       setState(() => widget.cards.removeAt(currentCard));
     }
   }
@@ -126,11 +123,8 @@ class _StudyPageState extends State<StudyPage> {
     String newName = await singleInputDialog(context, 'Rename ${widget.topic.name}', Input(name: 'Name'));
     if (newName == '') return;
 
-    var cardDocs = await FirestoreManager.cardDocs;
-    for (var card in cardDocs.docs) {
-      if (card['topic'] == widget.topic.name) {
-        card.reference.set({'topic': newName}, merge);
-      }
+    for (var card in await FirestoreManager.cardsFromTopic(widget.topic.name)) {
+      card.reference.update({'topic': newName});
     }
     setState(() {
       widget.topic.name = newName;
