@@ -1,7 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:studyappcs/utils/outlined_card.dart';
+import 'package:studyappcs/state_managers/firestore_manager.dart' as firestore_manager;
+import 'package:studyappcs/widgets/subject_card.dart';
 
 class SubjectOptionMenu extends StatelessWidget {
   final Function() editSubject;
@@ -10,7 +11,7 @@ class SubjectOptionMenu extends StatelessWidget {
   final Function() testSubject;
   final Function() editInfo;
   final int index;
-  final Animation animation;
+  final Animation<double> animation;
 
   const SubjectOptionMenu({
     super.key,
@@ -23,48 +24,56 @@ class SubjectOptionMenu extends StatelessWidget {
     required this.editInfo,
   });
 
+  Widget pIconButton({icon, onPressed, label = 'test'}) => Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: IconButton.filledTonal(
+              padding: const EdgeInsets.all(8),
+              icon: icon,
+              onPressed: onPressed,
+            ),
+          ),
+          Text(label),
+        ],
+      );
+
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: Alignment.center,
       child: AnimatedBuilder(
         animation: animation,
         builder: (_, __) => ImageFiltered(
           imageFilter: ImageFilter.blur(sigmaX: (1 - animation.value) * 5, sigmaY: (1 - animation.value) * 5),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(height: (116 * (index + 1)).toDouble() - 10),
-              OutlinedCard(
-                elevation: 2,
-                color: Colors.transparent,
-                radius: 20,
+              const Spacer(),
+              SubjectCard(subject: firestore_manager.subjectsList[index], width: 3),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
                 child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.color_lens_rounded),
-                      onPressed: editColor,
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.edit_rounded),
-                      onPressed: editSubject,
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete_rounded),
-                      onPressed: deleteSubject,
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.question_mark_rounded),
-                      onPressed: testSubject,
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.edit_location_alt_rounded),
-                      onPressed: editInfo,
-                    ),
+                    pIconButton(icon: const Icon(Icons.color_lens_rounded), onPressed: editColor, label: 'Color'),
+                    pIconButton(icon: const Icon(Icons.edit_rounded), onPressed: editSubject, label: 'Rename'),
+                    pIconButton(icon: const Icon(Icons.question_mark_rounded), onPressed: testSubject, label: 'Test'),
+                    pIconButton(icon: const Icon(Icons.edit_location_alt_rounded), onPressed: editInfo, label: 'Info'),
+                    pIconButton(icon: const Icon(Icons.edit_location_alt_rounded), onPressed: editInfo, label: 'Study'),
                   ],
                 ),
               ),
+              const Spacer(),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: IconButton.filled(
+                  onPressed: () {
+                    deleteSubject();
+                  },
+                  icon: const Icon(Icons.delete_rounded),
+                ),
+              ),
+              const Text('Delete Subject'),
             ],
           ),
         ),

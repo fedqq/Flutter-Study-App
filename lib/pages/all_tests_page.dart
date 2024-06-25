@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:studyappcs/pages/results_page.dart';
-import 'package:studyappcs/state_managers/tests_manager.dart';
+import 'package:studyappcs/state_managers/tests_manager.dart' as tests_manager;
 import 'package:studyappcs/states/test.dart';
 import 'package:window_rounded_corners/window_rounded_corners.dart';
 
@@ -31,7 +31,7 @@ class _AllTestsPageState extends State<AllTestsPage> with SingleTickerProviderSt
   void openTestPage(BuildContext context, int index) => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => ResultsPage(test: TestsManager.pastTests[index], editable: false),
+          builder: (_) => ResultsPage(test: tests_manager.pastTests[index], editable: false),
         ),
       );
 
@@ -40,7 +40,7 @@ class _AllTestsPageState extends State<AllTestsPage> with SingleTickerProviderSt
     TextTheme theme = Theme.of(context).textTheme;
     List<Test> tests = [];
 
-    tests = TestsManager.testsFromArea(widget.area).reversed.toList();
+    tests = tests_manager.testsFromArea(widget.area).reversed.toList();
 
     controller.forward();
 
@@ -90,7 +90,7 @@ class _AllTestsPageState extends State<AllTestsPage> with SingleTickerProviderSt
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text('Past Tests (${TestsManager.pastTests.length})'), centerTitle: true),
+      appBar: AppBar(title: Text('Past Tests (${tests_manager.pastTests.length})'), centerTitle: true),
       body: ListView.builder(
         itemCount: tests.length,
         itemBuilder: (context, index) => InkWell(

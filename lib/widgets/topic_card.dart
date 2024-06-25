@@ -6,14 +6,18 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:studyappcs/pages/all_tests_page.dart';
 import 'package:studyappcs/pages/study_page.dart';
-import 'package:studyappcs/state_managers/firestore_manager.dart';
-import 'package:studyappcs/state_managers/tests_manager.dart';
+import 'package:studyappcs/state_managers/firestore_manager.dart' as firestore_manager;
+import 'package:studyappcs/state_managers/tests_manager.dart' as tests_manager;
 import 'package:studyappcs/states/flashcard.dart';
 import 'package:studyappcs/states/test.dart';
 import 'package:studyappcs/states/topic.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
+import 'package:studyappcs/utils/utils.dart' as theming;
 
-import '../utils/utils.dart';
+//TODO Test Types
+//TODO Bugtesting
+//TODO More stats: Recent scores, percentage learned, etc...
+//TODO Stats on individual subject pages
 
 class TopicCard extends StatefulWidget {
   final Topic topic;
@@ -64,9 +68,11 @@ class _TopicCardState extends State<TopicCard> {
             renameCallback: renameCallback,
           ),
         ),
-      ).then((_) => setState(() {
-            return;
-          }));
+      ).then(
+        (_) => setState(() {
+          return;
+        }),
+      );
 
   void renameTopic(Topic topic) async {
     String newName = await singleInputDialog(
@@ -79,7 +85,7 @@ class _TopicCardState extends State<TopicCard> {
         String subjectName = widget.area.split('-')[0].trim();
         topic.name = newName;
         String newArea = '$subjectName - $newName';
-        for (Test test in TestsManager.testsFromArea(widget.area)) {
+        for (Test test in tests_manager.testsFromArea(widget.area)) {
           test.area = newArea;
         }
         widget.area.replaceAll(widget.area, newArea);
@@ -92,16 +98,15 @@ class _TopicCardState extends State<TopicCard> {
           context,
           'Create New Card',
           Input(name: 'Name', validate: checkExistingTerm),
-          Input(name: 'Meaning', nullable: false),
-          cancellable: true,
+          Input(name: 'Meaning'),
         ) ??
         DialogResult.empty();
 
     String name = result.first;
     if (name == '') return;
     String meaning = result.second;
-    if (meaning != '') setState(() => topic.cards.add(FlashCard(name, meaning, false)));
-    var cardCollection = FirestoreManager.cardCollection;
+    if (meaning != '') setState(() => topic.cards.add(FlashCard(name, meaning, learned: false)));
+    var cardCollection = firestore_manager.cardCollection;
     cardCollection
         .doc(name)
         .set({'name': name, 'meaning': meaning, 'subject': widget.subject, 'topic': topic.name, 'learned': false});
@@ -129,7 +134,7 @@ class _TopicCardState extends State<TopicCard> {
                 width: 450,
                 height: 5,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(Theming.radius),
+                  borderRadius: BorderRadius.circular(theming.radius),
                   color: const Color.fromARGB(255, 51, 51, 51),
                 ),
               ),
@@ -137,7 +142,7 @@ class _TopicCardState extends State<TopicCard> {
                 width: learnedPercentage() * 450,
                 height: 5,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(Theming.radius),
+                  borderRadius: BorderRadius.circular(theming.radius),
                   color: Theme.of(context).colorScheme.primary,
                 ),
               ),
@@ -203,12 +208,12 @@ class _TopicCardState extends State<TopicCard> {
             ),
           )..insert(
               0,
-              TestsManager.hasScore(widget.area)
+              tests_manager.hasScore(widget.area)
                   ? TextButton(
                       onPressed: () =>
                           Navigator.push(context, MaterialPageRoute(builder: (_) => AllTestsPage(area: widget.area))),
                       child: Text(
-                        'Your last score on this topic was ${TestsManager.testsFromArea(widget.area).last.percentage}%',
+                        'Your last score on this topic was ${tests_manager.testsFromArea(widget.area).last.percentage}%',
                       ),
                     )
                   : const SizedBox(),

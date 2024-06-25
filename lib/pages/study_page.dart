@@ -2,10 +2,9 @@
 import 'dart:developer' as developer;
 import "dart:ui";
 
-import "package:confirm_dialog/confirm_dialog.dart";
 import "package:flutter/material.dart";
-import "package:studyappcs/state_managers/firestore_manager.dart";
-import "package:studyappcs/state_managers/statistics.dart";
+import "package:studyappcs/state_managers/firestore_manager.dart" as firestore_manager;
+import "package:studyappcs/state_managers/statistics.dart" as stats;
 import "package:studyappcs/states/flashcard.dart";
 import "package:studyappcs/states/topic.dart";
 import "package:studyappcs/utils/input_dialogs.dart";
@@ -65,7 +64,7 @@ class _StudyPageState extends State<StudyPage> {
   void learnCard() async {
     var card = cards[currentCard];
 
-    var doc = await FirestoreManager.cardNamed(card.name);
+    var doc = await firestore_manager.cardNamed(card.name);
 
     doc.reference.update({'learned': !card.learned});
 
@@ -98,21 +97,20 @@ class _StudyPageState extends State<StudyPage> {
     String newName = cards[currentCard].name;
     String newMeaning = cards[currentCard].meaning;
 
-    var doc = await FirestoreManager.cardNamed(oldName);
+    var doc = await firestore_manager.cardNamed(oldName);
     doc.reference.update({'name': newName, 'meaning': newMeaning});
   }
 
   void deleteCard() async {
     if (cards.length == 1) return;
-    bool delete = await confirm(
+    bool delete = await confirmDialog(
       context,
-      title: Text('Are you sure you would like to delete ${cards[currentCard].name}?'),
-      content: const Text('This action cannot be undone. '),
+      title: 'Are you sure you would like to delete ${cards[currentCard].name}?',
     );
     if (delete) {
       var card = cards[currentCard];
 
-      var doc = await FirestoreManager.cardNamed(card.name);
+      var doc = await firestore_manager.cardNamed(card.name);
       doc.reference.delete();
 
       setState(() => widget.cards.removeAt(currentCard));
@@ -123,7 +121,7 @@ class _StudyPageState extends State<StudyPage> {
     String newName = await singleInputDialog(context, 'Rename ${widget.topic.name}', Input(name: 'Name'));
     if (newName == '') return;
 
-    for (var card in await FirestoreManager.cardsFromTopic(widget.topic.name)) {
+    for (var card in await firestore_manager.cardsFromTopic(widget.topic.name)) {
       card.reference.update({'topic': newName});
     }
     setState(() {
@@ -144,8 +142,8 @@ class _StudyPageState extends State<StudyPage> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: LinearProgressIndicator(
-                value: (StudyStatistics.dailyStudied[StudyStatistics.getNowString()] ?? 0) /
-                    ((StudyStatistics.dailyGoal == 0) ? 20 : StudyStatistics.dailyGoal),
+                value: (stats.dailyStudied[stats.getNowString()] ?? 0) /
+                    ((stats.dailyGoal == 0) ? 20 : stats.dailyGoal),
               ),
             ),
           ),
@@ -156,8 +154,8 @@ class _StudyPageState extends State<StudyPage> {
                 onTap: () {
                   setState(() => showingMeaning = !showingMeaning);
                   if (showingMeaning) {
-                    if (StudyStatistics.study()) {
-                      simpleSnackBar(context, 'You reached you daily goal of ${StudyStatistics.dailyGoal} terms!');
+                    if (stats.study()) {
+                      simpleSnackBar(context, 'You reached you daily goal of ${stats.dailyGoal} terms!');
                     }
                   }
                 },
@@ -184,23 +182,26 @@ class _StudyPageState extends State<StudyPage> {
                           ),
                         ),
                         Center(
-                          child: Column(mainAxisSize: MainAxisSize.min, children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(cards[currentCard].name, style: Theme.of(context).textTheme.headlineLarge),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: ImageFiltered(
-                                imageFilter:
-                                    showingMeaning ? ImageFilter.dilate() : ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                                child: Text(
-                                  cards[currentCard].meaning,
-                                  style: Theme.of(context).textTheme.headlineLarge,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(cards[currentCard].name, style: Theme.of(context).textTheme.headlineLarge),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: ImageFiltered(
+                                  imageFilter:
+                                      showingMeaning ? ImageFilter.dilate() : ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                                  child: Text(
+                                    cards[currentCard].meaning,
+                                    style: Theme.of(context).textTheme.headlineLarge,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ]),
+                            ],
+                          ),
                         ),
                       ],
                     ),

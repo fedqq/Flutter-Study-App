@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import 'package:studyappcs/main.dart';
-import 'package:studyappcs/state_managers/firestore_manager.dart';
+import 'package:studyappcs/state_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/utils/utils.dart';
 
 class Loginpage extends StatefulWidget {
@@ -45,7 +45,7 @@ class _LoginpageState extends State<Loginpage> {
         email: data.name ?? '',
         password: data.password ?? '',
       );
-      FirestoreManager.username = data.additionalSignupData?['username'] ?? '';
+      firestore_manager.username = data.additionalSignupData?['username'] ?? '';
       return null;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
@@ -76,7 +76,7 @@ class _LoginpageState extends State<Loginpage> {
           additionalSignupFields: const [UserFormField(keyName: 'Username')],
           onSubmitAnimationCompleted: () async {
             setState(() => loading = true);
-            await FirestoreManager.loadData();
+            await firestore_manager.loadData();
             setState(() => loading = false);
             Navigator.pushReplacement(
               // ignore: use_build_context_synchronously

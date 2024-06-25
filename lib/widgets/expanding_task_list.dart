@@ -45,6 +45,7 @@ class _ExpandingTaskListState extends State<ExpandingTaskList> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Card(
+        elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
         child: ExpansionTile(
           controlAffinity: ListTileControlAffinity.leading,
@@ -58,7 +59,7 @@ class _ExpandingTaskListState extends State<ExpandingTaskList> {
                 child: ListView(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
                       child: FilledButton(onPressed: deleteAll, child: const Text('Delete All')),
                     ),
                     Padding(
@@ -73,7 +74,7 @@ class _ExpandingTaskListState extends State<ExpandingTaskList> {
                           color: widget.outlineColor,
                           removeCallback: widget.deleteCallback,
                           completeCallback: widget.completeCallback,
-                          positionInList: index == 0 ? 0 : (index == widget.dates.length - 1 ? 2 : 1),
+                          positionInList: index == 0 ? 0 : (index == widget.tasks.length - 1 ? 2 : 1),
                         ),
                       ),
                     ),

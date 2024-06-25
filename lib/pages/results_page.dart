@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:studyappcs/state_managers/firestore_manager.dart';
+import 'package:studyappcs/state_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/states/test.dart';
 import 'package:studyappcs/widgets/result_card.dart';
 
@@ -55,7 +55,7 @@ class _ResultsPageState extends State<ResultsPage> {
               answer: widget.test.answers[index],
               editable: widget.editable,
               markCorrect: () async {
-                var testDocs = await FirestoreManager.testDocs;
+                var testDocs = await firestore_manager.testDocs;
 
                 var cardsDocs = await testDocs.docs
                     .firstWhere((a) => a['id'] == widget.test.id)

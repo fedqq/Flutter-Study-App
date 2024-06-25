@@ -3,7 +3,7 @@
 import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
-import 'package:studyappcs/state_managers/firestore_manager.dart';
+import 'package:studyappcs/state_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/states/task.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
 import 'package:studyappcs/utils/utils.dart';
@@ -47,7 +47,7 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
     super.initState();
   }
 
-  Map<DateTime, List<Task>> getTasksMap(bool late) {
+  Map<DateTime, List<Task>> getTasksMap({required bool late}) {
     Map<DateTime, List<Task>> ret = {};
     for (Task task in (late ? overdueTasks : timelyTasks)) {
       if (!ret.containsKey(task.dueDate)) {
@@ -98,9 +98,9 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
     Color? newColor = await showColorPicker(context, Colors.blue);
     if (newColor == null) return;
 
-    setState(() => widget.tasks.add(Task(name, date, false, newColor, desc)));
+    setState(() => widget.tasks.add(Task(name, date, newColor, desc, completed: false)));
 
-    var tasksCollection = FirestoreManager.taskCollection;
+    var tasksCollection = firestore_manager.taskCollection;
     tasksCollection.doc(name).set({
       'name': name,
       'desc': desc,
@@ -111,7 +111,7 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
   }
 
   void deleteTask(Task task) async {
-    var taskDocs = await FirestoreManager.taskDocs;
+    var taskDocs = await firestore_manager.taskDocs;
     try {
       taskDocs.docs
           .firstWhere((a) => a['name'] == task.name && a['date'] == task.dueDate.millisecondsSinceEpoch)
@@ -124,7 +124,7 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
   }
 
   void deleteCompletedTask(Task task) async {
-    var taskDocs = await FirestoreManager.taskDocs;
+    var taskDocs = await firestore_manager.taskDocs;
     taskDocs.docs
         .firstWhere((a) => a['name'] == task.name && a['date'] == task.dueDate.millisecondsSinceEpoch)
         .reference
@@ -136,7 +136,7 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
       list.keys.toList()..sort((first, second) => first.compareTo(second));
 
   void completeTask(Task task) async {
-    var taskDocs = await FirestoreManager.taskDocs;
+    var taskDocs = await firestore_manager.taskDocs;
     taskDocs.docs
         .firstWhere((a) => a['name'] == task.name && a['date'] == task.dueDate.millisecondsSinceEpoch)
         .reference
@@ -152,11 +152,11 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
     timelyTasks = [];
     overdueTasks = [];
     for (Task task in widget.tasks) {
-      ((task.dueDate.compareTo(DateTime.now()) < 0) ? overdueTasks : timelyTasks).add(task);
+      ((task.dueDate.compareTo(DateUtils.dateOnly(DateTime.now())) < 0) ? overdueTasks : timelyTasks).add(task);
     }
 
-    List<DateTime> dates = sortByDate(getTasksMap(false));
-    List<DateTime> lateDates = sortByDate(getTasksMap(true));
+    List<DateTime> dates = sortByDate(getTasksMap(late: false));
+    List<DateTime> lateDates = sortByDate(getTasksMap(late: true));
     List<DateTime> completedDates = sortByDate(getCompletedTasksMap());
 
     void onExpanded({bool second = false}) {
@@ -181,21 +181,24 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
           Flexible(
             child: ListView(
               children: [
-                ListView.builder(
-                  physics: const ScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: dates.length,
-                  itemBuilder: (context, index) => AnimatedBuilder(
-                    animation: controller,
-                    builder: (_, __) => Padding(
-                      padding: EdgeInsets.symmetric(vertical: ((1 - animation.value) * 30)),
-                      child: DayCard(
-                        date: dates[index],
-                        tasks: getTasksMap(false)[dates[index]] ?? [],
-                        removeCallback: deleteTask,
-                        completeCallback: completeTask,
-                        progress: animation.value,
-                        positionInList: index == 0 ? 0 : (index == dates.length - 1 ? 2 : 1),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListView.builder(
+                    physics: const ScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: dates.length,
+                    itemBuilder: (context, index) => AnimatedBuilder(
+                      animation: controller,
+                      builder: (_, __) => Padding(
+                        padding: EdgeInsets.symmetric(vertical: (1 - animation.value) * 30),
+                        child: DayCard(
+                          date: dates[index],
+                          tasks: getTasksMap(late: false)[dates[index]] ?? [],
+                          removeCallback: deleteTask,
+                          completeCallback: completeTask,
+                          progress: animation.value,
+                          positionInList: index == 0 ? 0 : (index == dates.length - 1 ? 2 : 1),
+                        ),
                       ),
                     ),
                   ),
@@ -210,7 +213,7 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
           if (overdueTasks.isNotEmpty)
             ExpandingTaskList(
               dates: lateDates,
-              tasks: getTasksMap(true),
+              tasks: getTasksMap(late: true),
               deleteCallback: deleteTask,
               completeCallback: completeTask,
               outlineColor: Colors.red,

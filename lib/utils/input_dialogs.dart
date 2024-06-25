@@ -34,7 +34,7 @@ class _DoubleInputDialogState extends State<DoubleInputDialog> {
         onChanged: onChanged,
         autofocus: true,
         decoration: InputDecoration(
-          border: const OutlineInputBorder(borderSide: BorderSide()),
+          border: const OutlineInputBorder(),
           label: Text(type.name ?? ''),
         ),
       ),
@@ -78,7 +78,7 @@ class _DoubleInputDialogState extends State<DoubleInputDialog> {
               if (widget.cancellable)
                 TextButton(
                   child: const Text('Cancel'),
-                  onPressed: () => Navigator.of(context).pop(null),
+                  onPressed: () => Navigator.of(context).pop(),
                 ),
               FilledButton(
                 child: const Text('Confirm'),
@@ -122,6 +122,21 @@ class Input {
   });
 
   static Input notExists() => Input(exists: false);
+}
+
+Future<bool> confirmDialog(BuildContext context, {required String title}) async {
+  return await showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(title),
+      content: const Text('Are you sure you would like to continue?'),
+      actionsAlignment: MainAxisAlignment.spaceBetween,
+      actions: [
+        FilledButton.tonal(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+        FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Confirm')),
+      ],
+    ),
+  );
 }
 
 class DialogResult {

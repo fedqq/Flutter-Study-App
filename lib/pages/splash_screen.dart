@@ -2,9 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:studyappcs/main.dart';
 import 'package:studyappcs/pages/login_page.dart';
-import 'package:studyappcs/state_managers/firestore_manager.dart';
-
-import '../utils/utils.dart';
+import 'package:studyappcs/state_managers/firestore_manager.dart' as firestore_manager;
+import 'package:studyappcs/utils/utils.dart' as theming;
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -67,7 +66,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       Navigator.push(context, MaterialPageRoute(builder: (_) => const Loginpage()));
       return;
     }
-    FirestoreManager.loadData().then((_) => pushMain(context));
+    firestore_manager.loadData().then((_) => pushMain(context));
   }
 
   @override
@@ -80,7 +79,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     return Scaffold(
       body: SizedBox.expand(
-        child: Container(
+        child: DecoratedBox(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
@@ -95,7 +94,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               children: [
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Opacity(
                       opacity: animation.value,
@@ -117,17 +115,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     begin: Alignment.topRight,
                     end: Alignment.bottomLeft,
                     tileMode: TileMode.repeated,
-                    colors: Theming.gradientColors,
+                    colors: theming.gradientColors,
                   ).createShader(
                     Rect.fromCenter(
                       center: bounds.center,
-                      width: (size * animation.value),
-                      height: (size * animation.value),
+                      width: size * animation.value,
+                      height: size * animation.value,
                     ),
                   ),
                   child: Icon(
                     Icons.school_rounded,
-                    size: (size * animation.value),
+                    size: size * animation.value,
                   ),
                 ),
               ],

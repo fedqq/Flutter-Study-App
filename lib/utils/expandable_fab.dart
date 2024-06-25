@@ -1,13 +1,13 @@
 // ignore: unused_import
 import 'dart:developer' as developer;
+import 'dart:math' show pi;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import 'dart:math' show pi;
-
 class ExFabController {
   bool open = false;
+  // ignore: avoid_positional_boolean_parameters
   late void Function(bool) updateState;
   void close() {
     open = false;
@@ -17,10 +17,6 @@ class ExFabController {
   void expand() {
     open = true;
     updateState(open);
-  }
-
-  void setCallback(var func) {
-    updateState = func;
   }
 }
 
@@ -60,6 +56,7 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
     );
   }
 
+  // ignore: avoid_positional_boolean_parameters
   void set(bool b) {
     if (b != _open) {
       toggle();
@@ -69,7 +66,7 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
   @override
   void initState() {
     if (widget.controller != null) {
-      widget.controller!.setCallback(set);
+      widget.controller!.updateState = set;
     }
 
     super.initState();

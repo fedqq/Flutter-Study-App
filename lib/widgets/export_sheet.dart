@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:studyappcs/state_managers/exporter.dart';
+import 'package:studyappcs/state_managers/exporter.dart' as exporter;
 import 'package:studyappcs/states/subject.dart';
 
 void export(BuildContext context, Subject subject) async {
@@ -51,13 +51,13 @@ void showPrintMenu(BuildContext context, Subject subject) {
           padding: const EdgeInsets.all(8.0),
           child: FilledButton(
             onPressed: () {
-              Exporter.printSubject(subject, slider.scoresShow.toInt());
+              exporter.printSubject(subject, slider.scoresShow.toInt());
               Navigator.of(context).pop();
             },
             child: const Text('Save as PDF'),
           ),
         ),
-      ]),
+      ],),
     ),
     showDragHandle: true,
   );
@@ -70,7 +70,7 @@ void showPrintOrExport(BuildContext context, Subject subject) {
       FilledButton.tonal(onPressed: Navigator.of(context).pop, child: const Text('Cancel')),
       FilledButton(onPressed: () => export(context, subject), child: const Text('As TXT')),
       FilledButton(onPressed: () => showPrintMenu(context, subject), child: const Text('As PDF')),
-    ]),
+    ],),
   );
 }
 
@@ -93,7 +93,7 @@ class _BasicSliderState extends State<BasicSlider> {
         divisions: 30,
         value: scoresShow,
         onChanged: (i) => setState(() {
-          scoresShow += (i - scoresShow);
+          scoresShow += i - scoresShow;
         }),
         max: 30,
         allowedInteraction: SliderInteraction.tapAndSlide,

@@ -9,8 +9,8 @@ import 'package:studyappcs/pages/calendar_page.dart';
 import 'package:studyappcs/pages/splash_screen.dart';
 import 'package:studyappcs/pages/stats_page.dart';
 import 'package:studyappcs/pages/subjects_page.dart';
-import 'package:studyappcs/state_managers/firestore_manager.dart';
-import 'package:studyappcs/state_managers/statistics.dart';
+import 'package:studyappcs/state_managers/firestore_manager.dart' as firestore_manager;
+import 'package:studyappcs/state_managers/statistics.dart' as stats;
 import 'package:studyappcs/states/subject.dart';
 import 'package:studyappcs/states/task.dart';
 import 'package:studyappcs/utils/utils.dart';
@@ -36,17 +36,18 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    StudyStatistics.updateTheme = setState;
+    stats.updateTheme = setState;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Study App',
       theme: ThemeData(
-          useMaterial3: true,
-          fontFamily: 'Product Sans',
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: StudyStatistics.color,
-            brightness: StudyStatistics.lightness ? Brightness.light : Brightness.dark,
-          )),
+        useMaterial3: true,
+        fontFamily: 'Product Sans',
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: stats.color,
+          brightness: stats.lightness ? Brightness.light : Brightness.dark,
+        ),
+      ),
       initialRoute: '/splash',
       routes: {'/splash': (context) => const SplashScreen()},
     );
@@ -86,9 +87,9 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
     List<Task> tasksRes = [];
     List<Task> completedTasksRes = [];
 
-    subjectsRes = FirestoreManager.subjectsList;
-    tasksRes = FirestoreManager.tasksList;
-    completedTasksRes = FirestoreManager.compTasksList;
+    subjectsRes = firestore_manager.subjectsList;
+    tasksRes = firestore_manager.tasksList;
+    completedTasksRes = firestore_manager.compTasksList;
 
     setState(() {
       subjects = subjectsRes;
@@ -106,7 +107,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
   }
 
   Future saveData() async {
-    await FirestoreManager.saveData();
+    await firestore_manager.saveData();
   }
 
   @override

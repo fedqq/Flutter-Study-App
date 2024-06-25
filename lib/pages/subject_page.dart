@@ -4,8 +4,8 @@ import 'dart:developer' as developer;
 import "package:flutter/material.dart";
 import "package:studyappcs/pages/all_tests_page.dart";
 import "package:studyappcs/pages/test_page.dart";
-import "package:studyappcs/state_managers/firestore_manager.dart";
-import "package:studyappcs/state_managers/tests_manager.dart";
+import "package:studyappcs/state_managers/firestore_manager.dart" as firestore_manager;
+import "package:studyappcs/state_managers/tests_manager.dart" as tests_manager;
 import "package:studyappcs/states/flashcard.dart";
 import "package:studyappcs/states/subject.dart";
 import "package:studyappcs/states/test.dart";
@@ -29,14 +29,13 @@ class _SubjectPageState extends State<SubjectPage> {
     final String topicName = await singleInputDialog(context, 'New Topic Name', Input(name: 'Name'));
 
     if (topicName == '') return;
-    Topic topic = Topic(topicName);
-    topic.addCard(FlashCard('First Card', 'First Card Meaning', false));
-    var cardCollection = FirestoreManager.cardCollection;
+    Topic topic = Topic(topicName)..addCard(FlashCard('First Card', 'First Card Meaning', learned: false));
+    var cardCollection = firestore_manager.cardCollection;
     cardCollection.doc('First Card').set({
       'name': 'First Card',
-      'Meaning': 'First Card Meaning',
+      'meaning': 'First Card Meaning',
       'learned': false,
-      'subject': widget.subject,
+      'subject': widget.subject.name,
       'topic': topic.name,
     });
     setState(() => widget.subject.addTopic(topic));
@@ -77,7 +76,7 @@ class _SubjectPageState extends State<SubjectPage> {
         title: Text('${widget.subject.name} Topics (${widget.subject.topics.length})'),
         centerTitle: true,
         actions: [
-          if (TestsManager.hasScore(widget.subject.asArea))
+          if (tests_manager.hasScore(widget.subject.asArea))
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(

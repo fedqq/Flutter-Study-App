@@ -4,14 +4,13 @@
 import 'dart:developer' as developer;
 import 'dart:ui';
 
-import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:studyappcs/pages/all_tests_page.dart';
 import 'package:studyappcs/pages/study_page.dart';
 import 'package:studyappcs/pages/subject_page.dart';
 import 'package:studyappcs/pages/test_page.dart';
-import 'package:studyappcs/state_managers/firestore_manager.dart';
-import 'package:studyappcs/state_managers/tests_manager.dart';
+import 'package:studyappcs/state_managers/firestore_manager.dart' as firestore_manager;
+import 'package:studyappcs/state_managers/tests_manager.dart' as tests_manager;
 import 'package:studyappcs/states/flashcard.dart';
 import 'package:studyappcs/states/subject.dart';
 import 'package:studyappcs/states/test.dart';
@@ -48,7 +47,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
       parent: enterController,
     );
 
-    blurController = AnimationController(vsync: this, value: 0, duration: Durations.short3);
+    blurController = AnimationController(vsync: this, value: 0, duration: Durations.short4);
 
     blurAnimation = CurvedAnimation(
       curve: Curves.easeInOutSine,
@@ -80,7 +79,6 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
   void closeMenus() async {
     await blurController.reverse(from: 1);
     setState(() {
-      controller.close();
       currentFocused = -1;
     });
   }
@@ -111,40 +109,44 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     Color? newColor = await showColorPicker(context, Colors.blue);
     if (newColor == null) return;
 
-    DialogResult? res = await doubleInputDialog(context, 'Choose teacher and classroom',
-        Input(name: 'Teacher', nullable: true), Input(name: 'Classroom', nullable: true));
+    DialogResult? res = await doubleInputDialog(
+      context,
+      'Choose teacher and classroom',
+      Input(name: 'Teacher', nullable: true),
+      Input(name: 'Classroom', nullable: true),
+    );
 
     if (res == null) return;
 
     final subject = Subject(name, newColor, res.first, res.second);
 
-    FirestoreManager.subjectCollection.doc(subject.name).set({
+    firestore_manager.subjectCollection.doc(subject.name).set({
       'name': subject.name,
       'scores': [],
       'color': newColor.value,
       'teacher': subject.teacher,
-      'classroom': subject.classroom
+      'classroom': subject.classroom,
     });
 
     setState(() => widget.subjects.add(subject));
   }
 
   void deleteSubject() async {
-    if (!await confirm(context, title: Text('Delete ${widget.subjects[currentFocused].name}'))) return;
+    if (!await confirmDialog(context, title: 'Delete ${widget.subjects[currentFocused].name}')) return;
 
     String area = widget.subjects[currentFocused].asArea.trim();
     setState(() => widget.subjects.removeAt(currentFocused));
-    TestsManager.pastTests.removeWhere((element) => element.area.trim() == area);
+    tests_manager.pastTests.removeWhere((element) => element.area.trim() == area);
 
-    var subject = await FirestoreManager.subjectNamed(area);
+    var subject = await firestore_manager.subjectNamed(area);
     subject.reference.delete();
 
-    var cards = await FirestoreManager.cardsFromSubject(area);
+    var cards = await firestore_manager.cardsFromSubject(area);
     for (var a in cards) {
       a.reference.delete();
     }
 
-    var tests = await FirestoreManager.testDocs;
+    var tests = await firestore_manager.testDocs;
     tests.docs.where((a) => (a['area'] as String).contains(area)).forEach((a) => a.reference.delete());
 
     closeMenus();
@@ -157,7 +159,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
 
     String name = widget.subjects[currentFocused].name;
 
-    var subject = await FirestoreManager.subjectNamed(name);
+    var subject = await firestore_manager.subjectNamed(name);
     subject.reference.update({'color': newColor.value});
 
     closeMenus();
@@ -200,16 +202,16 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
 
     if (newName == '') return;
 
-    for (Test test in TestsManager.pastTests) {
+    for (Test test in tests_manager.pastTests) {
       test.area = test.area.replaceAll(widget.subjects[currentFocused].name, newName);
     }
 
     String oldName = widget.subjects[currentFocused].name;
 
-    var subject = await FirestoreManager.subjectNamed(oldName);
+    var subject = await firestore_manager.subjectNamed(oldName);
     subject.reference.update({'name': newName});
 
-    var docs = await FirestoreManager.cardsFromSubject(oldName);
+    var docs = await firestore_manager.cardsFromSubject(oldName);
     for (var card in docs) {
       card.reference.update({'subject': newName});
     }
@@ -219,8 +221,12 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
   }
 
   void editSubjectInfo() async {
-    DialogResult? res = await doubleInputDialog(context, 'Choose teacher and classroom',
-        Input(name: 'Teacher', nullable: true), Input(name: 'Classroom', nullable: true));
+    DialogResult? res = await doubleInputDialog(
+      context,
+      'Choose teacher and classroom',
+      Input(name: 'Teacher', nullable: true),
+      Input(name: 'Classroom', nullable: true),
+    );
 
     if (res == null) return;
 
@@ -229,26 +235,25 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
       widget.subjects[currentFocused].classroom = res.second;
     });
 
-    var subject = await FirestoreManager.subjectNamed(widget.subjects[currentFocused].name);
+    var subject = await firestore_manager.subjectNamed(widget.subjects[currentFocused].name);
     subject.reference.update({'teacher': res.first, 'classroom': res.second});
   }
 
   void clearSubjects() async {
-    bool confirmed = await confirm(
+    bool confirmed = await confirmDialog(
       context,
-      title: const Text('Delete All Subjects'),
-      content: const Text('Are you sure you would like to delete all subjects? This action cannot be undone. '),
+      title: 'Delete all Subjects',
     );
 
     if (!confirmed) return;
 
-    var cardsCollection = FirestoreManager.cardCollection;
+    var cardsCollection = firestore_manager.cardCollection;
     var cards = await cardsCollection.get();
     for (var a in cards.docs) {
       a.reference.delete();
     }
 
-    var subjectCollection = FirestoreManager.subjectCollection;
+    var subjectCollection = firestore_manager.subjectCollection;
     var subjects = await subjectCollection.get();
     for (var a in subjects.docs) {
       a.reference.delete();
@@ -275,7 +280,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
 
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => StudyPage(cards: cards, topic: Topic('All Subjects'), renameCallback: null)),
+      MaterialPageRoute(builder: (_) => StudyPage(cards: cards, topic: Topic('All Subjects'))),
     );
   }
 
@@ -321,7 +326,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.history_rounded),
-          onPressed: TestsManager.pastTests.isNotEmpty ? showAllTests : null,
+          onPressed: tests_manager.pastTests.isNotEmpty ? showAllTests : null,
         ),
         title: Text(
           widget.subjects.length == 1 ? 'Study 1 Subject' : 'Study ${widget.subjects.length} Subjects',
@@ -351,36 +356,30 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
                       itemCount: widget.subjects.length,
                       itemBuilder: (context, index) => InkWell(
                         onTap: () async {
-                          closeMenus();
-                          if (currentFocused != -1 && currentFocused != index) {
+                          if (currentFocused != -1) {
                             blurController.reverse(from: 1).then((_) => setState(() => currentFocused = -1));
                             return;
                           }
                           study(widget.subjects[index]);
                         },
                         onLongPress: () {
-                          closeMenus();
-                          blurController.forward(from: 0);
                           setState(() => currentFocused = index);
+                          Future.delayed(Durations.short1, () => blurController.forward(from: 0));
                         },
                         child: AnimatedBuilder(
                           animation: blurController,
                           builder: (_, __) => ImageFiltered(
-                            imageFilter: (currentFocused == -1 ? false : currentFocused != index)
+                            imageFilter: (currentFocused != -1)
                                 ? ImageFilter.blur(
-                                    sigmaX: 8 * blurAnimation.value,
-                                    sigmaY: 8 * blurAnimation.value,
+                                    sigmaX: 20 * blurAnimation.value,
+                                    sigmaY: 20 * blurAnimation.value,
                                     tileMode: TileMode.decal,
                                   )
                                 : ImageFilter.blur(
                                     sigmaX: 8 * (1 - enterAnimation.value),
                                     sigmaY: 8 * (1 - enterAnimation.value),
                                   ),
-                            child: Stack(
-                              children: [
-                                SubjectCard(subject: widget.subjects[index], width: enterAnimation.value * 3),
-                              ],
-                            ),
+                            child: SubjectCard(subject: widget.subjects[index], width: enterAnimation.value * 3),
                           ),
                         ),
                       ),

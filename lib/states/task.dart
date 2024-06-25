@@ -10,5 +10,5 @@ class Task {
   late String desc;
   late int review;
 
-  Task(this.name, this.dueDate, this.completed, this.color, this.desc);
+  Task(this.name, this.dueDate, this.color, this.desc, {required this.completed});
 }

@@ -20,7 +20,6 @@ class OutlinedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      borderOnForeground: true,
       surfaceTintColor: color,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
       shadowColor: shadowColor,

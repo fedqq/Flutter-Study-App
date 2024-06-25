@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:studyappcs/state_managers/firestore_manager.dart';
+import 'package:studyappcs/state_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/states/task.dart';
-import 'package:studyappcs/utils/outlined_card.dart';
+import 'package:studyappcs/utils/utils.dart' as theming;
 import 'package:studyappcs/widgets/task_popup.dart';
-
-import '../utils/utils.dart';
 
 class DayCard extends StatefulWidget {
   final DateTime date;
@@ -43,26 +41,10 @@ class _DayCardState extends State<DayCard> {
   }
 
   Widget buildTaskCard(int index) => InkWell(
-        borderRadius: BorderRadius.circular(Theming.radius + Theming.padding),
-        onLongPress: () async {
-          if (widget.completeCallback == null) return;
-
-          var taskDocs = await FirestoreManager.taskDocs;
-          taskDocs.docs
-              .firstWhere((a) =>
-                  (a['name'] == widget.tasks[index].name) &&
-                  (a['date'] == widget.tasks[index].dueDate.millisecondsSinceEpoch))
-              .reference
-              .update({'completed': true});
-
-          setState(() {
-            widget.tasks[index].completed = true;
-            widget.completeCallback!(widget.tasks[index]);
-          });
-        },
-        child: OutlinedCard(
-          color: widget.color ?? widget.tasks[index].color,
-          elevation: 10,
+        borderRadius: BorderRadius.circular(theming.radius + theming.padding),
+        child: Card(
+          surfaceTintColor: widget.color ?? widget.tasks[index].color,
+          elevation: 20,
           margin: const EdgeInsets.all(16.0),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -88,6 +70,26 @@ class _DayCardState extends State<DayCard> {
                     ),
                   ).then((_) => setState(() {})),
                 ),
+                if (!widget.tasks[index].completed)
+                  IconButton(
+                    icon: const Icon(Icons.check_rounded),
+                    onPressed: () async {
+                      if (widget.completeCallback == null) return;
+
+                      var taskDocs = await firestore_manager.taskDocs;
+                      taskDocs.docs
+                          .firstWhere((a) =>
+                              (a['name'] == widget.tasks[index].name) &&
+                              (a['date'] == widget.tasks[index].dueDate.millisecondsSinceEpoch),)
+                          .reference
+                          .update({'completed': true});
+
+                      setState(() {
+                        widget.tasks[index].completed = true;
+                        widget.completeCallback!(widget.tasks[index]);
+                      });
+                    },
+                  ),
               ],
             ),
           ),
@@ -99,13 +101,14 @@ class _DayCardState extends State<DayCard> {
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(widget.positionInList == 0 ? 25 + 8 : 10),
-          topRight: Radius.circular(widget.positionInList == 0 ? 25 + 8 : 10),
-          bottomLeft: Radius.circular(widget.positionInList == 2 ? 25 + 8 : 10),
-          bottomRight: Radius.circular(widget.positionInList == 2 ? 25 + 8 : 10),
+          topLeft: Radius.circular(widget.positionInList == 0 ? 17 : 10),
+          topRight: Radius.circular(widget.positionInList == 0 ? 17 : 10),
+          bottomLeft: Radius.circular(widget.positionInList == 2 ? 10 : 17),
+          bottomRight: Radius.circular(widget.positionInList == 2 ? 10 : 17),
         ),
       ),
-      elevation: 4,
+      elevation: 1,
+      surfaceTintColor: Theme.of(context).colorScheme.surfaceTint,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

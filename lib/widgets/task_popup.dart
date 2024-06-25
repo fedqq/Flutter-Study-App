@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:studyappcs/state_managers/firestore_manager.dart';
+import 'package:studyappcs/state_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/states/task.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
 
@@ -24,7 +24,7 @@ class _TaskPopupState extends State<TaskPopup> {
 
     if (result.first == '') return;
 
-    var taskDocs = await FirestoreManager.taskDocs;
+    var taskDocs = await firestore_manager.taskDocs;
     taskDocs.docs.firstWhere((a) => a['name'] == widget.task.name && a['desc'] == widget.task.desc).reference.update({
       'name': result.first,
       'desc': result.second,
@@ -40,7 +40,7 @@ class _TaskPopupState extends State<TaskPopup> {
     Color? color = await showColorPicker(context, widget.task.color);
     if (color == null) return;
     setState(() => widget.task.color = color);
-    var taskDocs = await FirestoreManager.taskDocs;
+    var taskDocs = await firestore_manager.taskDocs;
     taskDocs.docs
         .firstWhere((a) => a['name'] == widget.task.name && a['desc'] == widget.task.desc)
         .reference

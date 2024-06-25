@@ -34,40 +34,46 @@ class _ResultCardState extends State<ResultCard> {
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Stack(
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(widget.card.name, overflow: TextOverflow.ellipsis),
-                Text(
-                  widget.card.origin,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.white.withAlpha(150)),
-                ),
-              ],
-            ),
             if ((!correct) && widget.editable)
-              IconButton(
-                icon: const Icon(Icons.check_rounded),
-                onPressed: () => setState(
-                  () {
-                    widget.markCorrect();
-                    correct = true;
-                  },
+              Center(
+                child: IconButton(
+                  icon: const Icon(Icons.check_rounded),
+                  onPressed: () => setState(
+                    () {
+                      widget.markCorrect();
+                      correct = true;
+                    },
+                  ),
                 ),
               ),
-            Column(
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(widget.card.meaning, overflow: TextOverflow.ellipsis),
-                if (!correct)
-                  Text(
-                    widget.answer,
-                    style: Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.red.withAlpha(150)),
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(widget.card.name, overflow: TextOverflow.ellipsis),
+                    Text(
+                      widget.card.origin,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.white.withAlpha(150)),
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Text(widget.card.meaning, overflow: TextOverflow.ellipsis),
+                    if (!correct)
+                      Text(
+                        widget.answer,
+                        style: Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.red.withAlpha(150)),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                  ],
+                ),
               ],
             ),
           ],

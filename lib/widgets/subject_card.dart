@@ -26,7 +26,7 @@ class _SubjectCardState extends State<SubjectCard> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16),
-        child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+        child: Row(children: [
           SizedBox(
             height: 100,
             child: AspectRatio(
@@ -44,13 +44,13 @@ class _SubjectCardState extends State<SubjectCard> {
                   Text(subject.name, style: Theme.of(context).textTheme.headlineMedium),
                   if (!(teacher == '' && classroom == '')) ...[
                     const SizedBox(height: 10),
-                    Text(arr.where((a) => a != '').join(' - '), style: Theme.of(context).textTheme.bodyLarge)
+                    Text(arr.where((a) => a != '').join(' - '), style: Theme.of(context).textTheme.bodyLarge),
                   ],
                 ],
               ),
             ),
           ),
-        ]),
+        ],),
       ),
     );
   }
