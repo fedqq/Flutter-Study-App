@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 import 'package:intl/intl.dart';
+import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
+import 'package:studyappcs/data_managers/tests_manager.dart' as tests_manager;
 import 'package:studyappcs/pages/results_page.dart';
-import 'package:studyappcs/state_managers/firestore_manager.dart' as firestore_manager;
-import 'package:studyappcs/state_managers/tests_manager.dart' as tests_manager;
 import 'package:studyappcs/states/subject.dart';
 import 'package:studyappcs/states/test.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';

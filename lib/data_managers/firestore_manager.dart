@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:studyappcs/state_managers/statistics.dart' as stats;
-import 'package:studyappcs/state_managers/tests_manager.dart' as tests_manager;
+import 'package:studyappcs/data_managers/user_data.dart' as user_data;
+import 'package:studyappcs/data_managers/tests_manager.dart' as tests_manager;
 import 'package:studyappcs/states/flashcard.dart';
 import 'package:studyappcs/states/subject.dart';
 import 'package:studyappcs/states/task.dart';
@@ -65,12 +65,12 @@ Future<void> _loadPrefs() async {
   Map<String, int> streaks = (prefs['streaks'] as Map<String, dynamic>).cast<String, int>();
   Map<String, int> studied = (prefs['studied'] as Map<String, dynamic>).cast<String, int>();
 
-  stats.userName = name;
-  stats.color = Color(accentColor);
-  stats.lightness = lightness;
-  stats.dailyGoal = goal;
-  stats.dailyStreak = streaks;
-  stats.dailyStudied = studied;
+  user_data.userName = name;
+  user_data.color = Color(accentColor);
+  user_data.lightness = lightness;
+  user_data.dailyGoal = goal;
+  user_data.dailyStreak = streaks;
+  user_data.dailyStudied = studied;
 }
 
 Future<void> loadData() async {
@@ -167,11 +167,11 @@ Future<void> _loadSubjects(List<Subject> subjects) async {
 
 Future<void> saveData() async {
   _user.set({
-    'username': stats.userName,
-    'goal': stats.dailyGoal,
-    'color': stats.color.value,
-    'lightness': stats.lightness,
-    'streaks': stats.dailyStreak,
-    'studied': stats.dailyStudied,
+    'username': user_data.userName,
+    'goal': user_data.dailyGoal,
+    'color': user_data.color.value,
+    'lightness': user_data.lightness,
+    'streaks': user_data.dailyStreak,
+    'studied': user_data.dailyStudied,
   });
 }

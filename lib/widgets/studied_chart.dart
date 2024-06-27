@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:studyappcs/state_managers/statistics.dart' as stats;
+import 'package:studyappcs/data_managers/user_data.dart' as user_data;
 
 class StudiedChart extends StatefulWidget {
   final double animValue;
@@ -25,7 +25,7 @@ class _StudiedChartState extends State<StudiedChart> {
 
   @override
   Widget build(BuildContext context) {
-    List<int> daysData = stats.getLastWeek();
+    List<int> daysData = user_data.getLastWeek();
 
     int getMaxStudied() {
       int max = 0;
@@ -52,19 +52,20 @@ class _StudiedChartState extends State<StudiedChart> {
 
     return LineChart(
       LineChartData(
-        maxY: max(getMaxStudied() + 1, stats.dailyGoal + 1),
+        maxY: max(getMaxStudied() + 1, user_data.dailyGoal + 1),
         gridData: const FlGridData(verticalInterval: 1),
         titlesData: FlTitlesData(
           leftTitles: const AxisTitles(),
           rightTitles: const AxisTitles(),
           topTitles: const AxisTitles(),
           bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-            interval: 1,
-            showTitles: true,
-            reservedSize: 20,
-            getTitlesWidget: (value, meta) => Text(getLastWeekNames()[value.toInt()]),
-          ),),
+            sideTitles: SideTitles(
+              interval: 1,
+              showTitles: true,
+              reservedSize: 20,
+              getTitlesWidget: (value, meta) => Text(getLastWeekNames()[value.toInt()]),
+            ),
+          ),
         ),
         borderData: FlBorderData(show: false),
         lineBarsData: [
@@ -86,13 +87,13 @@ class _StudiedChartState extends State<StudiedChart> {
             spots: List.generate(7, (i) => FlSpot(i.toDouble(), daysData[6 - i] * (min(widget.animValue, 0.8) + 0.2))),
           ),
           LineChartBarData(
-            spots: [FlSpot(0, stats.getAverage()), FlSpot(6, stats.getAverage())],
+            spots: [FlSpot(0, user_data.getAverage()), FlSpot(6, user_data.getAverage())],
             color: Colors.grey,
             dashArray: [10],
             dotData: const FlDotData(show: false),
           ),
           LineChartBarData(
-            spots: [FlSpot(0, stats.dailyGoal.toDouble()), FlSpot(6, stats.dailyGoal.toDouble())],
+            spots: [FlSpot(0, user_data.dailyGoal.toDouble()), FlSpot(6, user_data.dailyGoal.toDouble())],
             dotData: const FlDotData(show: false),
           ),
         ],

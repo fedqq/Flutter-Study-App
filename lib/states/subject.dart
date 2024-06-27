@@ -24,4 +24,10 @@ class Subject {
   void addScore(int score) {
     testScores.add(score);
   }
+
+  int get learned => topics.fold(0, (a, b) => a + b.cards.where((c) => c.learned).length);
+
+  int get total => topics.fold(0, (a, b) => a + b.cards.length);
+
+  double get percentage => learned / total;
 }

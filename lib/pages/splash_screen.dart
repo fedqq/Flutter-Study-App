@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:studyappcs/main.dart';
 import 'package:studyappcs/pages/login_page.dart';
-import 'package:studyappcs/state_managers/firestore_manager.dart' as firestore_manager;
+import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/utils/utils.dart' as theming;
 
 class SplashScreen extends StatefulWidget {

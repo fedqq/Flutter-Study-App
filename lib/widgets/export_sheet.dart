@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:studyappcs/state_managers/exporter.dart' as exporter;
+import 'package:studyappcs/data_managers/exporter.dart' as exporter;
 import 'package:studyappcs/states/subject.dart';
 
 void export(BuildContext context, Subject subject) async {

@@ -9,8 +9,8 @@ import 'package:studyappcs/pages/calendar_page.dart';
 import 'package:studyappcs/pages/splash_screen.dart';
 import 'package:studyappcs/pages/stats_page.dart';
 import 'package:studyappcs/pages/subjects_page.dart';
-import 'package:studyappcs/state_managers/firestore_manager.dart' as firestore_manager;
-import 'package:studyappcs/state_managers/statistics.dart' as stats;
+import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
+import 'package:studyappcs/data_managers/user_data.dart' as user_data;
 import 'package:studyappcs/states/subject.dart';
 import 'package:studyappcs/states/task.dart';
 import 'package:studyappcs/utils/utils.dart';
@@ -36,7 +36,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    stats.updateTheme = setState;
+    user_data.updateTheme = setState;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Study App',
@@ -44,8 +44,8 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: true,
         fontFamily: 'Product Sans',
         colorScheme: ColorScheme.fromSeed(
-          seedColor: stats.color,
-          brightness: stats.lightness ? Brightness.light : Brightness.dark,
+          seedColor: user_data.color,
+          brightness: user_data.lightness ? Brightness.light : Brightness.dark,
         ),
       ),
       initialRoute: '/splash',

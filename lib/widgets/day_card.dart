@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:studyappcs/state_managers/firestore_manager.dart' as firestore_manager;
+import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/states/task.dart';
 import 'package:studyappcs/utils/utils.dart' as theming;
 import 'package:studyappcs/widgets/task_popup.dart';

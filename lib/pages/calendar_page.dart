@@ -3,7 +3,7 @@
 import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
-import 'package:studyappcs/state_managers/firestore_manager.dart' as firestore_manager;
+import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/states/task.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
 import 'package:studyappcs/utils/utils.dart';

@@ -4,13 +4,12 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:studyappcs/state_managers/exporter.dart' as exporter;
-import 'package:studyappcs/state_managers/firestore_manager.dart' as firestore_manager;
-import 'package:studyappcs/state_managers/statistics.dart' as stats;
-import 'package:studyappcs/state_managers/tests_manager.dart' as tests_manager;
+import 'package:studyappcs/data_managers/exporter.dart' as exporter;
+import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
+import 'package:studyappcs/data_managers/tests_manager.dart' as tests_manager;
+import 'package:studyappcs/data_managers/user_data.dart' as user_data;
 import 'package:studyappcs/states/subject.dart';
 import 'package:studyappcs/states/test.dart';
-import 'package:studyappcs/states/topic.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
 import 'package:studyappcs/widgets/studied_chart.dart';
 
@@ -57,7 +56,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
 
     firestore_manager.goal = result;
 
-    setState(() => stats.dailyGoal = int.parse(result));
+    setState(() => user_data.dailyGoal = int.parse(result));
   }
 
   void editUserName() async {
@@ -66,12 +65,12 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
       'Change Username',
       Input(
         name: 'Username',
-        value: stats.userName,
+        value: user_data.userName,
       ),
     );
     if (name == '') return;
     firestore_manager.username = name;
-    setState(() => stats.userName = name);
+    setState(() => user_data.userName = name);
   }
 
   Widget buildButton(String text, void Function() callback) => Expanded(
@@ -94,9 +93,9 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
       );
 
   void chooseAccentColor() async {
-    Color col = await showColorPicker(context, stats.color) ?? Colors.black;
+    Color col = await showColorPicker(context, user_data.color) ?? Colors.black;
     if (col == Colors.black) return;
-    stats.color = col;
+    user_data.color = col;
     firestore_manager.color = col.value;
   }
 
@@ -109,10 +108,8 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
     int total = 0;
     int learned = 0;
     for (Subject subject in firestore_manager.subjectsList) {
-      for (Topic topic in subject.topics) {
-        total += topic.cards.length;
-        learned += topic.cards.where((a) => a.learned).length;
-      }
+      total += subject.total;
+      learned += subject.learned;
     }
     return [total, learned];
   }
@@ -124,14 +121,14 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
         Future.delayed(
           Durations.extralong1,
           () async {
-            if (stats.userName == '') {
+            if (user_data.userName == '') {
               if (showingNameInput) return;
 
               showingNameInput = true;
               Future<String?> res =
                   singleInputDialog(context, 'Set User Name', Input(name: 'Name'), cancellable: false);
               String name = await res ?? '';
-              setState(() => stats.userName = name);
+              setState(() => user_data.userName = name);
               showingNameInput = false;
             }
           },
@@ -195,14 +192,14 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                       child: Text(
-                        'Hello ${stats.userName}',
+                        'Hello ${user_data.userName}',
                         style: theme.displayLarge?.copyWith(fontWeight: FontWeight.w800, letterSpacing: 4),
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                       child: Text(
-                        'Today you have studied ${stats.getTodayStudied()} cards out of ${stats.dailyGoal}',
+                        'Today you have studied ${user_data.getTodayStudied()} cards out of ${user_data.dailyGoal}',
                         style: theme.bodyLarge,
                         textAlign: TextAlign.center,
                       ),
@@ -223,7 +220,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                           child: Padding(
                             padding: const EdgeInsets.all(10.0),
                             child: Center(
-                              child: Text('  ${stats.calculateStreak()}🔥', textAlign: TextAlign.center),
+                              child: Text('  ${user_data.calculateStreak()}🔥', textAlign: TextAlign.center),
                             ),
                           ),
                         ),
@@ -272,9 +269,9 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                   child: Column(
                     children: [
                       buildText(
-                        'Average 10 test percentages: ${getRecentAverage()}% (${getRecentAverage() - getAllAverage() >= 0 ? '+' : ''}${getRecentAverage() - getAllAverage()}%)',
+                        'Last 10 average test scores: ${getRecentAverage()}% (${getRecentAverage() - getAllAverage() >= 0 ? '+' : ''}${getRecentAverage() - getAllAverage()}%)',
                       ),
-                      buildText('Average total test percentages: ${getAllAverage()}%'),
+                      buildText('Overall average scores: ${getAllAverage()}%'),
                     ],
                   ),
                 ),
@@ -409,7 +406,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                   InkWell(
                     onTap: chooseAccentColor,
                     child: DecoratedBox(
-                      decoration: BoxDecoration(color: stats.color, shape: BoxShape.circle),
+                      decoration: BoxDecoration(color: user_data.color, shape: BoxShape.circle),
                       child: const Padding(
                         padding: EdgeInsets.all(8.0),
                         child: Icon(Icons.edit_rounded),
@@ -426,9 +423,9 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                 children: [
                   const Text("Light Mode"),
                   Switch(
-                    value: stats.lightness,
+                    value: user_data.lightness,
                     onChanged: (b) {
-                      stats.lightness = b;
+                      user_data.lightness = b;
                       firestore_manager.lightness = b;
                     },
                   ),
@@ -443,7 +440,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
 
   void useDeviceAccentColor() async {
     Color? color = (await DynamicColorPlugin.getCorePalette())?.toColorScheme().primary;
-    stats.color = color ?? Colors.red;
-    firestore_manager.color = stats.color.value;
+    user_data.color = color ?? Colors.red;
+    firestore_manager.color = user_data.color.value;
   }
 }

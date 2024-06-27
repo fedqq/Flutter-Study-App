@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:studyappcs/state_managers/firestore_manager.dart' as firestore_manager;
+import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/widgets/subject_card.dart';
 
 class SubjectOptionMenu extends StatelessWidget {

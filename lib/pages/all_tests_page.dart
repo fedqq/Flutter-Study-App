@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:studyappcs/pages/results_page.dart';
-import 'package:studyappcs/state_managers/tests_manager.dart' as tests_manager;
+import 'package:studyappcs/data_managers/tests_manager.dart' as tests_manager;
 import 'package:studyappcs/states/test.dart';
 import 'package:window_rounded_corners/window_rounded_corners.dart';
 

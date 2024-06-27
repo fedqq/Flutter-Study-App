@@ -5,7 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
-import 'package:studyappcs/state_managers/statistics.dart' as stats;
+import 'package:studyappcs/data_managers/user_data.dart' as user_data;
 import 'package:studyappcs/states/subject.dart';
 import 'package:studyappcs/states/topic.dart';
 
@@ -54,7 +54,7 @@ pw.Page subjectToPdf(Subject subject, int scoresToShow) {
 }
 
 void printEverything(List<Subject> subjects) async {
-  final pdf = pw.Document(author: stats.userName);
+  final pdf = pw.Document(author: user_data.userName);
   for (Subject subject in subjects) {
     pdf.addPage(subjectToPdf(subject, 10));
   }

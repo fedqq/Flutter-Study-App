@@ -3,8 +3,8 @@ import 'dart:developer' as developer;
 import "dart:ui";
 
 import "package:flutter/material.dart";
-import "package:studyappcs/state_managers/firestore_manager.dart" as firestore_manager;
-import "package:studyappcs/state_managers/statistics.dart" as stats;
+import "package:studyappcs/data_managers/firestore_manager.dart" as firestore_manager;
+import "package:studyappcs/data_managers/user_data.dart" as user_data;
 import "package:studyappcs/states/flashcard.dart";
 import "package:studyappcs/states/topic.dart";
 import "package:studyappcs/utils/input_dialogs.dart";
@@ -142,8 +142,8 @@ class _StudyPageState extends State<StudyPage> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: LinearProgressIndicator(
-                value: (stats.dailyStudied[stats.getNowString()] ?? 0) /
-                    ((stats.dailyGoal == 0) ? 20 : stats.dailyGoal),
+                value: (user_data.dailyStudied[user_data.getNowString()] ?? 0) /
+                    ((user_data.dailyGoal == 0) ? 20 : user_data.dailyGoal),
               ),
             ),
           ),
@@ -154,8 +154,8 @@ class _StudyPageState extends State<StudyPage> {
                 onTap: () {
                   setState(() => showingMeaning = !showingMeaning);
                   if (showingMeaning) {
-                    if (stats.study()) {
-                      simpleSnackBar(context, 'You reached you daily goal of ${stats.dailyGoal} terms!');
+                    if (user_data.study()) {
+                      simpleSnackBar(context, 'You reached you daily goal of ${user_data.dailyGoal} terms!');
                     }
                   }
                 },

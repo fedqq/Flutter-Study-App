@@ -2,10 +2,11 @@
 import 'dart:developer' as developer;
 
 import "package:flutter/material.dart";
+import "package:studyappcs/data_managers/firestore_manager.dart" as firestore_manager;
+import "package:studyappcs/data_managers/tests_manager.dart" as tests_manager;
 import "package:studyappcs/pages/all_tests_page.dart";
+import "package:studyappcs/pages/subjects_stats_page.dart";
 import "package:studyappcs/pages/test_page.dart";
-import "package:studyappcs/state_managers/firestore_manager.dart" as firestore_manager;
-import "package:studyappcs/state_managers/tests_manager.dart" as tests_manager;
 import "package:studyappcs/states/flashcard.dart";
 import "package:studyappcs/states/subject.dart";
 import "package:studyappcs/states/test.dart";
@@ -76,24 +77,26 @@ class _SubjectPageState extends State<SubjectPage> {
         title: Text('${widget.subject.name} Topics (${widget.subject.topics.length})'),
         centerTitle: true,
         actions: [
+          if (1 == 2)
+            IconButton(
+              onPressed: () => Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (context) => SubjectsStatsPage(subject: widget.subject))),
+              icon: const Icon(Icons.auto_graph_rounded),
+            ),
           if (tests_manager.hasScore(widget.subject.asArea))
             Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  FilledButton.tonal(
-                    child: const Text(
-                      'Past tests',
-                      textAlign: TextAlign.center,
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => AllTestsPage(area: widget.subject.name)),
-                      );
-                    },
-                  ),
-                ],
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: FilledButton(
+                child: const Text(
+                  'Past tests',
+                  textAlign: TextAlign.center,
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => AllTestsPage(area: widget.subject.name)),
+                  );
+                },
               ),
             ),
         ],
