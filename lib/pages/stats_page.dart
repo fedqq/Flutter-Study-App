@@ -101,7 +101,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
 
   double calculateLearnedPercentage() {
     var a = totalAndLearned();
-    return a[1] / a[0];
+    return a[0] == 0 ? 0 : a[1] / a[0];
   }
 
   List<int> totalAndLearned() {

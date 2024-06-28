@@ -178,7 +178,7 @@ class _StudyPageState extends State<StudyPage> {
                           top: 8,
                           child: IconButton(
                             icon: const Icon(Icons.edit_rounded),
-                            onPressed: () {},
+                            onPressed: editCard,
                           ),
                         ),
                         Center(

@@ -29,5 +29,5 @@ class Subject {
 
   int get total => topics.fold(0, (a, b) => a + b.cards.length);
 
-  double get percentage => learned / total;
+  double get percentage => total == 0 ? 0 : learned / total;
 }

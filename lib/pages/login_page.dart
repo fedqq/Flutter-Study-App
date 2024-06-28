@@ -65,7 +65,6 @@ class _LoginpageState extends State<Loginpage> {
   }
 
   void close() async {
-    setState(() => loading = true);
     await firestore_manager.loadData();
     setState(() => loading = false);
     Navigator.pushReplacement(
@@ -94,12 +93,16 @@ class _LoginpageState extends State<Loginpage> {
   }
 
   void submit() async {
+    setState(() => loading = true);
     String? a = await (register ? _signupUser(email, password, username) : _authUser(email, password));
     if (a == null) {
       close();
+      return;
     } else {
       snackbar(a);
     }
+
+    setState(() => loading = false);
   }
 
   @override
@@ -108,63 +111,65 @@ class _LoginpageState extends State<Loginpage> {
       body: Stack(
         alignment: Alignment.center,
         children: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(30.0),
-              child: Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(30.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('Log in', style: Theme.of(context).textTheme.displayMedium),
-                      const SizedBox(height: 20),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextField(
-                          onChanged: (v) => email = v,
-                          decoration: const InputDecoration.collapsed(hintText: 'E-Mail'),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextField(
-                          onChanged: (v) => password = v,
-                          decoration: const InputDecoration.collapsed(hintText: 'Password'),
-                          obscureText: true,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      if (register) ...[
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextField(
-                            onChanged: (v) => username = v,
-                            decoration: const InputDecoration.collapsed(hintText: 'Username'),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                      ],
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(child: FilledButton(onPressed: submit, child: const Text('Submit'))),
-                          const SizedBox(width: 20),
-                          Expanded(
-                            child: FilledButton.tonal(
-                              onPressed: () => setState(() => register = !register),
-                              child: Text(!register ? 'Sign Up' : 'Log In'),
+          loading
+              ? const Center(child: CircularProgressIndicator(strokeCap: StrokeCap.round, strokeWidth: 7))
+              : Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(30.0),
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(30.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('Log in', style: Theme.of(context).textTheme.displayMedium),
+                            const SizedBox(height: 20),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: TextField(
+                                onChanged: (v) => email = v,
+                                decoration: const InputDecoration.collapsed(hintText: 'E-Mail'),
+                              ),
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 20),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: TextField(
+                                onChanged: (v) => password = v,
+                                decoration: const InputDecoration.collapsed(hintText: 'Password'),
+                                obscureText: true,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            if (register) ...[
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: TextField(
+                                  onChanged: (v) => username = v,
+                                  decoration: const InputDecoration.collapsed(hintText: 'Username'),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                            ],
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(child: FilledButton(onPressed: submit, child: const Text('Submit'))),
+                                const SizedBox(width: 20),
+                                Expanded(
+                                  child: FilledButton.tonal(
+                                    onPressed: () => setState(() => register = !register),
+                                    child: Text(!register ? 'Sign Up' : 'Log In'),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ),
-          ),
         ],
       ),
     );

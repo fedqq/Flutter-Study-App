@@ -5,7 +5,6 @@ import "package:flutter/material.dart";
 import "package:studyappcs/data_managers/firestore_manager.dart" as firestore_manager;
 import "package:studyappcs/data_managers/tests_manager.dart" as tests_manager;
 import "package:studyappcs/pages/all_tests_page.dart";
-import "package:studyappcs/pages/subjects_stats_page.dart";
 import "package:studyappcs/pages/test_page.dart";
 import "package:studyappcs/states/flashcard.dart";
 import "package:studyappcs/states/subject.dart";
@@ -77,12 +76,6 @@ class _SubjectPageState extends State<SubjectPage> {
         title: Text('${widget.subject.name} Topics (${widget.subject.topics.length})'),
         centerTitle: true,
         actions: [
-          if (1 == 2)
-            IconButton(
-              onPressed: () => Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (context) => SubjectsStatsPage(subject: widget.subject))),
-              icon: const Icon(Icons.auto_graph_rounded),
-            ),
           if (tests_manager.hasScore(widget.subject.asArea))
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

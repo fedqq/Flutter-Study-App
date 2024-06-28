@@ -113,7 +113,7 @@ class _TestPageState extends State<TestPage> {
       appBar: AppBar(title: Text('Test on ${widget.testArea}'), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: ListView(
+        child: Column(
           children: [
             ...List.generate(
               widget.cards.length,
@@ -125,7 +125,6 @@ class _TestPageState extends State<TestPage> {
                 padding: getPadding(index),
               ),
             ),
-            const Spacer(),
             Row(
               children: [
                 Expanded(

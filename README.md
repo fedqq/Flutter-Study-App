@@ -1,0 +1,1 @@
+Hi Mr. Edgar, all the code that I wrote is in the lib folder, all the other code is packages and android system code that I didn't write. 
