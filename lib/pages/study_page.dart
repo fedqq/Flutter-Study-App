@@ -13,8 +13,7 @@ import "package:studyappcs/utils/utils.dart";
 class StudyPage extends StatefulWidget {
   final List<FlashCard> cards;
   final Topic topic;
-  final Function(String)? renameCallback;
-  const StudyPage({super.key, required this.cards, required this.topic, this.renameCallback});
+  const StudyPage({super.key, required this.cards, required this.topic});
 
   @override
   State<StudyPage> createState() => _StudyPageState();
@@ -115,19 +114,6 @@ class _StudyPageState extends State<StudyPage> {
 
       setState(() => widget.cards.removeAt(currentCard));
     }
-  }
-
-  void editTopicName() async {
-    String newName = await singleInputDialog(context, 'Rename ${widget.topic.name}', Input(name: 'Name'));
-    if (newName == '') return;
-
-    for (var card in await firestore_manager.cardsFromTopic(widget.topic.name)) {
-      card.reference.update({'topic': newName});
-    }
-    setState(() {
-      widget.topic.name = newName;
-      widget.renameCallback!(newName);
-    });
   }
 
   @override

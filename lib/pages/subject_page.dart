@@ -49,6 +49,7 @@ class _SubjectPageState extends State<SubjectPage> {
         itemBuilder: (context, index) => TopicCard(
           topic: widget.subject.topics[index],
           area: '${widget.subject.name} - ${widget.subject.topics[index].name}',
+          deleteTopic: () => setState(() => widget.subject.topics.removeAt(index)),
           testTopic: () => Navigator.push(
             context,
             MaterialPageRoute(

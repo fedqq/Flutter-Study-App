@@ -36,11 +36,10 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
 
   @override
   void initState() {
-    controller = AnimationController(vsync: this, value: 0, duration: Durations.long3);
+    controller = AnimationController(vsync: this, value: 0, duration: const Duration(seconds: 2));
 
     animation = CurvedAnimation(
-      curve: Curves.easeIn,
-      reverseCurve: Curves.easeOutQuad,
+      curve: Curves.easeOutCirc,
       parent: controller,
     );
     super.initState();
@@ -160,15 +159,11 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
       return total / length;
     }
 
-    TextTheme theme = Theme.of(context).textTheme;
-
     controller.forward();
 
     return AnimatedBuilder(
       animation: animation,
       builder: (context, __) {
-        double elevation = 2 * animation.value;
-
         return Scaffold(
           appBar: AppBar(
             backgroundColor: Colors.transparent,
@@ -182,37 +177,41 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
             ],
           ),
           extendBodyBehindAppBar: true,
-          body: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 46, 16, 16),
-            children: [
-              FittedBox(
-                fit: BoxFit.fitHeight,
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                      child: Text(
-                        'Hello ${user_data.userName}',
-                        style: theme.displayLarge?.copyWith(fontWeight: FontWeight.w800, letterSpacing: 4),
+          body: Opacity(
+            opacity: animation.value,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 46, 16, 16),
+              children: [
+                FittedBox(
+                  fit: BoxFit.fitHeight,
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                        child: Text(
+                          'Hello ${user_data.userName}',
+                          style: Theme.of(context)
+                              .textTheme
+                              .displayLarge
+                              ?.copyWith(fontWeight: FontWeight.w800, letterSpacing: 4),
+                        ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                      child: Text(
-                        'Today you have studied ${user_data.getTodayStudied()} cards out of ${user_data.dailyGoal}',
-                        style: theme.bodyLarge,
-                        textAlign: TextAlign.center,
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                        child: Text(
+                          'Today you have studied ${user_data.getTodayStudied()} cards out of ${user_data.dailyGoal}',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: Card(
+                Row(
+                  children: [
+                    Card(
                       margin: const EdgeInsets.all(8),
-                      elevation: elevation,
+                      elevation: 2,
                       child: AspectRatio(
                         aspectRatio: 1,
                         child: FittedBox(
@@ -226,13 +225,11 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                         ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: AspectRatio(
+                    AspectRatio(
                       aspectRatio: 1,
                       child: Card(
                         margin: const EdgeInsets.all(8),
-                        elevation: elevation,
+                        elevation: 2,
                         child: Center(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
@@ -248,98 +245,84 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              Card(
-                margin: const EdgeInsets.all(8),
-                elevation: elevation,
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: Padding(
-                    padding: const EdgeInsets.all(25),
-                    child: StudiedChart(animValue: animation.value),
-                  ),
+                  ].map((a) => Expanded(child: a)).toList(),
                 ),
-              ),
-              if (tests_manager.pastTests.isNotEmpty)
                 Card(
                   margin: const EdgeInsets.all(8),
-                  elevation: elevation,
-                  child: Column(
-                    children: [
-                      buildText(
-                        'Last 10 average test scores: ${getRecentAverage()}% (${getRecentAverage() - getAllAverage() >= 0 ? '+' : ''}${getRecentAverage() - getAllAverage()}%)',
-                      ),
-                      buildText('Overall average scores: ${getAllAverage()}%'),
-                    ],
+                  elevation: 2,
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: Padding(
+                      padding: const EdgeInsets.all(25),
+                      child: StudiedChart(animValue: animation.value),
+                    ),
                   ),
                 ),
-              Row(
-                children: [
-                  Expanded(
-                    child: AspectRatio(
-                      aspectRatio: 1,
-                      child: Card(
-                        margin: const EdgeInsets.all(8),
-                        elevation: elevation,
-                        child: Center(
-                          child: SizedBox.expand(
-                            child: Padding(
-                              padding: const EdgeInsets.all(20.0),
-                              child: CircularProgressIndicator(
-                                strokeWidth: 10,
-                                value: calculateLearnedPercentage() * animation.value,
-                                backgroundColor: Colors.black,
-                                strokeCap: StrokeCap.round,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: AspectRatio(
-                      aspectRatio: 1,
-                      child: Card(
-                        margin: const EdgeInsets.all(8),
-                        elevation: elevation,
-                        child: Center(
-                          child: Text(
-                            'You have\nlearned ${totalAndLearned()[1]}\nout of ${totalAndLearned()[0]}\ncards',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: 80,
-                child: Card(
-                  margin: const EdgeInsets.all(8),
-                  elevation: elevation,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
+                if (tests_manager.pastTests.isNotEmpty)
+                  Card(
+                    margin: const EdgeInsets.all(8),
+                    elevation: 2,
+                    child: Column(
                       children: [
-                        //TODO: Find another button to put here
-                        buildButton(
-                          'Data to PDF',
-                          () {
-                            widget.saveCallback();
-                            exporter.printEverything(widget.subjects);
-                          },
+                        buildText(
+                          'Last 10 average test scores: ${getRecentAverage()}% (${getRecentAverage() - getAllAverage() >= 0 ? '+' : ''}${getRecentAverage() - getAllAverage()}%)',
                         ),
+                        buildText('Overall average scores: ${getAllAverage()}%'),
                       ],
                     ),
                   ),
+                Row(
+                  children: [
+                    SizedBox.expand(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 10,
+                          value: calculateLearnedPercentage() * animation.value,
+                          backgroundColor: Colors.black,
+                          strokeCap: StrokeCap.round,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      'You have\nlearned ${totalAndLearned()[1]}\nout of \n${totalAndLearned()[0]}cards',
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                      textAlign: TextAlign.center,
+                    ),
+                  ]
+                      .map(
+                        (a) => Expanded(
+                          child: AspectRatio(
+                            aspectRatio: 1,
+                            child: Card(margin: const EdgeInsets.all(8), child: Center(child: a)),
+                          ),
+                        ),
+                      )
+                      .toList(),
                 ),
-              ),
-            ],
+                SizedBox(
+                  height: 80,
+                  child: Card(
+                    margin: const EdgeInsets.all(8),
+                    elevation: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          buildButton(
+                            'Data to PDF',
+                            () {
+                              widget.saveCallback();
+                              exporter.printEverything(widget.subjects);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ].map((a) => ScaleTransition(scale: animation, child: a)).toList(),
+            ),
           ),
         );
       },
@@ -355,84 +338,68 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextButton.icon(
-                onPressed: editUserName,
-                label: const Row(
-                  children: [Text("Edit Username")],
-                ),
-                icon: const Icon(Icons.arrow_forward_rounded),
-                iconAlignment: IconAlignment.end,
+            TextButton.icon(
+              onPressed: editUserName,
+              label: const Row(
+                children: [Text("Edit Username")],
               ),
+              icon: const Icon(Icons.arrow_forward_rounded),
+              iconAlignment: IconAlignment.end,
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextButton.icon(
-                onPressed: () {
-                  FirebaseAuth.instance.signOut();
-                  SystemNavigator.pop();
-                },
-                label: const Row(
-                  children: [Text("Sign Out (Closes the app)")],
-                ),
-                icon: const Icon(Icons.arrow_forward_rounded),
-                iconAlignment: IconAlignment.end,
+            TextButton.icon(
+              onPressed: () {
+                FirebaseAuth.instance.signOut();
+                SystemNavigator.pop();
+              },
+              label: const Row(
+                children: [Text("Sign Out (Closes the app)")],
               ),
+              icon: const Icon(Icons.arrow_forward_rounded),
+              iconAlignment: IconAlignment.end,
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextButton.icon(
-                onPressed: editDailyGoal,
-                label: const Row(
-                  children: [Text("Edit Daily Goal")],
-                ),
-                icon: const Icon(Icons.arrow_forward_rounded),
-                iconAlignment: IconAlignment.end,
+            TextButton.icon(
+              onPressed: editDailyGoal,
+              label: const Row(
+                children: [Text("Edit Daily Goal")],
               ),
+              icon: const Icon(Icons.arrow_forward_rounded),
+              iconAlignment: IconAlignment.end,
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child:
-                          FilledButton(onPressed: useDeviceAccentColor, child: const Text("Use Device Accent Color")),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: FilledButton(onPressed: useDeviceAccentColor, child: const Text("Use Device Accent Color")),
+                  ),
+                ),
+                InkWell(
+                  onTap: chooseAccentColor,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(color: user_data.color, shape: BoxShape.circle),
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Icon(Icons.edit_rounded),
                     ),
                   ),
-                  InkWell(
-                    onTap: chooseAccentColor,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(color: user_data.color, shape: BoxShape.circle),
-                      child: const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Icon(Icons.edit_rounded),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text("Light Mode"),
-                  Switch(
-                    value: user_data.lightness,
-                    onChanged: (b) {
-                      user_data.lightness = b;
-                      firestore_manager.lightness = b;
-                    },
-                  ),
-                ],
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text("Light Mode"),
+                Switch(
+                  value: user_data.lightness,
+                  onChanged: (b) {
+                    user_data.lightness = b;
+                    firestore_manager.lightness = b;
+                  },
+                ),
+              ],
             ),
-          ],
+          ].map((a) => Padding(padding: const EdgeInsets.all(8), child: a)).toList(),
         );
       },
     );

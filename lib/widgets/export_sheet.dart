@@ -16,48 +16,48 @@ void export(BuildContext context, Subject subject) async {
 }
 
 void showPrintMenu(BuildContext context, Subject subject) {
-  TextTheme theme = Theme.of(context).textTheme;
-
   BasicSlider slider = const BasicSlider(scoresShow: 0);
 
   showModalBottomSheet(
     context: context,
     builder: (context) => Align(
       alignment: Alignment.topCenter,
-      child: Column(children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text('Export ${subject.name}', style: theme.headlineMedium),
-        ),
-        Card(
-          margin: const EdgeInsets.all(16.0),
-          elevation: 3.0,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text('PDF Options: ', style: theme.titleLarge),
-                ),
-                const Text('Scores to show: '),
-                slider,
-              ],
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text('Export ${subject.name}', style: Theme.of(context).textTheme.headlineMedium),
+          ),
+          Card(
+            margin: const EdgeInsets.all(16.0),
+            elevation: 3.0,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text('PDF Options: ', style: Theme.of(context).textTheme.titleLarge),
+                  ),
+                  const Text('Scores to show: '),
+                  slider,
+                ],
+              ),
             ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: FilledButton(
-            onPressed: () {
-              exporter.printSubject(subject, slider.scoresShow.toInt());
-              Navigator.of(context).pop();
-            },
-            child: const Text('Save as PDF'),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FilledButton(
+              onPressed: () {
+                exporter.printSubject(subject, slider.scoresShow.toInt());
+                Navigator.of(context).pop();
+              },
+              child: const Text('Save as PDF'),
+            ),
           ),
-        ),
-      ],),
+        ],
+      ),
     ),
     showDragHandle: true,
   );
@@ -66,11 +66,14 @@ void showPrintMenu(BuildContext context, Subject subject) {
 void showPrintOrExport(BuildContext context, Subject subject) {
   showDialog(
     context: context,
-    builder: (context) => AlertDialog(title: Text('Print or export ${subject.name}'), actions: [
-      FilledButton.tonal(onPressed: Navigator.of(context).pop, child: const Text('Cancel')),
-      FilledButton(onPressed: () => export(context, subject), child: const Text('As TXT')),
-      FilledButton(onPressed: () => showPrintMenu(context, subject), child: const Text('As PDF')),
-    ],),
+    builder: (context) => AlertDialog(
+      title: Text('Print or export ${subject.name}'),
+      actions: [
+        FilledButton.tonal(onPressed: Navigator.of(context).pop, child: const Text('Cancel')),
+        FilledButton(onPressed: () => export(context, subject), child: const Text('As TXT')),
+        FilledButton(onPressed: () => showPrintMenu(context, subject), child: const Text('As PDF')),
+      ],
+    ),
   );
 }
 

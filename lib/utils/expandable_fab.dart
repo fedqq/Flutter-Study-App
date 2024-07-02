@@ -87,8 +87,10 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
     setState(() {
       _open = !_open;
       if (_open) {
+        widget.controller?.expand();
         _controller.forward();
       } else {
+        widget.controller?.close();
         _controller.reverse();
       }
     });

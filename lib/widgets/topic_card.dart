@@ -4,39 +4,36 @@
 import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
-import 'package:studyappcs/pages/all_tests_page.dart';
-import 'package:studyappcs/pages/study_page.dart';
 import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/data_managers/tests_manager.dart' as tests_manager;
+import 'package:studyappcs/pages/all_tests_page.dart';
+import 'package:studyappcs/pages/study_page.dart';
 import 'package:studyappcs/states/flashcard.dart';
 import 'package:studyappcs/states/test.dart';
 import 'package:studyappcs/states/topic.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
 import 'package:studyappcs/utils/utils.dart' as theming;
 
-//TODO Test Types
-//TODO Bugtesting
-//TODO More stats: Recent scores, percentage learned, etc...
-//TODO Stats on individual subject pages
-
 class TopicCard extends StatefulWidget {
   final Topic topic;
   final Future Function() testTopic;
   final String area;
   final String subject;
-  const TopicCard({super.key, required this.topic, required this.testTopic, required this.area, required this.subject});
+  final void Function() deleteTopic;
+  const TopicCard({
+    super.key,
+    required this.topic,
+    required this.testTopic,
+    required this.area,
+    required this.subject,
+    required this.deleteTopic,
+  });
 
   @override
   State<TopicCard> createState() => _TopicCardState();
 }
 
 class _TopicCardState extends State<TopicCard> {
-  void renameCallback(String newName) {
-    setState(() {
-      widget.topic.name = newName;
-    });
-  }
-
   bool checkExistingTerm(String name) {
     for (FlashCard card in widget.topic.cards) {
       if (card.name == name) {
@@ -65,16 +62,14 @@ class _TopicCardState extends State<TopicCard> {
           pageBuilder: (_, __, ___) => StudyPage(
             cards: topic.cards,
             topic: topic,
-            renameCallback: renameCallback,
           ),
         ),
       ).then(
-        (_) => setState(() {
-          return;
-        }),
+        (_) => setState(() {}),
       );
 
-  void renameTopic(Topic topic) async {
+  Future renameTopic(Topic topic) async {
+    String oldName = topic.name;
     String newName = await singleInputDialog(
       context,
       'Rename ${topic.name}',
@@ -90,6 +85,31 @@ class _TopicCardState extends State<TopicCard> {
         }
         widget.area.replaceAll(widget.area, newArea);
       });
+
+      var cards = await firestore_manager.cardDocs;
+      cards.docs.where((a) => a['topic'] == oldName).forEach((a) => a.reference.update({'topic': newName}));
+
+      var tests = await firestore_manager.testDocs;
+      tests.docs
+          .where((a) => (a['area'] as String).contains(oldName))
+          .forEach((a) => a.reference.update({'area': (a['area'] as String).replaceAll(oldName, newName)}));
+    }
+  }
+
+  Future deleteTopic(Topic topic) async {
+    String oldName = topic.name;
+    bool confirmed = await confirmDialog(
+      context,
+      title: 'Delete $oldName',
+    );
+    if (confirmed) {
+      var cards = await firestore_manager.cardDocs;
+      cards.docs.where((a) => a['topic'] == oldName).forEach((a) => a.reference.delete());
+
+      var tests = await firestore_manager.testDocs;
+      tests.docs.where((a) => (a['area'] as String).contains(oldName)).forEach((a) => a.reference.delete());
+
+      widget.deleteTopic();
     }
   }
 
@@ -188,6 +208,26 @@ class _TopicCardState extends State<TopicCard> {
                     children: [
                       Icon(Icons.add_rounded),
                       Text('New card'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  onTap: () => renameTopic(topic).then((_) => setState(() {})),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Icon(Icons.edit_rounded),
+                      Text('Rename Topic'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  onTap: () => deleteTopic(topic).then((_) => setState(() {})),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Icon(Icons.delete_rounded),
+                      Text('Delete Topic'),
                     ],
                   ),
                 ),

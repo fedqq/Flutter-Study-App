@@ -26,31 +26,33 @@ class _SubjectCardState extends State<SubjectCard> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16),
-        child: Row(children: [
-          SizedBox(
-            height: 100,
-            child: AspectRatio(
-              aspectRatio: 1,
-              child: Card(
-                color: subject.color,
-                elevation: 10,
+        child: Row(
+          children: [
+            SizedBox(
+              height: 100,
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: Card(color: subject.color, elevation: 10),
               ),
             ),
-          ),
-          Expanded(
-            child: Center(
-              child: Column(
-                children: [
-                  Text(subject.name, style: Theme.of(context).textTheme.headlineMedium),
-                  if (!(teacher == '' && classroom == '')) ...[
-                    const SizedBox(height: 10),
-                    Text(arr.where((a) => a != '').join(' - '), style: Theme.of(context).textTheme.bodyLarge),
+            Expanded(
+              child: Center(
+                child: Column(
+                  children: [
+                    Hero(
+                      tag: subject.name,
+                      child: Text(subject.name, style: Theme.of(context).textTheme.headlineMedium),
+                    ),
+                    if (!(teacher == '' && classroom == '')) ...[
+                      const SizedBox(height: 10),
+                      Text(arr.where((a) => a != '').join(' - '), style: Theme.of(context).textTheme.bodyLarge),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
-          ),
-        ],),
+          ],
+        ),
       ),
     );
   }

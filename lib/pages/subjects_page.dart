@@ -5,12 +5,12 @@ import 'dart:developer' as developer;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
+import 'package:studyappcs/data_managers/tests_manager.dart' as tests_manager;
 import 'package:studyappcs/pages/all_tests_page.dart';
 import 'package:studyappcs/pages/study_page.dart';
 import 'package:studyappcs/pages/subject_page.dart';
 import 'package:studyappcs/pages/test_page.dart';
-import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
-import 'package:studyappcs/data_managers/tests_manager.dart' as tests_manager;
 import 'package:studyappcs/states/flashcard.dart';
 import 'package:studyappcs/states/subject.dart';
 import 'package:studyappcs/states/test.dart';
@@ -364,6 +364,8 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
                         },
                         onLongPress: () {
                           setState(() => currentFocused = index);
+                          //TODO option menu fixing cus its ugly
+                          //TODO clean up other stuff or something
                           Future.delayed(Durations.short1, () => blurController.forward(from: 0));
                         },
                         child: AnimatedBuilder(

@@ -38,14 +38,14 @@ class _ResultCardState extends State<ResultCard> {
           children: [
             if ((!correct) && widget.editable)
               Center(
-                child: IconButton(
-                  icon: const Icon(Icons.check_rounded),
+                child: FilledButton.tonal(
                   onPressed: () => setState(
                     () {
                       widget.markCorrect();
                       correct = true;
                     },
                   ),
+                  child: const Text('Override'),
                 ),
               ),
             Row(

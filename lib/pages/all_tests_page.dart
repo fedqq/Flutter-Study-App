@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:studyappcs/pages/results_page.dart';
 import 'package:studyappcs/data_managers/tests_manager.dart' as tests_manager;
+import 'package:studyappcs/pages/results_page.dart';
 import 'package:studyappcs/states/test.dart';
 import 'package:window_rounded_corners/window_rounded_corners.dart';
 
@@ -37,7 +37,6 @@ class _AllTestsPageState extends State<AllTestsPage> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    TextTheme theme = Theme.of(context).textTheme;
     List<Test> tests = [];
 
     tests = tests_manager.testsFromArea(widget.area).reversed.toList();
@@ -108,7 +107,7 @@ class _AllTestsPageState extends State<AllTestsPage> with SingleTickerProviderSt
                   children: [
                     Text(
                       tests[index].area,
-                      style: theme.titleMedium!,
+                      style: Theme.of(context).textTheme.titleMedium!,
                     ),
                     Text(tests[index].date),
                   ],

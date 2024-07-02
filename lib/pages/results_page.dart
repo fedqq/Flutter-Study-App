@@ -64,7 +64,7 @@ class _ResultsPageState extends State<ResultsPage> {
                     .get();
 
                 cardsDocs.docs
-                    .firstWhere((a) => a['name'] == cards[index].name && a['meaning'] == cards[index])
+                    .firstWhere((a) => a['name'] == cards[index].name && a['meaning'] == cards[index].meaning)
                     .reference
                     .update({'answer': cards[index].meaning});
 
