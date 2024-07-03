@@ -1,37 +1,39 @@
 // ignore: unused_import
 import 'dart:developer' as developer;
 
-import "package:flutter/material.dart";
-import "package:studyappcs/data_managers/firestore_manager.dart" as firestore_manager;
-import "package:studyappcs/data_managers/tests_manager.dart" as tests_manager;
-import "package:studyappcs/pages/all_tests_page.dart";
-import "package:studyappcs/pages/test_page.dart";
-import "package:studyappcs/states/flashcard.dart";
-import "package:studyappcs/states/subject.dart";
-import "package:studyappcs/states/test.dart";
-import "package:studyappcs/states/topic.dart";
-import "package:studyappcs/utils/input_dialogs.dart";
-import "package:studyappcs/widgets/topic_card.dart";
+import 'package:flutter/material.dart';
+import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
+import 'package:studyappcs/data_managers/tests_manager.dart' as tests_manager;
+import 'package:studyappcs/pages/all_tests_page.dart';
+import 'package:studyappcs/pages/test_page.dart';
+import 'package:studyappcs/states/flashcard.dart';
+import 'package:studyappcs/states/subject.dart';
+import 'package:studyappcs/states/test.dart';
+import 'package:studyappcs/states/topic.dart';
+import 'package:studyappcs/utils/input_dialogs.dart';
+import 'package:studyappcs/widgets/topic_card.dart';
 
 class SubjectPage extends StatefulWidget {
-  final Subject subject;
   const SubjectPage({
     super.key,
     required this.subject,
   });
+  final Subject subject;
 
   @override
   State<SubjectPage> createState() => _SubjectPageState();
 }
 
 class _SubjectPageState extends State<SubjectPage> {
-  void newTopic() async {
+  Future<void> newTopic() async {
     final String topicName = await singleInputDialog(context, 'New Topic Name', Input(name: 'Name'));
 
-    if (topicName == '') return;
-    Topic topic = Topic(topicName)..addCard(FlashCard('First Card', 'First Card Meaning', learned: false));
-    var cardCollection = firestore_manager.cardCollection;
-    cardCollection.doc('First Card').set({
+    if (topicName == '') {
+      return;
+    }
+    final Topic topic = Topic(topicName)..addCard(FlashCard('First Card', 'First Card Meaning', learned: false));
+    final firestore_manager.CollectionType cardCollection = firestore_manager.cardCollection;
+    await cardCollection.doc('First Card').set(<String, dynamic>{
       'name': 'First Card',
       'meaning': 'First Card Meaning',
       'learned': false,
@@ -43,22 +45,23 @@ class _SubjectPageState extends State<SubjectPage> {
 
   @override
   Widget build(BuildContext context) {
-    Expanded topicList = Expanded(
+    final Expanded topicList = Expanded(
       child: ListView.builder(
         itemCount: widget.subject.topics.length,
-        itemBuilder: (context, index) => TopicCard(
+        itemBuilder: (BuildContext context, int index) => TopicCard(
           topic: widget.subject.topics[index],
           area: '${widget.subject.name} - ${widget.subject.topics[index].name}',
           deleteTopic: () => setState(() => widget.subject.topics.removeAt(index)),
           testTopic: () => Navigator.push(
             context,
+            // ignore: always_specify_types
             MaterialPageRoute(
               builder: (_) {
-                Subject subject = widget.subject;
-                Topic topic = subject.topics[index];
+                final Subject subject = widget.subject;
+                final Topic topic = subject.topics[index];
 
-                List<TestCard> cards = List.generate(topic.cards.length, (i) {
-                  FlashCard card = topic.cards[i];
+                final List<TestCard> cards = List<TestCard>.generate(topic.cards.length, (int i) {
+                  final FlashCard card = topic.cards[i];
 
                   return TestCard(card.name, card.meaning, '${widget.subject.name} - ${topic.name}');
                 });
@@ -76,7 +79,7 @@ class _SubjectPageState extends State<SubjectPage> {
       appBar: AppBar(
         title: Text('${widget.subject.name} Topics (${widget.subject.topics.length})'),
         centerTitle: true,
-        actions: [
+        actions: <Widget>[
           if (tests_manager.hasScore(widget.subject.asArea))
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -88,6 +91,7 @@ class _SubjectPageState extends State<SubjectPage> {
                 onPressed: () {
                   Navigator.push(
                     context,
+                    // ignore: always_specify_types
                     MaterialPageRoute(builder: (_) => AllTestsPage(area: widget.subject.name)),
                   );
                 },
@@ -101,10 +105,10 @@ class _SubjectPageState extends State<SubjectPage> {
         child: const Icon(Icons.add_rounded),
       ),
       body: Stack(
-        children: [
+        children: <Widget>[
           Center(
             child: Column(
-              children: [
+              children: <Widget>[
                 if (widget.subject.topics.isNotEmpty) topicList,
               ],
             ),

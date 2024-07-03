@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:studyappcs/states/subject.dart';
 
 class SubjectCard extends StatefulWidget {
+  const SubjectCard({super.key, required this.subject, required this.width});
   final Subject subject;
   final double width;
-  const SubjectCard({super.key, required this.subject, required this.width});
 
   @override
   State<SubjectCard> createState() => _SubjectCardState();
@@ -15,19 +15,20 @@ class _SubjectCardState extends State<SubjectCard> {
 
   @override
   Widget build(BuildContext context) {
-    Subject subject = widget.subject;
-    String classroom, teacher;
-    List<String> arr = [subject.teacher, subject.classroom];
+    final Subject subject = widget.subject;
+    String classroom;
+    String teacher;
+    final List<String> arr = <String>[subject.teacher, subject.classroom];
     [teacher, classroom] = arr;
 
     return Card(
       elevation: 5,
-      margin: const EdgeInsets.all(8.0),
+      margin: const EdgeInsets.all(8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Row(
-          children: [
+          children: <Widget>[
             SizedBox(
               height: 100,
               child: AspectRatio(
@@ -38,14 +39,14 @@ class _SubjectCardState extends State<SubjectCard> {
             Expanded(
               child: Center(
                 child: Column(
-                  children: [
+                  children: <Widget>[
                     Hero(
                       tag: subject.name,
                       child: Text(subject.name, style: Theme.of(context).textTheme.headlineMedium),
                     ),
-                    if (!(teacher == '' && classroom == '')) ...[
+                    if (!(teacher == '' && classroom == '')) ...<Widget>[
                       const SizedBox(height: 10),
-                      Text(arr.where((a) => a != '').join(' - '), style: Theme.of(context).textTheme.bodyLarge),
+                      Text(arr.where((String a) => a != '').join(' - '), style: Theme.of(context).textTheme.bodyLarge),
                     ],
                   ],
                 ),

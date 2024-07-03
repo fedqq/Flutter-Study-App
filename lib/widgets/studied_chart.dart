@@ -6,8 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:studyappcs/data_managers/user_data.dart' as user_data;
 
 class StudiedChart extends StatefulWidget {
-  final double animValue;
   const StudiedChart({super.key, required this.animValue});
+  final double animValue;
 
   @override
   State<StudiedChart> createState() => _StudiedChartState();
@@ -15,9 +15,9 @@ class StudiedChart extends StatefulWidget {
 
 class _StudiedChartState extends State<StudiedChart> {
   List<String> getLastWeekNames() {
-    List<String> strs = [];
+    final List<String> strs = <String>[];
     for (int i = 0; i < 7; i++) {
-      strs.add(DateFormat("EEE", 'en-US').format(DateTime.now().add(Duration(days: 7 - i))));
+      strs.add(DateFormat('EEE', 'en-US').format(DateTime.now().add(Duration(days: 7 - i))));
     }
 
     return strs.reversed.toList();
@@ -25,11 +25,11 @@ class _StudiedChartState extends State<StudiedChart> {
 
   @override
   Widget build(BuildContext context) {
-    List<int> daysData = user_data.getLastWeek();
+    final List<int> daysData = user_data.getLastWeek();
 
     int getMaxStudied() {
       int max = 0;
-      for (int i in daysData) {
+      for (final int i in daysData) {
         if (i > max) {
           max = i;
         }
@@ -38,12 +38,12 @@ class _StudiedChartState extends State<StudiedChart> {
       return max;
     }
 
-    Color col = Theme.of(context).colorScheme.inversePrimary;
-    var [r, g, b] = [col.red, col.green, col.blue];
+    final Color col = Theme.of(context).colorScheme.inversePrimary;
+    final [int r, int g, int b] = <int>[col.red, col.green, col.blue];
 
-    double value = max(widget.animValue, 0.7);
+    final double value = max(widget.animValue, 0.7);
 
-    Color res = Color.fromARGB(
+    final Color res = Color.fromARGB(
       255,
       255 - ((255 - r) * value).toInt(),
       255 - ((255 - g) * value).toInt(),
@@ -63,16 +63,16 @@ class _StudiedChartState extends State<StudiedChart> {
               interval: 1,
               showTitles: true,
               reservedSize: 20,
-              getTitlesWidget: (value, meta) => Text(getLastWeekNames()[value.toInt()]),
+              getTitlesWidget: (double value, TitleMeta meta) => Text(getLastWeekNames()[value.toInt()]),
             ),
           ),
         ),
         borderData: FlBorderData(show: false),
-        lineBarsData: [
+        lineBarsData: <LineChartBarData>[
           LineChartBarData(
             belowBarData: BarAreaData(
               gradient: LinearGradient(
-                colors: [res, res.withAlpha(30)],
+                colors: <Color>[res, res.withAlpha(30)],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -84,16 +84,16 @@ class _StudiedChartState extends State<StudiedChart> {
             isCurved: true,
             preventCurveOverShooting: true,
             dotData: const FlDotData(show: false),
-            spots: List.generate(7, (i) => FlSpot(i.toDouble(), daysData[6 - i] * (min(widget.animValue, 0.8) + 0.2))),
+            spots: List<FlSpot>.generate(7, (int i) => FlSpot(i.toDouble(), daysData[6 - i] * (min(widget.animValue, 0.8) + 0.2))),
           ),
           LineChartBarData(
-            spots: [FlSpot(0, user_data.getAverage()), FlSpot(6, user_data.getAverage())],
+            spots: <FlSpot>[FlSpot(0, user_data.getAverage()), FlSpot(6, user_data.getAverage())],
             color: Colors.grey,
-            dashArray: [10],
+            dashArray: <int>[10],
             dotData: const FlDotData(show: false),
           ),
           LineChartBarData(
-            spots: [FlSpot(0, user_data.dailyGoal.toDouble()), FlSpot(6, user_data.dailyGoal.toDouble())],
+            spots: <FlSpot>[FlSpot(0, user_data.dailyGoal.toDouble()), FlSpot(6, user_data.dailyGoal.toDouble())],
             dotData: const FlDotData(show: false),
           ),
         ],

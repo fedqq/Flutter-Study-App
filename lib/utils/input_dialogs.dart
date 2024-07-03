@@ -6,10 +6,6 @@ import 'package:flutter_material_color_picker/flutter_material_color_picker.dart
 import 'package:studyappcs/utils/utils.dart';
 
 class DoubleInputDialog extends StatefulWidget {
-  final String title;
-  final Input first;
-  final Input second;
-  final bool cancellable;
   const DoubleInputDialog({
     super.key,
     required this.title,
@@ -17,6 +13,10 @@ class DoubleInputDialog extends StatefulWidget {
     required this.second,
     this.cancellable = true,
   });
+  final String title;
+  final Input first;
+  final Input second;
+  final bool cancellable;
 
   @override
   State<DoubleInputDialog> createState() => _DoubleInputDialogState();
@@ -24,10 +24,12 @@ class DoubleInputDialog extends StatefulWidget {
 
 class _DoubleInputDialogState extends State<DoubleInputDialog> {
   Widget buildInputField(Input type, Function(String) onChanged) {
-    if (!type.exists) return Container();
+    if (!type.exists) {
+      return Container();
+    }
 
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8),
       child: TextFormField(
         keyboardType: type.numerical ? TextInputType.number : TextInputType.name,
         initialValue: type.value,
@@ -41,40 +43,42 @@ class _DoubleInputDialogState extends State<DoubleInputDialog> {
     );
   }
 
-  bool validateInput(final Input input) {
-    if (!input.exists) return true;
+  bool validateInput(Input input) {
+    if (!input.exists) {
+      return true;
+    }
 
-    String value = input.value?.trim() ?? '';
-    bool numericalPass = !(input.numerical && int.tryParse(value) == null);
-    bool customValidatePass = input.validate == null ? true : input.validate!(value);
-    bool emptyPass = input.nullable ? true : value.isNotEmpty;
+    final String value = input.value?.trim() ?? '';
+    final bool numericalPass = !(input.numerical && int.tryParse(value) == null);
+    final bool customValidatePass = input.validate == null || input.validate!(value);
+    final bool emptyPass = input.nullable || value.isNotEmpty;
 
     return numericalPass && customValidatePass && emptyPass;
   }
 
   @override
   Widget build(BuildContext context) {
-    Input first = widget.first;
-    Input second = widget.second;
+    final Input first = widget.first;
+    final Input second = widget.second;
 
     return AlertDialog(
-      contentPadding: const EdgeInsets.all(24.0),
+      contentPadding: const EdgeInsets.all(24),
       title: Text(widget.title),
       content: Column(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          buildInputField(first, (str) {
+        children: <Widget>[
+          buildInputField(first, (String str) {
             first.value = str;
           }),
-          buildInputField(second, (str) => second.value = str),
+          buildInputField(second, (String str) => second.value = str),
         ],
       ),
-      actions: [
+      actions: <Widget>[
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
+            children: <Widget>[
               if (widget.cancellable)
                 TextButton(
                   child: const Text('Cancel'),
@@ -83,8 +87,8 @@ class _DoubleInputDialogState extends State<DoubleInputDialog> {
               FilledButton(
                 child: const Text('Confirm'),
                 onPressed: () {
-                  bool validFirst = validateInput(first);
-                  bool validSecond = validateInput(second);
+                  final bool validFirst = validateInput(first);
+                  final bool validSecond = validateInput(second);
                   if (!(validFirst && validSecond)) {
                     simpleSnackBar(
                       context,
@@ -105,13 +109,6 @@ class _DoubleInputDialogState extends State<DoubleInputDialog> {
 }
 
 class Input {
-  final String? name;
-  final bool exists;
-  final bool numerical;
-  String? value;
-  final bool nullable;
-  final bool Function(String)? validate;
-
   Input({
     this.validate,
     this.exists = true,
@@ -120,31 +117,34 @@ class Input {
     this.value,
     this.nullable = false,
   });
+  final String? name;
+  final bool exists;
+  final bool numerical;
+  String? value;
+  final bool nullable;
+  final bool Function(String)? validate;
 
-  static Input notExists() => Input(exists: false);
+  static Input notExists = Input(exists: false);
 }
 
-Future<bool> confirmDialog(BuildContext context, {required String title}) async {
-  return await showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Text(title),
-      content: const Text('Are you sure you would like to continue?'),
-      actionsAlignment: MainAxisAlignment.spaceBetween,
-      actions: [
-        FilledButton.tonal(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-        FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Confirm')),
-      ],
-    ),
-  );
-}
+Future<bool> confirmDialog(BuildContext context, {required String title}) async => await showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text(title),
+        content: const Text('Are you sure you would like to continue?'),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+        actions: <Widget>[
+          FilledButton.tonal(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Confirm')),
+        ],
+      ),
+    );
 
 class DialogResult {
+  DialogResult(this.first, this.second);
   String first = '';
   String second = '';
-
-  DialogResult(this.first, this.second);
-  static DialogResult empty() => DialogResult('', '');
+  static DialogResult empty = DialogResult('', '');
 }
 
 Future<String> singleInputDialog(
@@ -153,11 +153,11 @@ Future<String> singleInputDialog(
   Input input, {
   bool cancellable = true,
 }) async {
-  DialogResult? result = await doubleInputDialog(
+  final DialogResult? result = await doubleInputDialog(
     context,
     title,
     input,
-    Input.notExists(),
+    Input.notExists,
     cancellable: cancellable,
   );
 
@@ -171,10 +171,10 @@ Future<DialogResult?> doubleInputDialog(
   Input second, {
   bool cancellable = true,
 }) async =>
-    await showDialog<DialogResult>(
+    showDialog<DialogResult>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => DoubleInputDialog(
+      builder: (BuildContext context) => DoubleInputDialog(
         title: title,
         first: first,
         second: second,
@@ -188,13 +188,13 @@ Future<Color?> showColorPicker(BuildContext context, Color color) async {
   return showDialog<Color>(
     context: context,
     builder: (_) => AlertDialog(
-      contentPadding: const EdgeInsets.all(8.0),
+      contentPadding: const EdgeInsets.all(8),
       title: const Text('Choose a color'),
       content: MaterialColorPicker(
-        onColorChange: (value) => tempColor = value,
+        onColorChange: (Color value) => tempColor = value,
         selectedColor: color,
       ),
-      actions: [
+      actions: <Widget>[
         TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
         TextButton(
           onPressed: () => Navigator.pop(context, tempColor),

@@ -6,38 +6,38 @@ import 'package:share_plus/share_plus.dart';
 import 'package:studyappcs/data_managers/exporter.dart' as exporter;
 import 'package:studyappcs/states/subject.dart';
 
-void export(BuildContext context, Subject subject) async {
-  String res = subject.toString();
-  String dir = (await getTemporaryDirectory()).path;
-  File temp = File('$dir/${subject.name}.txt');
+Future<void> export(BuildContext context, Subject subject) async {
+  final String res = subject.toString();
+  final String dir = (await getTemporaryDirectory()).path;
+  final File temp = File('$dir/${subject.name}.txt');
 
   await temp.writeAsString(res);
-  await Share.shareXFiles([XFile('$dir/${subject.name}.txt')]);
+  await Share.shareXFiles(<XFile>[XFile('$dir/${subject.name}.txt')]);
 }
 
 void showPrintMenu(BuildContext context, Subject subject) {
-  BasicSlider slider = const BasicSlider(scoresShow: 0);
+  const BasicSlider slider = BasicSlider(scoresShow: 0);
 
   showModalBottomSheet(
     context: context,
-    builder: (context) => Align(
+    builder: (BuildContext context) => Align(
       alignment: Alignment.topCenter,
       child: Column(
-        children: [
+        children: <Widget>[
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8),
             child: Text('Export ${subject.name}', style: Theme.of(context).textTheme.headlineMedium),
           ),
           Card(
-            margin: const EdgeInsets.all(16.0),
-            elevation: 3.0,
+            margin: const EdgeInsets.all(16),
+            elevation: 3,
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                children: <Widget>[
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(8),
                     child: Text('PDF Options: ', style: Theme.of(context).textTheme.titleLarge),
                   ),
                   const Text('Scores to show: '),
@@ -47,7 +47,7 @@ void showPrintMenu(BuildContext context, Subject subject) {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8),
             child: FilledButton(
               onPressed: () {
                 exporter.printSubject(subject, slider.scoresShow.toInt());
@@ -66,9 +66,9 @@ void showPrintMenu(BuildContext context, Subject subject) {
 void showPrintOrExport(BuildContext context, Subject subject) {
   showDialog(
     context: context,
-    builder: (context) => AlertDialog(
+    builder: (BuildContext context) => AlertDialog(
       title: Text('Print or export ${subject.name}'),
-      actions: [
+      actions: <Widget>[
         FilledButton.tonal(onPressed: Navigator.of(context).pop, child: const Text('Cancel')),
         FilledButton(onPressed: () => export(context, subject), child: const Text('As TXT')),
         FilledButton(onPressed: () => showPrintMenu(context, subject), child: const Text('As PDF')),
@@ -78,8 +78,8 @@ void showPrintOrExport(BuildContext context, Subject subject) {
 }
 
 class BasicSlider extends StatefulWidget {
-  final double scoresShow;
   const BasicSlider({super.key, required this.scoresShow});
+  final double scoresShow;
 
   @override
   State<BasicSlider> createState() => _BasicSliderState();
@@ -88,19 +88,17 @@ class BasicSlider extends StatefulWidget {
 class _BasicSliderState extends State<BasicSlider> {
   double scoresShow = 0;
   @override
-  Widget build(BuildContext context) {
-    return SliderTheme(
-      data: SliderThemeData(tickMarkShape: SliderTickMarkShape.noTickMark),
-      child: Slider(
-        label: 'Show $scoresShow scores',
-        divisions: 30,
-        value: scoresShow,
-        onChanged: (i) => setState(() {
-          scoresShow += i - scoresShow;
-        }),
-        max: 30,
-        allowedInteraction: SliderInteraction.tapAndSlide,
-      ),
-    );
-  }
+  Widget build(BuildContext context) => SliderTheme(
+        data: SliderThemeData(tickMarkShape: SliderTickMarkShape.noTickMark),
+        child: Slider(
+          label: 'Show $scoresShow scores',
+          divisions: 30,
+          value: scoresShow,
+          onChanged: (double i) => setState(() {
+            scoresShow += i - scoresShow;
+          }),
+          max: 30,
+          allowedInteraction: SliderInteraction.tapAndSlide,
+        ),
+      );
 }

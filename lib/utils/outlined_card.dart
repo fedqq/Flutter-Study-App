@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
 
 class OutlinedCard extends StatelessWidget {
-  final Color? color;
-  final Widget child;
-  final EdgeInsetsGeometry? margin;
-  final double elevation;
-  final double radius;
-  final Color? shadowColor;
   const OutlinedCard({
     super.key,
     this.color,
@@ -16,10 +10,15 @@ class OutlinedCard extends StatelessWidget {
     this.radius = 25,
     this.shadowColor,
   });
+  final Color? color;
+  final Widget child;
+  final EdgeInsetsGeometry? margin;
+  final double elevation;
+  final double radius;
+  final Color? shadowColor;
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
+  Widget build(BuildContext context) => Card(
       surfaceTintColor: color,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
       shadowColor: shadowColor,
@@ -27,5 +26,4 @@ class OutlinedCard extends StatelessWidget {
       margin: margin,
       child: child,
     );
-  }
 }

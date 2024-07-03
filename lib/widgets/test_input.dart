@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 
 class TestInput extends StatefulWidget {
-  final String name;
-  final String area;
-  final Function(String) onChanged;
-  final EdgeInsetsGeometry padding;
-  final BorderRadius borderRadius;
   const TestInput({
     super.key,
     required this.name,
@@ -14,6 +9,11 @@ class TestInput extends StatefulWidget {
     required this.padding,
     required this.borderRadius,
   });
+  final String name;
+  final String area;
+  final Function(String) onChanged;
+  final EdgeInsetsGeometry padding;
+  final BorderRadius borderRadius;
 
   @override
   State<TestInput> createState() => _TestInputState();
@@ -21,18 +21,17 @@ class TestInput extends StatefulWidget {
 
 class _TestInputState extends State<TestInput> {
   @override
-  Widget build(BuildContext context) {
-    return Card(
+  Widget build(BuildContext context) => Card(
       shape: RoundedRectangleBorder(borderRadius: widget.borderRadius),
       margin: widget.padding,
       elevation: 3,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
+          children: <Widget>[
             Column(
-              children: [
+              children: <Widget>[
                 Text('${widget.name}: '),
                 Text(
                   widget.area,
@@ -48,5 +47,4 @@ class _TestInputState extends State<TestInput> {
         ),
       ),
     );
-  }
 }

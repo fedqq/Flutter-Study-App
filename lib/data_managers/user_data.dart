@@ -3,8 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-Map<String, int> dailyStudied = {};
-Map<String, int> dailyStreak = {};
+Map<String, int> dailyStudied = <String, int>{};
+Map<String, int> dailyStreak = <String, int>{};
 String userName = '';
 int _dailyGoal = 0;
 int streak = 0;
@@ -13,9 +13,11 @@ Color _accentColor = Colors.blue;
 late void Function(void Function()) updateTheme;
 
 int calculateStreak() {
-  if ((dailyStudied[getNowString()] ?? 0) < _dailyGoal) return 0;
+  if ((dailyStudied[getNowString()] ?? 0) < _dailyGoal) {
+    return 0;
+  }
 
-  int lastStreak = dailyStreak[format(DateTime.now().add(const Duration(days: -1)))] ?? 0;
+  final int lastStreak = dailyStreak[format(DateTime.now().add(const Duration(days: -1)))] ?? 0;
 
   return lastStreak + 1;
 }
@@ -41,13 +43,13 @@ set dailyGoal(int goal) => _dailyGoal = goal;
 
 int get maxStreak {
   int highest = 0;
-  dailyStreak.forEach((_, value) => highest = max(highest, value));
+  dailyStreak.forEach((_, int value) => highest = max(highest, value));
 
   return highest;
 }
 
 bool study() {
-  String formatted = getNowString();
+  final String formatted = getNowString();
   if (!dailyStudied.containsKey(formatted)) {
     dailyStudied[formatted] = 1;
   } else {
@@ -58,13 +60,13 @@ bool study() {
 }
 
 List<int> getLastWeek() {
-  List<String> strs = [];
+  final List<String> strs = <String>[];
   for (int i = 0; i < 7; i++) {
     strs.add(format(DateTime.now().add(Duration(days: -i))));
   }
-  List<int> res = [];
-  for (String date in strs) {
-    int num = dailyStudied[date] ?? 0;
+  final List<int> res = <int>[];
+  for (final String date in strs) {
+    final int num = dailyStudied[date] ?? 0;
     res.add(num);
   }
 
@@ -73,7 +75,7 @@ List<int> getLastWeek() {
 
 double getAverage() {
   int sum = 0;
-  for (int i in getLastWeek()) {
+  for (final int i in getLastWeek()) {
     sum += i;
   }
 

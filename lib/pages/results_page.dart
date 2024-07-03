@@ -1,12 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/states/test.dart';
+import 'package:studyappcs/utils/utils.dart';
 import 'package:studyappcs/widgets/result_card.dart';
 
 class ResultsPage extends StatefulWidget {
+  const ResultsPage({super.key, required this.test, this.editable = true});
   final Test test;
   final bool editable;
-  const ResultsPage({super.key, required this.test, this.editable = true});
 
   @override
   State<ResultsPage> createState() => _ResultsPageState();
@@ -24,8 +26,8 @@ class _ResultsPageState extends State<ResultsPage> {
   @override
   Widget build(BuildContext context) {
     BorderRadius getRadius(int index) {
-      Radius top = Radius.circular(index == 0 ? 12 : 3);
-      Radius bottom = Radius.circular(index == cards.length - 1 ? 12 : 3);
+      final Radius top = Radius.circular(index == 0 ? 12 : 3);
+      final Radius bottom = Radius.circular(index == cards.length - 1 ? 12 : 3);
 
       return BorderRadius.only(topLeft: top, topRight: top, bottomLeft: bottom, bottomRight: bottom);
     }
@@ -33,11 +35,11 @@ class _ResultsPageState extends State<ResultsPage> {
     return Scaffold(
       appBar: AppBar(title: Text('Test on ${widget.test.area} - ${widget.test.date}'), centerTitle: true),
       body: ListView(
-        padding: const EdgeInsets.all(8.0),
-        children: [
+        padding: const EdgeInsets.all(8),
+        children: <Widget>[
           Center(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16),
               child: Text(
                 'You got ${widget.test.percentage}% correct\n(${widget.test.correct} / ${widget.test.totalAmount})',
                 textAlign: TextAlign.center,
@@ -49,24 +51,24 @@ class _ResultsPageState extends State<ResultsPage> {
             physics: const ScrollPhysics(),
             shrinkWrap: true,
             itemCount: cards.length,
-            itemBuilder: (context, index) => ResultCard(
+            itemBuilder: (BuildContext context, int index) => ResultCard(
               correct: widget.test.scored[cards[index]],
               card: cards[index],
               answer: widget.test.answers[index],
               editable: widget.editable,
               markCorrect: () async {
-                var testDocs = await firestore_manager.testDocs;
+                final QuerySnapshot<StrMap> testDocs = await firestore_manager.testDocs;
 
-                var cardsDocs = await testDocs.docs
-                    .firstWhere((a) => a['id'] == widget.test.id)
+                final QuerySnapshot<Map<String, dynamic>> cardsDocs = await testDocs.docs
+                    .firstWhere((QueryDocumentSnapshot<StrMap> a) => a['id'] == widget.test.id)
                     .reference
                     .collection('testcards')
                     .get();
 
-                cardsDocs.docs
-                    .firstWhere((a) => a['name'] == cards[index].name && a['meaning'] == cards[index].meaning)
+                await cardsDocs.docs
+                    .firstWhere((QueryDocumentSnapshot<Map<String, dynamic>> a) => a['name'] == cards[index].name && a['meaning'] == cards[index].meaning)
                     .reference
-                    .update({'answer': cards[index].meaning});
+                    .update(<Object, Object?>{'answer': cards[index].meaning});
 
                 setState(() => widget.test.scored[cards[index]] = true);
               },

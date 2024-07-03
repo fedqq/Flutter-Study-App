@@ -1,3 +1,5 @@
+// ignore_for_file: always_specify_types
+
 import 'package:flutter/material.dart';
 import 'package:studyappcs/data_managers/tests_manager.dart' as tests_manager;
 import 'package:studyappcs/pages/results_page.dart';
@@ -5,8 +7,8 @@ import 'package:studyappcs/states/test.dart';
 import 'package:window_rounded_corners/window_rounded_corners.dart';
 
 class AllTestsPage extends StatefulWidget {
-  final String area;
   const AllTestsPage({super.key, this.area = ''});
+  final String area;
 
   @override
   State<AllTestsPage> createState() => _AllTestsPageState();
@@ -47,7 +49,7 @@ class _AllTestsPageState extends State<AllTestsPage> with SingleTickerProviderSt
       double top = WindowCorners.getCorners().topLeft + 16;
       double bottom = WindowCorners.getCorners().topLeft + 16;
 
-      String area = tests[index].area;
+      final String area = tests[index].area;
 
       if (index != 0) {
         if (area == tests[index - 1].area) {
@@ -61,8 +63,8 @@ class _AllTestsPageState extends State<AllTestsPage> with SingleTickerProviderSt
         }
       }
 
-      Radius t = Radius.circular(top);
-      Radius b = Radius.circular(bottom);
+      final Radius t = Radius.circular(top);
+      final Radius b = Radius.circular(bottom);
 
       return BorderRadius.only(topLeft: t, topRight: t, bottomLeft: b, bottomRight: b);
     }
@@ -71,7 +73,7 @@ class _AllTestsPageState extends State<AllTestsPage> with SingleTickerProviderSt
       double top = 8;
       double bottom = 8;
 
-      String area = tests[index].area;
+      final String area = tests[index].area;
 
       if (index != 0) {
         if (area == tests[index - 1].area) {
@@ -101,13 +103,13 @@ class _AllTestsPageState extends State<AllTestsPage> with SingleTickerProviderSt
               margin: getMargin(index),
               shape: RoundedRectangleBorder(borderRadius: getRadius(index)),
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16),
                 child: Wrap(
                   alignment: WrapAlignment.spaceBetween,
                   children: [
                     Text(
                       tests[index].area,
-                      style: Theme.of(context).textTheme.titleMedium!,
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
                     Text(tests[index].date),
                   ],

@@ -2,12 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:studyappcs/states/test.dart';
 
 class ResultCard extends StatefulWidget {
-  final bool? correct;
-  final TestCard card;
-  final bool editable;
-  final String answer;
-  final void Function() markCorrect;
-  final BorderRadius borderRadius;
   const ResultCard({
     super.key,
     required this.correct,
@@ -17,6 +11,12 @@ class ResultCard extends StatefulWidget {
     required this.markCorrect,
     required this.borderRadius,
   });
+  final bool? correct;
+  final TestCard card;
+  final bool editable;
+  final String answer;
+  final void Function() markCorrect;
+  final BorderRadius borderRadius;
 
   @override
   State<ResultCard> createState() => _ResultCardState();
@@ -33,9 +33,9 @@ class _ResultCardState extends State<ResultCard> {
         side: BorderSide(color: correct ? Colors.green : Colors.red),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Stack(
-          children: [
+          children: <Widget>[
             if ((!correct) && widget.editable)
               Center(
                 child: FilledButton.tonal(
@@ -51,10 +51,10 @@ class _ResultCardState extends State<ResultCard> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
+              children: <Widget>[
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                  children: <Widget>[
                     Text(widget.card.name, overflow: TextOverflow.ellipsis),
                     Text(
                       widget.card.origin,
@@ -64,7 +64,7 @@ class _ResultCardState extends State<ResultCard> {
                   ],
                 ),
                 Column(
-                  children: [
+                  children: <Widget>[
                     Text(widget.card.meaning, overflow: TextOverflow.ellipsis),
                     if (!correct)
                       Text(

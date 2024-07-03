@@ -1,23 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:studyappcs/data_managers/user_data.dart' as user_data;
 import 'package:studyappcs/data_managers/tests_manager.dart' as tests_manager;
+import 'package:studyappcs/data_managers/user_data.dart' as user_data;
 import 'package:studyappcs/states/flashcard.dart';
 import 'package:studyappcs/states/subject.dart';
 import 'package:studyappcs/states/task.dart';
 import 'package:studyappcs/states/test.dart';
 import 'package:studyappcs/states/topic.dart';
+import 'package:studyappcs/utils/utils.dart';
 
-typedef SnapshotType = Future<QuerySnapshot<Map<String, dynamic>>>;
-typedef DocSnapshotType = Future<QueryDocumentSnapshot<Map<String, dynamic>>>;
-typedef CollectionType = CollectionReference<Map<String, dynamic>>;
+typedef SnapshotType = Future<QuerySnapshot<StrMap>>;
+typedef DocSnapshotType = Future<QueryDocumentSnapshot<StrMap>>;
+typedef CollectionType = CollectionReference<StrMap>;
 
-DocumentReference get _user {
-  User? user = FirebaseAuth.instance.currentUser;
-  final db = FirebaseFirestore.instance;
-  CollectionReference users = db.collection('users');
-  DocumentReference currentUser = users.doc(user?.uid);
+DocumentReference<StrMap> get _user {
+  final User? user = FirebaseAuth.instance.currentUser;
+  final FirebaseFirestore db = FirebaseFirestore.instance;
+  final CollectionReference<StrMap> users = db.collection('users');
+  final DocumentReference<StrMap> currentUser = users.doc(user?.uid);
   return currentUser;
 }
 
@@ -26,29 +27,29 @@ CollectionType get cardCollection => _user.collection('cards');
 CollectionType get taskCollection => _user.collection('tasks');
 CollectionType get testCollection => _user.collection('tests');
 
-SnapshotType get subjectDocs async => await subjectCollection.get();
-SnapshotType get cardDocs async => await cardCollection.get();
-SnapshotType get taskDocs async => await taskCollection.get();
-SnapshotType get testDocs async => await testCollection.get();
+SnapshotType get subjectDocs async => subjectCollection.get();
+SnapshotType get cardDocs async => cardCollection.get();
+SnapshotType get taskDocs async => taskCollection.get();
+SnapshotType get testDocs async => testCollection.get();
 
-List<Subject> subjectsList = [];
-List<Task> tasksList = [];
-List<Task> compTasksList = [];
+List<Subject> subjectsList = <Subject>[];
+List<Task> tasksList = <Task>[];
+List<Task> compTasksList = <Task>[];
 
-void _userpref(Map<String, dynamic> v) => _user.update(v);
+void _userpref(StrMap v) => _user.update(v);
 
-set goal(String goal) => _userpref({'goal': int.tryParse(goal)});
-set username(String name) => _userpref({'username': name});
-set color(int color) => _userpref({'color': color});
+set goal(String goal) => _userpref(<String, dynamic>{'goal': int.tryParse(goal)});
+set username(String name) => _userpref(<String, dynamic>{'username': name});
+set color(int color) => _userpref(<String, dynamic>{'color': color});
 // ignore: avoid_positional_boolean_parameters
-set lightness(bool l) => _userpref({'lightness': l});
-set streaks(Map s) => _user.update({'streaks': s});
-set studied(Map s) => _user.update({'studied': s});
+set lightness(bool l) => _userpref(<String, dynamic>{'lightness': l});
+set streaks(StrMap s) => _user.update(<Object, Object?>{'streaks': s});
+set studied(StrMap s) => _user.update(<Object, Object?>{'studied': s});
 
-Future<List<QueryDocumentSnapshot>> cardsFromSubject(String s) async =>
+Future<List<QueryDocumentSnapshot<StrMap>>> cardsFromSubject(String s) async =>
     (await cardCollection.where('subject', isEqualTo: s).get()).docs;
 
-Future<List<QueryDocumentSnapshot>> cardsFromTopic(String t) async =>
+Future<List<QueryDocumentSnapshot<StrMap>>> cardsFromTopic(String t) async =>
     (await cardCollection.where('topic', isEqualTo: t).get()).docs;
 
 DocSnapshotType cardNamed(String n) async => (await cardCollection.where('name', isEqualTo: n).get()).docs.first;
@@ -56,14 +57,16 @@ DocSnapshotType cardNamed(String n) async => (await cardCollection.where('name',
 DocSnapshotType subjectNamed(String n) async => (await subjectCollection.where('name', isEqualTo: n).get()).docs.first;
 
 Future<void> _loadPrefs() async {
-  final prefs = (await _user.get()).data() as Map<String, dynamic>?;
-  if (prefs == null) return;
-  String name = prefs['username'] as String;
-  int goal = prefs['goal'] as int;
-  int accentColor = prefs['color'] as int;
-  bool lightness = prefs['lightness'] as bool;
-  Map<String, int> streaks = (prefs['streaks'] as Map<String, dynamic>).cast<String, int>();
-  Map<String, int> studied = (prefs['studied'] as Map<String, dynamic>).cast<String, int>();
+  final StrMap? prefs = (await _user.get()).data();
+  if (prefs == null) {
+    return;
+  }
+  final String name = prefs['username'] as String;
+  final int goal = prefs['goal'] as int;
+  final int accentColor = prefs['color'] as int;
+  final bool lightness = prefs['lightness'] as bool;
+  final Map<String, int> streaks = (prefs['streaks'] as StrMap).cast<String, int>();
+  final Map<String, int> studied = (prefs['studied'] as StrMap).cast<String, int>();
 
   user_data.userName = name;
   user_data.color = Color(accentColor);
@@ -74,7 +77,7 @@ Future<void> _loadPrefs() async {
 }
 
 Future<void> loadData() async {
-  List<Subject> subjects = [];
+  final List<Subject> subjects = <Subject>[];
 
   await _loadPrefs();
   await _loadSubjects(subjects);
@@ -86,23 +89,23 @@ Future<void> loadData() async {
 }
 
 Future<void> _loadTests() async {
-  List<Test> tests = [];
-  final testsCol = await testDocs;
-  for (var snapshot in testsCol.docs) {
-    final data = snapshot.data();
-    String area = data['area'];
-    String date = data['date'];
-    int id = data['id'] ?? 0;
-    final Map<TestCard, bool> scored = {};
-    final List<String> answers = [];
+  final List<Test> tests = <Test>[];
+  final QuerySnapshot<StrMap> testsCol = await testDocs;
+  for (final QueryDocumentSnapshot<StrMap> snapshot in testsCol.docs) {
+    final StrMap data = snapshot.data();
+    final String area = data['area'];
+    final String date = data['date'];
+    final int id = data['id'] ?? 0;
+    final Map<TestCard, bool> scored = <TestCard, bool>{};
+    final List<String> answers = <String>[];
 
-    var docs = await snapshot.reference.collection('testcards').get();
-    for (var r in docs.docs) {
-      String name = r['name'];
-      String meaning = r['meaning'];
-      String given = r['given'];
-      bool correct = meaning == given;
-      String origin = r['origin'];
+    final QuerySnapshot<StrMap> docs = await snapshot.reference.collection('testcards').get();
+    for (final QueryDocumentSnapshot<StrMap> r in docs.docs) {
+      final String name = r['name'];
+      final String meaning = r['meaning'];
+      final String given = r['given'];
+      final bool correct = meaning == given;
+      final String origin = r['origin'];
       scored[TestCard(name, meaning, origin)] = correct;
       answers.add(given);
     }
@@ -113,17 +116,17 @@ Future<void> _loadTests() async {
 }
 
 Future<void> _loadTasks() async {
-  List<Task> completedTasks = [];
-  List<Task> tasks = [];
+  final List<Task> completedTasks = <Task>[];
+  final List<Task> tasks = <Task>[];
 
-  final tasksCol = await taskDocs;
-  for (var snapshot in tasksCol.docs) {
-    final data = snapshot.data();
-    String name = data['name'] as String;
-    String desc = data['desc'] as String;
-    bool completed = data['completed'] as bool;
-    Color taskColor = Color(data['color'] as int);
-    DateTime dueDate = DateTime.fromMillisecondsSinceEpoch(data['date'] as int);
+  final QuerySnapshot<StrMap> tasksCol = await taskDocs;
+  for (final QueryDocumentSnapshot<StrMap> snapshot in tasksCol.docs) {
+    final StrMap data = snapshot.data();
+    final String name = data['name'] as String;
+    final String desc = data['desc'] as String;
+    final bool completed = data['completed'] as bool;
+    final Color taskColor = Color(data['color'] as int);
+    final DateTime dueDate = DateTime.fromMillisecondsSinceEpoch(data['date'] as int);
 
     (completed ? completedTasks : tasks).add(Task(name, dueDate, taskColor, desc, completed: completed));
   }
@@ -133,40 +136,40 @@ Future<void> _loadTasks() async {
 }
 
 Future<void> _loadCards(List<Subject> subjects) async {
-  final cardsCol = await cardDocs;
-  for (var snapshot in cardsCol.docs) {
-    final data = snapshot.data();
-    String subjectName = data['subject'] as String;
-    String topicName = data['topic'] as String;
-    String name = data['name'] as String;
-    String meaning = data['meaning'] as String;
-    bool learned = data['learned'] as bool;
-    FlashCard card = FlashCard(name, meaning, learned: learned);
+  final QuerySnapshot<StrMap> cardsCol = await cardDocs;
+  for (final QueryDocumentSnapshot<StrMap> snapshot in cardsCol.docs) {
+    final StrMap data = snapshot.data();
+    final String subjectName = data['subject'] as String;
+    final String topicName = data['topic'] as String;
+    final String name = data['name'] as String;
+    final String meaning = data['meaning'] as String;
+    final bool learned = data['learned'] as bool;
+    final FlashCard card = FlashCard(name, meaning, learned: learned);
 
-    Subject realSubject = subjects.firstWhere((s) => s.name == subjectName);
+    final Subject realSubject = subjects.firstWhere((Subject s) => s.name == subjectName);
 
     realSubject.topics
-        .firstWhere((t) => t.name == topicName, orElse: () => realSubject.addTopic(Topic(topicName)))
+        .firstWhere((Topic t) => t.name == topicName, orElse: () => realSubject.addTopic(Topic(topicName)))
         .addCard(card);
   }
 }
 
 Future<void> _loadSubjects(List<Subject> subjects) async {
-  final subjectsCol = await subjectDocs;
-  for (var snapshot in subjectsCol.docs) {
-    final data = snapshot.data();
-    String name = data['name'] as String;
-    List<int> scores = (data['scores'] as List).cast<int>();
-    Color subjectColor = Color(data['color'] as int);
-    String teacher = (data['teacher'] as String?) ?? '';
-    String classroom = (data['classroom'] as String?) ?? '';
-    Subject subject = Subject(name, subjectColor, teacher, classroom)..testScores = scores;
+  final QuerySnapshot<StrMap> subjectsCol = await subjectDocs;
+  for (final QueryDocumentSnapshot<StrMap> snapshot in subjectsCol.docs) {
+    final StrMap data = snapshot.data();
+    final String name = data['name'] as String;
+    final List<int> scores = data['scores'] as List<int>;
+    final Color subjectColor = Color(data['color'] as int);
+    final String teacher = (data['teacher'] as String?) ?? '';
+    final String classroom = (data['classroom'] as String?) ?? '';
+    final Subject subject = Subject(name, subjectColor, teacher, classroom)..testScores = scores;
     subjects.add(subject);
   }
 }
 
 Future<void> saveData() async {
-  _user.set({
+  await _user.set(<String, Object>{
     'username': user_data.userName,
     'goal': user_data.dailyGoal,
     'color': user_data.color.value,

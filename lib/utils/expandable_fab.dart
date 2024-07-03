@@ -21,10 +21,10 @@ class ExFabController {
 }
 
 class ExpandableFab extends StatefulWidget {
+  const ExpandableFab({super.key, required this.children, this.controller, this.onPress});
   final List<ActionButton> children;
   final ExFabController? controller;
   final void Function()? onPress;
-  const ExpandableFab({super.key, required this.children, this.controller, this.onPress});
 
   @override
   State<ExpandableFab> createState() => _ExpandableFabState();
@@ -36,25 +36,21 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
   bool _open = false;
 
   @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (_, __) => BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 8 * animation.value, sigmaY: 8 * animation.value),
-        child: SizedBox(
-          width: double.infinity,
-          height: double.infinity,
-          child: Stack(
-            alignment: Alignment.bottomRight,
-            children: [
-              ..._buildExpandingActionButtons(),
-              buildButton(),
-            ],
+  Widget build(BuildContext context) => AnimatedBuilder(
+        animation: animation,
+        builder: (_, __) => BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 8 * animation.value, sigmaY: 8 * animation.value),
+          child: SizedBox.expand(
+            child: Stack(
+              alignment: Alignment.bottomRight,
+              children: <Widget>[
+                ..._buildExpandingActionButtons(),
+                buildButton(),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 
   // ignore: avoid_positional_boolean_parameters
   void set(bool b) {
@@ -99,21 +95,21 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
   Widget buildButton() => FloatingActionButton(
         onPressed: () {
           toggle();
-          if (widget.onPress != null) widget.onPress!();
+          widget.onPress?.call();
         },
         child: AnimatedIcon(icon: AnimatedIcons.menu_close, progress: _controller),
       );
 
   List<Widget> _buildExpandingActionButtons() {
-    final children = <Widget>[];
-    final count = widget.children.length;
-    final step = 90.0 / (count - 1);
-    for (var i = 0, offset = 0.0; i < count; i++, offset += step) {
+    final List<Widget> children = <Widget>[];
+    final int count = widget.children.length;
+    final double step = 90.0 / (count - 1);
+    for (double i = 0, offset = 0; i < count; i++, offset += step) {
       children.add(
         ExpandingActionButton(
-          index: i.toDouble(),
+          index: i,
           progress: animation,
-          child: widget.children[i],
+          child: widget.children[i.toInt()],
         ),
       );
     }
@@ -136,12 +132,10 @@ class ActionButton extends StatelessWidget {
   final String name;
 
   @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: onPressed,
-      icon: icon,
-    );
-  }
+  Widget build(BuildContext context) => IconButton(
+        onPressed: onPressed,
+        icon: icon,
+      );
 }
 
 @immutable
@@ -158,40 +152,38 @@ class ExpandingActionButton extends StatelessWidget {
   final ActionButton child;
 
   @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: progress,
-      builder: (context, _) {
-        final offset = Offset(0, ((index + 1) * 60) * progress.value);
+  Widget build(BuildContext context) => AnimatedBuilder(
+        animation: progress,
+        builder: (BuildContext context, _) {
+          final Offset offset = Offset(0, ((index + 1) * 60) * progress.value);
 
-        return Positioned(
-          bottom: 10 + offset.dy,
-          child: Opacity(
-            opacity: progress.value,
-            child: Row(
-              children: [
-                Text(child.name),
-                const SizedBox(width: 10),
-                Transform.rotate(
-                  angle: (1.0 - progress.value) * pi / 2,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SizedBox(
-                      height: 40,
-                      width: 40,
-                      child: child,
+          return Positioned(
+            bottom: 10 + offset.dy,
+            child: Opacity(
+              opacity: progress.value,
+              child: Row(
+                children: <Widget>[
+                  Text(child.name),
+                  const SizedBox(width: 10),
+                  Transform.rotate(
+                    angle: (1.0 - progress.value) * pi / 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: SizedBox(
+                        height: 40,
+                        width: 40,
+                        child: child,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
-      },
-      child: FadeTransition(
-        opacity: progress,
-        child: child,
-      ),
-    );
-  }
+          );
+        },
+        child: FadeTransition(
+          opacity: progress,
+          child: child,
+        ),
+      );
 }

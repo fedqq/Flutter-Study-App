@@ -1,8 +1,10 @@
+// ignore_for_file: always_specify_types
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/main.dart';
 import 'package:studyappcs/pages/login_page.dart';
-import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/utils/utils.dart' as theming;
 
 class SplashScreen extends StatefulWidget {
@@ -37,12 +39,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           context,
           PageRouteBuilder(
             transitionDuration: Durations.extralong3,
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              const begin = Offset(0.0, 1.0);
-              const end = Offset.zero;
+            transitionsBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+              Widget child,
+            ) {
+              const Offset begin = Offset(0, 1);
+              const Offset end = Offset.zero;
 
-              final tween = Tween(begin: begin, end: end);
-              final curvedAnimation = CurvedAnimation(
+              final Tween<Offset> tween = Tween(begin: begin, end: end);
+              final CurvedAnimation curvedAnimation = CurvedAnimation(
                 parent: animation,
                 curve: Curves.ease,
               );
@@ -59,14 +66,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     );
   }
 
-  void beginLoad() async {
+  Future<void> beginLoad() async {
     if (FirebaseAuth.instance.currentUser == null) {
       animationController.dispose();
       Navigator.pop(context);
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const Loginpage()));
+      await Navigator.push(context, MaterialPageRoute(builder: (_) => const Loginpage()));
       return;
     }
-    firestore_manager.loadData().then((_) => pushMain(context));
+    await firestore_manager.loadData().then((_) => pushMain(context));
   }
 
   @override
@@ -84,17 +91,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Colors.black, Color.fromARGB(255, 14, 14, 14)],
+              colors: <Color>[Colors.black, Color.fromARGB(255, 14, 14, 14)],
             ),
           ),
           child: AnimatedBuilder(
             animation: animation,
-            builder: (context, __) => Stack(
+            builder: (BuildContext context, __) => Stack(
               alignment: Alignment.center,
-              children: [
+              children: <Widget>[
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
+                  children: <Widget>[
                     Opacity(
                       opacity: animation.value,
                       child: Text(

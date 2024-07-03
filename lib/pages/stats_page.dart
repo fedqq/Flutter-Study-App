@@ -9,15 +9,16 @@ import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_ma
 import 'package:studyappcs/data_managers/tests_manager.dart' as tests_manager;
 import 'package:studyappcs/data_managers/user_data.dart' as user_data;
 import 'package:studyappcs/states/subject.dart';
+import 'package:studyappcs/states/task.dart';
 import 'package:studyappcs/states/test.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
 import 'package:studyappcs/widgets/studied_chart.dart';
 
 class StatsPage extends StatefulWidget {
+  const StatsPage({super.key, required this.saveCallback, required this.loadCallback, required this.subjects});
   final void Function() saveCallback;
   final void Function() loadCallback;
   final List<Subject> subjects;
-  const StatsPage({super.key, required this.saveCallback, required this.loadCallback, required this.subjects});
 
   @override
   State<StatsPage> createState() => _StatsPageState();
@@ -45,21 +46,23 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
     super.initState();
   }
 
-  void editDailyGoal() async {
-    String result = await singleInputDialog(
+  Future<void> editDailyGoal() async {
+    final String result = await singleInputDialog(
       context,
       'Choose Daily Goal',
-      Input(name: 'Goal', numerical: true, validate: (str) => (int.tryParse(str) ?? 0) > 0),
+      Input(name: 'Goal', numerical: true, validate: (String str) => (int.tryParse(str) ?? 0) > 0),
     );
-    if (result == '') return;
+    if (result == '') {
+      return;
+    }
 
     firestore_manager.goal = result;
 
     setState(() => user_data.dailyGoal = int.parse(result));
   }
 
-  void editUserName() async {
-    String name = await singleInputDialog(
+  Future<void> editUserName() async {
+    final String name = await singleInputDialog(
       context,
       'Change Username',
       Input(
@@ -67,14 +70,16 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
         value: user_data.userName,
       ),
     );
-    if (name == '') return;
+    if (name == '') {
+      return;
+    }
     firestore_manager.username = name;
     setState(() => user_data.userName = name);
   }
 
   Widget buildButton(String text, void Function() callback) => Expanded(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5.0),
+          padding: const EdgeInsets.symmetric(horizontal: 5),
           child: FilledButton.tonal(
             onPressed: callback,
             child: Text(text),
@@ -83,7 +88,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
       );
 
   Widget buildText(String s) => Padding(
-        padding: const EdgeInsets.all(15.0),
+        padding: const EdgeInsets.all(15),
         child: Text(
           s,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
@@ -91,42 +96,46 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
         ),
       );
 
-  void chooseAccentColor() async {
-    Color col = await showColorPicker(context, user_data.color) ?? Colors.black;
-    if (col == Colors.black) return;
+  Future<void> chooseAccentColor() async {
+    final Color col = await showColorPicker(context, user_data.color) ?? Colors.black;
+    if (col == Colors.black) {
+      return;
+    }
     user_data.color = col;
     firestore_manager.color = col.value;
   }
 
   double calculateLearnedPercentage() {
-    var a = totalAndLearned();
+    final List<int> a = totalAndLearned();
     return a[0] == 0 ? 0 : a[1] / a[0];
   }
 
   List<int> totalAndLearned() {
     int total = 0;
     int learned = 0;
-    for (Subject subject in firestore_manager.subjectsList) {
+    for (final Subject subject in firestore_manager.subjectsList) {
       total += subject.total;
       learned += subject.learned;
     }
-    return [total, learned];
+    return <int>[total, learned];
   }
 
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback(
       (_) {
-        Future.delayed(
+        Future<void>.delayed(
           Durations.extralong1,
           () async {
             if (user_data.userName == '') {
-              if (showingNameInput) return;
+              if (showingNameInput) {
+                return;
+              }
 
               showingNameInput = true;
-              Future<String?> res =
+              final Future<String?> res =
                   singleInputDialog(context, 'Set User Name', Input(name: 'Name'), cancellable: false);
-              String name = await res ?? '';
+              final String name = await res ?? '';
               setState(() => user_data.userName = name);
               showingNameInput = false;
             }
@@ -137,12 +146,12 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
 
     double getRecentAverage() {
       DateTime fromString(String s) {
-        var [day, month, year] = s.split('/');
+        final [String day, String month, String year] = s.split('/');
 
         return DateTime(int.parse(year), int.parse(month), int.parse(day));
       }
 
-      List<Test> pastTests = tests_manager.pastTests
+      final List<Test> pastTests = tests_manager.pastTests
         ..sort((Test a, Test b) => fromString(a.date).compareTo(fromString(b.date)));
       int sum = 0;
       pastTests.sublist(0, min(10, pastTests.length)).forEach((Test element) => sum += element.percentage);
@@ -150,10 +159,10 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
     }
 
     double getAllAverage() {
-      List<Test> tests = tests_manager.pastTests;
+      final List<Test> tests = tests_manager.pastTests;
       int total = 0;
-      int length = tests.length;
-      for (var element in tests) {
+      final int length = tests.length;
+      for (final Test element in tests) {
         total += element.percentage;
       }
       return total / length;
@@ -163,15 +172,14 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
 
     return AnimatedBuilder(
       animation: animation,
-      builder: (context, __) {
-        return Scaffold(
+      builder: (BuildContext context, __) => Scaffold(
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
             surfaceTintColor: Colors.transparent,
-            actions: [
+            actions: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8),
                 child: IconButton(onPressed: showThemeOptions, icon: const Icon(Icons.settings_rounded)),
               ),
             ],
@@ -181,11 +189,11 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
             opacity: animation.value,
             child: ListView(
               padding: const EdgeInsets.fromLTRB(16, 46, 16, 16),
-              children: [
+              children: <Widget>[
                 FittedBox(
                   fit: BoxFit.fitHeight,
                   child: Column(
-                    children: [
+                    children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                         child: Text(
@@ -208,7 +216,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                   ),
                 ),
                 Row(
-                  children: [
+                  children: <Widget>[
                     Card(
                       margin: const EdgeInsets.all(8),
                       elevation: 2,
@@ -217,7 +225,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                         child: FittedBox(
                           fit: BoxFit.fitHeight,
                           child: Padding(
-                            padding: const EdgeInsets.all(10.0),
+                            padding: const EdgeInsets.all(10),
                             child: Center(
                               child: Text('  ${user_data.calculateStreak()}🔥', textAlign: TextAlign.center),
                             ),
@@ -233,19 +241,19 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                         child: Center(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
-                            children: [
+                            children: <Widget>[
                               buildText(
-                                '${firestore_manager.tasksList.where((a) => a.dueDate == DateUtils.dateOnly(DateTime.now())).length} due today',
+                                '${firestore_manager.tasksList.where((Task a) => a.dueDate == DateUtils.dateOnly(DateTime.now())).length} due today',
                               ),
                               buildText(
-                                '${firestore_manager.tasksList.where((a) => a.dueDate.compareTo(DateUtils.dateOnly(DateTime.now())) > 0).length} overdue',
+                                '${firestore_manager.tasksList.where((Task a) => a.dueDate.compareTo(DateUtils.dateOnly(DateTime.now())) > 0).length} overdue',
                               ),
                             ],
                           ),
                         ),
                       ),
                     ),
-                  ].map((a) => Expanded(child: a)).toList(),
+                  ].map((Widget a) => Expanded(child: a)).toList(),
                 ),
                 Card(
                   margin: const EdgeInsets.all(8),
@@ -263,7 +271,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                     margin: const EdgeInsets.all(8),
                     elevation: 2,
                     child: Column(
-                      children: [
+                      children: <Widget>[
                         buildText(
                           'Last 10 average test scores: ${getRecentAverage()}% (${getRecentAverage() - getAllAverage() >= 0 ? '+' : ''}${getRecentAverage() - getAllAverage()}%)',
                         ),
@@ -272,10 +280,10 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                     ),
                   ),
                 Row(
-                  children: [
+                  children: <Widget>[
                     SizedBox.expand(
                       child: Padding(
-                        padding: const EdgeInsets.all(20.0),
+                        padding: const EdgeInsets.all(20),
                         child: CircularProgressIndicator(
                           strokeWidth: 10,
                           value: calculateLearnedPercentage() * animation.value,
@@ -291,7 +299,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                     ),
                   ]
                       .map(
-                        (a) => Expanded(
+                        (Widget a) => Expanded(
                           child: AspectRatio(
                             aspectRatio: 1,
                             child: Card(margin: const EdgeInsets.all(8), child: Center(child: a)),
@@ -306,9 +314,9 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                     margin: const EdgeInsets.all(8),
                     elevation: 2,
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(8),
                       child: Row(
-                        children: [
+                        children: <Widget>[
                           buildButton(
                             'Data to PDF',
                             () {
@@ -321,11 +329,10 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                     ),
                   ),
                 ),
-              ].map((a) => ScaleTransition(scale: animation, child: a)).toList(),
+              ].map((Widget a) => ScaleTransition(scale: animation, child: a)).toList(),
             ),
           ),
-        );
-      },
+        ),
     );
   }
 
@@ -334,14 +341,13 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
-      builder: (context) {
-        return Column(
+      builder: (BuildContext context) => Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
+          children: <Widget>[
             TextButton.icon(
               onPressed: editUserName,
               label: const Row(
-                children: [Text("Edit Username")],
+                children: <Widget>[Text('Edit Username')],
               ),
               icon: const Icon(Icons.arrow_forward_rounded),
               iconAlignment: IconAlignment.end,
@@ -352,7 +358,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                 SystemNavigator.pop();
               },
               label: const Row(
-                children: [Text("Sign Out (Closes the app)")],
+                children: <Widget>[Text('Sign Out (Closes the app)')],
               ),
               icon: const Icon(Icons.arrow_forward_rounded),
               iconAlignment: IconAlignment.end,
@@ -360,18 +366,18 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
             TextButton.icon(
               onPressed: editDailyGoal,
               label: const Row(
-                children: [Text("Edit Daily Goal")],
+                children: <Widget>[Text('Edit Daily Goal')],
               ),
               icon: const Icon(Icons.arrow_forward_rounded),
               iconAlignment: IconAlignment.end,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
+              children: <Widget>[
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: FilledButton(onPressed: useDeviceAccentColor, child: const Text("Use Device Accent Color")),
+                    padding: const EdgeInsets.all(8),
+                    child: FilledButton(onPressed: useDeviceAccentColor, child: const Text('Use Device Accent Color')),
                   ),
                 ),
                 InkWell(
@@ -379,7 +385,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
                   child: DecoratedBox(
                     decoration: BoxDecoration(color: user_data.color, shape: BoxShape.circle),
                     child: const Padding(
-                      padding: EdgeInsets.all(8.0),
+                      padding: EdgeInsets.all(8),
                       child: Icon(Icons.edit_rounded),
                     ),
                   ),
@@ -388,25 +394,24 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text("Light Mode"),
+              children: <Widget>[
+                const Text('Light Mode'),
                 Switch(
                   value: user_data.lightness,
-                  onChanged: (b) {
+                  onChanged: (bool b) {
                     user_data.lightness = b;
                     firestore_manager.lightness = b;
                   },
                 ),
               ],
             ),
-          ].map((a) => Padding(padding: const EdgeInsets.all(8), child: a)).toList(),
-        );
-      },
+          ].map((Widget a) => Padding(padding: const EdgeInsets.all(8), child: a)).toList(),
+        ),
     );
   }
 
-  void useDeviceAccentColor() async {
-    Color? color = (await DynamicColorPlugin.getCorePalette())?.toColorScheme().primary;
+  Future<void> useDeviceAccentColor() async {
+    final Color? color = (await DynamicColorPlugin.getCorePalette())?.toColorScheme().primary;
     user_data.color = color ?? Colors.red;
     firestore_manager.color = user_data.color.value;
   }

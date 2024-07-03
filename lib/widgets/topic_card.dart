@@ -1,8 +1,9 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, always_specify_types
 
 // ignore: unused_import
 import 'dart:developer' as developer;
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/data_managers/tests_manager.dart' as tests_manager;
@@ -12,14 +13,9 @@ import 'package:studyappcs/states/flashcard.dart';
 import 'package:studyappcs/states/test.dart';
 import 'package:studyappcs/states/topic.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
-import 'package:studyappcs/utils/utils.dart' as theming;
+import 'package:studyappcs/utils/utils.dart' as utils;
 
 class TopicCard extends StatefulWidget {
-  final Topic topic;
-  final Future Function() testTopic;
-  final String area;
-  final String subject;
-  final void Function() deleteTopic;
   const TopicCard({
     super.key,
     required this.topic,
@@ -28,6 +24,11 @@ class TopicCard extends StatefulWidget {
     required this.subject,
     required this.deleteTopic,
   });
+  final Topic topic;
+  final Future<void> Function() testTopic;
+  final String area;
+  final String subject;
+  final void Function() deleteTopic;
 
   @override
   State<TopicCard> createState() => _TopicCardState();
@@ -35,7 +36,7 @@ class TopicCard extends StatefulWidget {
 
 class _TopicCardState extends State<TopicCard> {
   bool checkExistingTerm(String name) {
-    for (FlashCard card in widget.topic.cards) {
+    for (final FlashCard card in widget.topic.cards) {
       if (card.name == name) {
         return false;
       }
@@ -47,12 +48,13 @@ class _TopicCardState extends State<TopicCard> {
   void studyTopic(Topic topic) => Navigator.push(
         context,
         PageRouteBuilder(
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const begin = Offset(0.0, 1.0);
-            const end = Offset.zero;
-            const curve = Curves.ease;
+          transitionsBuilder:
+              (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+            const Offset begin = Offset(0, 1);
+            const Offset end = Offset.zero;
+            const Cubic curve = Curves.ease;
 
-            Animatable<Offset> tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+            final Animatable<Offset> tween = Tween<Offset>(begin: begin, end: end).chain(CurveTween(curve: curve));
 
             return SlideTransition(
               position: animation.drive(tween),
@@ -68,80 +70,95 @@ class _TopicCardState extends State<TopicCard> {
         (_) => setState(() {}),
       );
 
-  Future renameTopic(Topic topic) async {
-    String oldName = topic.name;
-    String newName = await singleInputDialog(
+  Future<void> renameTopic(Topic topic) async {
+    final String oldName = topic.name;
+    final String newName = await singleInputDialog(
       context,
       'Rename ${topic.name}',
       Input(name: 'Name'),
     );
     if (newName != '') {
       setState(() {
-        String subjectName = widget.area.split('-')[0].trim();
+        final String subjectName = widget.area.split('-')[0].trim();
         topic.name = newName;
-        String newArea = '$subjectName - $newName';
-        for (Test test in tests_manager.testsFromArea(widget.area)) {
+        final String newArea = '$subjectName - $newName';
+        for (final Test test in tests_manager.testsFromArea(widget.area)) {
           test.area = newArea;
         }
         widget.area.replaceAll(widget.area, newArea);
       });
 
-      var cards = await firestore_manager.cardDocs;
-      cards.docs.where((a) => a['topic'] == oldName).forEach((a) => a.reference.update({'topic': newName}));
+      final QuerySnapshot<utils.StrMap> cards = await firestore_manager.cardDocs;
+      cards.docs
+          .where((QueryDocumentSnapshot<utils.StrMap> a) => a['topic'] == oldName)
+          .forEach((QueryDocumentSnapshot<utils.StrMap> a) => a.reference.update(<Object, Object?>{'topic': newName}));
 
-      var tests = await firestore_manager.testDocs;
-      tests.docs
-          .where((a) => (a['area'] as String).contains(oldName))
-          .forEach((a) => a.reference.update({'area': (a['area'] as String).replaceAll(oldName, newName)}));
+      final QuerySnapshot<utils.StrMap> tests = await firestore_manager.testDocs;
+      tests.docs.where((QueryDocumentSnapshot<utils.StrMap> a) => (a['area'] as String).contains(oldName)).forEach(
+            (QueryDocumentSnapshot<utils.StrMap> a) =>
+                a.reference.update(<Object, Object?>{'area': (a['area'] as String).replaceAll(oldName, newName)}),
+          );
     }
   }
 
-  Future deleteTopic(Topic topic) async {
-    String oldName = topic.name;
-    bool confirmed = await confirmDialog(
+  Future<void> deleteTopic(Topic topic) async {
+    final String oldName = topic.name;
+    final bool confirmed = await confirmDialog(
       context,
       title: 'Delete $oldName',
     );
     if (confirmed) {
-      var cards = await firestore_manager.cardDocs;
-      cards.docs.where((a) => a['topic'] == oldName).forEach((a) => a.reference.delete());
+      final QuerySnapshot<utils.StrMap> cards = await firestore_manager.cardDocs;
+      cards.docs
+          .where((QueryDocumentSnapshot<utils.StrMap> a) => a['topic'] == oldName)
+          .forEach((QueryDocumentSnapshot<utils.StrMap> a) => a.reference.delete());
 
-      var tests = await firestore_manager.testDocs;
-      tests.docs.where((a) => (a['area'] as String).contains(oldName)).forEach((a) => a.reference.delete());
+      final QuerySnapshot<utils.StrMap> tests = await firestore_manager.testDocs;
+      tests.docs
+          .where((QueryDocumentSnapshot<utils.StrMap> a) => (a['area'] as String).contains(oldName))
+          .forEach((QueryDocumentSnapshot<utils.StrMap> a) => a.reference.delete());
 
       widget.deleteTopic();
     }
   }
 
-  void addCard(Topic topic) async {
-    DialogResult result = await doubleInputDialog(
+  Future<void> addCard(Topic topic) async {
+    final DialogResult result = await doubleInputDialog(
           context,
           'Create New Card',
           Input(name: 'Name', validate: checkExistingTerm),
           Input(name: 'Meaning'),
         ) ??
-        DialogResult.empty();
+        DialogResult.empty;
 
-    String name = result.first;
-    if (name == '') return;
-    String meaning = result.second;
-    if (meaning != '') setState(() => topic.cards.add(FlashCard(name, meaning, learned: false)));
-    var cardCollection = firestore_manager.cardCollection;
-    cardCollection
-        .doc(name)
-        .set({'name': name, 'meaning': meaning, 'subject': widget.subject, 'topic': topic.name, 'learned': false});
+    final String name = result.first;
+    if (name == '') {
+      return;
+    }
+    final String meaning = result.second;
+    if (meaning != '') {
+      setState(() => topic.cards.add(FlashCard(name, meaning, learned: false)));
+    }
+    final firestore_manager.CollectionType cardCollection = firestore_manager.cardCollection;
+    await cardCollection.doc(name).set(<String, dynamic>{
+      'name': name,
+      'meaning': meaning,
+      'subject': widget.subject,
+      'topic': topic.name,
+      'learned': false,
+    });
   }
 
   double learnedPercentage() => widget.topic.cards.isNotEmpty
-      ? widget.topic.cards.where((element) => element.learned).length / widget.topic.cards.length
+      ? widget.topic.cards.where((FlashCard element) => element.learned).length / widget.topic.cards.length
       : 0;
 
   @override
   Widget build(BuildContext context) {
-    Topic topic = widget.topic;
+    final Topic topic = widget.topic;
 
     return Card(
-      margin: const EdgeInsets.all(14.0),
+      margin: const EdgeInsets.all(14),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
       elevation: 3,
       child: ListTileTheme(
@@ -149,12 +166,12 @@ class _TopicCardState extends State<TopicCard> {
         minLeadingWidth: 10,
         child: ExpansionTile(
           subtitle: Stack(
-            children: [
+            children: <Widget>[
               Container(
                 width: 450,
                 height: 5,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(theming.radius),
+                  borderRadius: BorderRadius.circular(utils.radius),
                   color: const Color.fromARGB(255, 51, 51, 51),
                 ),
               ),
@@ -162,7 +179,7 @@ class _TopicCardState extends State<TopicCard> {
                 width: learnedPercentage() * 450,
                 height: 5,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(theming.radius),
+                  borderRadius: BorderRadius.circular(utils.radius),
                   color: Theme.of(context).colorScheme.primary,
                 ),
               ),
@@ -170,8 +187,8 @@ class _TopicCardState extends State<TopicCard> {
           ),
           controlAffinity: ListTileControlAffinity.leading,
           shape: const Border(),
-          onExpansionChanged: (expanded) => setState(() {
-            final controller = ExpansionTileController.maybeOf(context);
+          onExpansionChanged: (bool expanded) => setState(() {
+            final ExpansionTileController? controller = ExpansionTileController.maybeOf(context);
             if (expanded) {
               controller?.collapse();
             } else {
@@ -180,12 +197,12 @@ class _TopicCardState extends State<TopicCard> {
           }),
           trailing: SizedBox(
             child: PopupMenuButton(
-              itemBuilder: (BuildContext context) => [
+              itemBuilder: (BuildContext context) => <PopupMenuItem>[
                 PopupMenuItem(
                   onTap: () => widget.testTopic().then((_) => setState(() {})),
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+                    children: <Widget>[
                       Icon(Icons.question_mark_rounded),
                       Text('Test on topic'),
                     ],
@@ -195,7 +212,7 @@ class _TopicCardState extends State<TopicCard> {
                   onTap: () => topic.cards.isNotEmpty ? studyTopic(topic) : null,
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+                    children: <Widget>[
                       Icon(Icons.school_rounded),
                       Text('Open cards'),
                     ],
@@ -205,7 +222,7 @@ class _TopicCardState extends State<TopicCard> {
                   onTap: () => addCard(topic),
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+                    children: <Widget>[
                       Icon(Icons.add_rounded),
                       Text('New card'),
                     ],
@@ -215,7 +232,7 @@ class _TopicCardState extends State<TopicCard> {
                   onTap: () => renameTopic(topic).then((_) => setState(() {})),
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+                    children: <Widget>[
                       Icon(Icons.edit_rounded),
                       Text('Rename Topic'),
                     ],
@@ -225,7 +242,7 @@ class _TopicCardState extends State<TopicCard> {
                   onTap: () => deleteTopic(topic).then((_) => setState(() {})),
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+                    children: <Widget>[
                       Icon(Icons.delete_rounded),
                       Text('Delete Topic'),
                     ],
@@ -238,12 +255,12 @@ class _TopicCardState extends State<TopicCard> {
             topic.name,
             textAlign: TextAlign.center,
           ),
-          childrenPadding: const EdgeInsets.all(0),
+          childrenPadding: EdgeInsets.zero,
           children: List.generate(
             topic.cards.length,
-            (cardIndex) => ListTile(
+            (int cardIndex) => ListTile(
               minVerticalPadding: 0,
-              contentPadding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 18),
+              contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 18),
               title: Text(topic.cards[cardIndex].name),
             ),
           )..insert(

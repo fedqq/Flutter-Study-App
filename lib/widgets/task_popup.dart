@@ -1,31 +1,35 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/states/task.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
+import 'package:studyappcs/utils/utils.dart';
 
 class TaskPopup extends StatefulWidget {
+  const TaskPopup({super.key, required this.task, required this.deleteCallback});
   final Task task;
   final void Function(Task) deleteCallback;
-  const TaskPopup({super.key, required this.task, required this.deleteCallback});
 
   @override
   State<TaskPopup> createState() => _TaskPopupState();
 }
 
 class _TaskPopupState extends State<TaskPopup> {
-  void edit() async {
-    DialogResult result = await doubleInputDialog(
+  Future<void> edit() async {
+    final DialogResult result = await doubleInputDialog(
           context,
           'Edit Task',
           Input(name: 'Name', value: widget.task.name),
           Input(name: 'Desc', nullable: true, value: widget.task.desc),
         ) ??
-        DialogResult.empty();
+        DialogResult.empty;
 
-    if (result.first == '') return;
+    if (result.first == '') {
+      return;
+    }
 
-    var taskDocs = await firestore_manager.taskDocs;
-    taskDocs.docs.firstWhere((a) => a['name'] == widget.task.name && a['desc'] == widget.task.desc).reference.update({
+    final QuerySnapshot<StrMap> taskDocs = await firestore_manager.taskDocs;
+    await taskDocs.docs.firstWhere((QueryDocumentSnapshot<StrMap> a) => a['name'] == widget.task.name && a['desc'] == widget.task.desc).reference.update(<Object, Object?>{
       'name': result.first,
       'desc': result.second,
     });
@@ -36,15 +40,17 @@ class _TaskPopupState extends State<TaskPopup> {
     });
   }
 
-  void editColor() async {
-    Color? color = await showColorPicker(context, widget.task.color);
-    if (color == null) return;
+  Future<void> editColor() async {
+    final Color? color = await showColorPicker(context, widget.task.color);
+    if (color == null) {
+      return;
+    }
     setState(() => widget.task.color = color);
-    var taskDocs = await firestore_manager.taskDocs;
-    taskDocs.docs
-        .firstWhere((a) => a['name'] == widget.task.name && a['desc'] == widget.task.desc)
+    final QuerySnapshot<StrMap> taskDocs = await firestore_manager.taskDocs;
+    await taskDocs.docs
+        .firstWhere((QueryDocumentSnapshot<StrMap> a) => a['name'] == widget.task.name && a['desc'] == widget.task.desc)
         .reference
-        .update({'color': color.value});
+        .update(<Object, Object?>{'color': color.value});
   }
 
   void delete() {
@@ -53,22 +59,20 @@ class _TaskPopupState extends State<TaskPopup> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
+  Widget build(BuildContext context) => AlertDialog(
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [Text(widget.task.name), IconButton(onPressed: edit, icon: const Icon(Icons.edit_rounded))],
+        children: <Widget>[Text(widget.task.name), IconButton(onPressed: edit, icon: const Icon(Icons.edit_rounded))],
       ),
       content: Text(widget.task.desc),
-      actions: [
+      actions: <Widget>[
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
+          children: <Widget>[
             FilledButton(onPressed: delete, child: const Text('Delete')),
             TextButton(onPressed: editColor, child: const Text('Edit Color')),
           ],
         ),
       ],
     );
-  }
 }

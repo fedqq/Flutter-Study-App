@@ -16,9 +16,6 @@ import 'package:studyappcs/states/task.dart';
 import 'package:studyappcs/utils/utils.dart';
 import 'package:window_rounded_corners/window_rounded_corners.dart';
 
-// ignore: constant_identifier_names
-const CLEAR = false;
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   WindowCorners.init();
@@ -49,7 +46,7 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
       initialRoute: '/splash',
-      routes: {'/splash': (context) => const SplashScreen()},
+      routes: <String, WidgetBuilder>{'/splash': (BuildContext context) => const SplashScreen()},
     );
   }
 }
@@ -63,9 +60,9 @@ class NavigationPage extends StatefulWidget {
 }
 
 class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObserver {
-  List<Subject> subjects = [];
-  List<Task> tasks = [];
-  List<Task> completedTasks = [];
+  List<Subject> subjects = <Subject>[];
+  List<Task> tasks = <Task>[];
+  List<Task> completedTasks = <Task>[];
   int selectedDest = 0;
   PageController pageController = PageController();
 
@@ -82,10 +79,10 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
     super.initState();
   }
 
-  Future loadData() async {
-    List<Subject> subjectsRes = [];
-    List<Task> tasksRes = [];
-    List<Task> completedTasksRes = [];
+  Future<void> loadData() async {
+    List<Subject> subjectsRes = <Subject>[];
+    List<Task> tasksRes = <Task>[];
+    List<Task> completedTasksRes = <Task>[];
 
     subjectsRes = firestore_manager.subjectsList;
     tasksRes = firestore_manager.tasksList;
@@ -106,11 +103,12 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
     });
   }
 
-  Future saveData() async {
+  Future<void> saveData() async {
     await firestore_manager.saveData();
   }
 
   @override
+  // ignore: avoid_void_async
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     await saveData();
     super.didChangeAppLifecycleState(state);
@@ -123,7 +121,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
     });
   }
 
-  Future authlogin({
+  Future<void> authlogin({
     required String email,
     required String password,
   }) async {
@@ -148,18 +146,18 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> pages = [
+    final List<Widget> pages = <Widget>[
       StatsPage(saveCallback: saveData, loadCallback: loadData, subjects: subjects),
       SubjectsPage(subjects: subjects),
       CalendarPage(tasks: tasks, completedTasks: completedTasks),
     ];
 
-    double left = WindowCorners.getCorners().bottomLeft - 8;
-    double right = WindowCorners.getCorners().bottomRight - 8;
+    final double left = WindowCorners.getCorners().bottomLeft - 8;
+    final double right = WindowCorners.getCorners().bottomRight - 8;
 
-    Scaffold scaffold = Scaffold(
+    final Scaffold scaffold = Scaffold(
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(8),
         child: ClipRRect(
           borderRadius: BorderRadius.only(
             bottomLeft: Radius.circular(left),
@@ -173,20 +171,20 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
               labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
               indicatorColor: Theme.of(context).colorScheme.primaryContainer,
               selectedIndex: selectedDest,
-              destinations: const [
+              destinations: const <Widget>[
                 NavigationDestination(
                   icon: Icon(Icons.bar_chart_outlined),
-                  label: "Statistics",
+                  label: 'Statistics',
                   selectedIcon: Icon(Icons.bar_chart_rounded),
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.school),
-                  label: "Study",
+                  label: 'Study',
                   selectedIcon: Icon(Icons.school_rounded),
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.calendar_today_outlined),
-                  label: "Calendar",
+                  label: 'Calendar',
                   selectedIcon: Icon(Icons.calendar_today_rounded),
                 ),
               ],
