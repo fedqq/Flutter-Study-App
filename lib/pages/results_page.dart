@@ -23,11 +23,29 @@ class _ResultsPageState extends State<ResultsPage> {
     super.initState();
   }
 
+  Future<void> overrideAsCorrect(int index) async {
+    final testDocs = await firestore_manager.testDocs;
+
+    final cardsDocs = await testDocs.docs
+        .firstWhere((QueryDocumentSnapshot<StrMap> a) => a['id'] == widget.test.id)
+        .reference
+        .collection('testcards')
+        .get();
+
+    final docs = cardsDocs.docs;
+    final ref =
+        docs.firstWhere((QueryDocumentSnapshot<StrMap> a) => cards[index].compare(a)).reference;
+
+    await ref.update(<Object, Object?>{'answer': cards[index].meaning});
+
+    setState(() => widget.test.scored[cards[index]] = true);
+  }
+
   @override
   Widget build(BuildContext context) {
-    BorderRadius getRadius(int index) {
-      final Radius top = Radius.circular(index == 0 ? 12 : 3);
-      final Radius bottom = Radius.circular(index == cards.length - 1 ? 12 : 3);
+    BorderRadius calculateRadius(int index) {
+      final top = Radius.circular(index == 0 ? 12 : 3);
+      final bottom = Radius.circular(index == cards.length - 1 ? 12 : 3);
 
       return BorderRadius.only(topLeft: top, topRight: top, bottomLeft: bottom, bottomRight: bottom);
     }
@@ -56,23 +74,8 @@ class _ResultsPageState extends State<ResultsPage> {
               card: cards[index],
               answer: widget.test.answers[index],
               editable: widget.editable,
-              markCorrect: () async {
-                final QuerySnapshot<StrMap> testDocs = await firestore_manager.testDocs;
-
-                final QuerySnapshot<Map<String, dynamic>> cardsDocs = await testDocs.docs
-                    .firstWhere((QueryDocumentSnapshot<StrMap> a) => a['id'] == widget.test.id)
-                    .reference
-                    .collection('testcards')
-                    .get();
-
-                await cardsDocs.docs
-                    .firstWhere((QueryDocumentSnapshot<Map<String, dynamic>> a) => a['name'] == cards[index].name && a['meaning'] == cards[index].meaning)
-                    .reference
-                    .update(<Object, Object?>{'answer': cards[index].meaning});
-
-                setState(() => widget.test.scored[cards[index]] = true);
-              },
-              borderRadius: getRadius(index),
+              markCorrect: () => overrideAsCorrect(index),
+              borderRadius: calculateRadius(index),
             ),
           ),
         ],

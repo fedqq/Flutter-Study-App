@@ -6,7 +6,6 @@ import 'package:studyappcs/states/flashcard.dart';
 import 'package:studyappcs/states/topic.dart';
 
 class Subject {
-
   Subject(this.name, this.color, this.teacher, this.classroom);
   String name = 'Default';
   List<Topic> topics = <Topic>[];

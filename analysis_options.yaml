@@ -4,7 +4,6 @@ linter:
   rules:
     - always_declare_return_types
     - always_put_control_body_on_new_line
-    - always_specify_types
     - always_use_package_imports
     - annotate_overrides
     - annotate_redeclares
@@ -202,3 +201,4 @@ linter:
     - use_to_and_as_if_applicable
     - valid_regexps
     - void_checks
+    - omit_local_variable_types

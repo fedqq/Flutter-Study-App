@@ -28,6 +28,10 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
   late ExpansionTileController overdueController;
   late ExpansionTileController completedController;
 
+  List<DateTime> dates = <DateTime>[];
+  List<DateTime> lateDates = <DateTime>[];
+  List<DateTime> completedDates = <DateTime>[];
+
   @override
   void dispose() {
     controller.dispose();
@@ -49,8 +53,8 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
   }
 
   Map<DateTime, List<Task>> getTasksMap({required bool late}) {
-    final Map<DateTime, List<Task>> ret = <DateTime, List<Task>>{};
-    for (final Task task in (late ? overdueTasks : timelyTasks)) {
+    final ret = <DateTime, List<Task>>{};
+    for (final task in (late ? overdueTasks : timelyTasks)) {
       if (!ret.containsKey(task.dueDate)) {
         ret[task.dueDate] = <Task>[task];
       } else {
@@ -62,8 +66,8 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
   }
 
   Map<DateTime, List<Task>> getCompletedTasksMap() {
-    final Map<DateTime, List<Task>> ret = <DateTime, List<Task>>{};
-    for (final Task task in widget.completedTasks) {
+    final ret = <DateTime, List<Task>>{};
+    for (final task in widget.completedTasks) {
       if (!ret.containsKey(task.dueDate)) {
         ret[task.dueDate] = <Task>[task];
       } else {
@@ -75,7 +79,7 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
   }
 
   Future<void> createTask(BuildContext context) async {
-    final DialogResult result = await doubleInputDialog(
+    final result = await doubleInputDialog(
           context,
           'New task',
           Input(name: 'Name'),
@@ -83,14 +87,14 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
         ) ??
         DialogResult.empty;
 
-    final String name = result.first;
-    final String desc = result.second;
+    final name = result.first;
+    final desc = result.second;
 
     if (name == '') {
       return;
     }
 
-    final DateTime? date = await showDatePicker(
+    final date = await showDatePicker(
       context: context,
       firstDate: DateTime.now().add(const Duration(days: -100)),
       lastDate: DateTime.now().add(const Duration(days: 1000)),
@@ -100,14 +104,14 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
       return;
     }
 
-    final Color? newColor = await showColorPicker(context, Colors.blue);
+    final newColor = await showColorPicker(context, Colors.blue);
     if (newColor == null) {
       return;
     }
 
     setState(() => widget.tasks.add(Task(name, date, newColor, desc, completed: false)));
 
-    final firestore_manager.CollectionType tasksCollection = firestore_manager.taskCollection;
+    final tasksCollection = firestore_manager.taskCollection;
     await tasksCollection.doc(name).set(<String, dynamic>{
       'name': name,
       'desc': desc,
@@ -118,13 +122,9 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
   }
 
   Future<void> deleteTask(Task task) async {
-    final QuerySnapshot<StrMap> taskDocs = await firestore_manager.taskDocs;
+    final taskDocs = await firestore_manager.taskDocs;
     try {
-      await taskDocs.docs
-          .firstWhere((QueryDocumentSnapshot<StrMap> a) =>
-              a['name'] == task.name && a['date'] == task.dueDate.millisecondsSinceEpoch,)
-          .reference
-          .delete();
+      await taskDocs.docs.firstWhere((QueryDocumentSnapshot<StrMap> a) => task.compare(a)).reference.delete();
     } catch (e) {
       simpleSnackBar(context, 'An unexpected error occured: $e');
     }
@@ -132,12 +132,8 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
   }
 
   Future<void> deleteCompletedTask(Task task) async {
-    final QuerySnapshot<StrMap> taskDocs = await firestore_manager.taskDocs;
-    await taskDocs.docs
-        .firstWhere((QueryDocumentSnapshot<StrMap> a) =>
-            a['name'] == task.name && a['date'] == task.dueDate.millisecondsSinceEpoch,)
-        .reference
-        .delete();
+    final taskDocs = await firestore_manager.taskDocs;
+    await taskDocs.docs.firstWhere((QueryDocumentSnapshot<StrMap> a) => task.compare(a)).reference.delete();
     setState(() => widget.completedTasks.remove(task));
   }
 
@@ -145,10 +141,9 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
       list.keys.toList()..sort((DateTime first, DateTime second) => first.compareTo(second));
 
   Future<void> completeTask(Task task) async {
-    final QuerySnapshot<StrMap> taskDocs = await firestore_manager.taskDocs;
+    final taskDocs = await firestore_manager.taskDocs;
     await taskDocs.docs
-        .firstWhere((QueryDocumentSnapshot<StrMap> a) =>
-            a['name'] == task.name && a['date'] == task.dueDate.millisecondsSinceEpoch,)
+        .firstWhere((QueryDocumentSnapshot<StrMap> a) => task.compare(a))
         .reference
         .update(<Object, Object?>{'completed': true});
     setState(() {
@@ -157,30 +152,57 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
+  void updateDates() {
     timelyTasks = <Task>[];
     overdueTasks = <Task>[];
-    for (final Task task in widget.tasks) {
-      ((task.dueDate.compareTo(DateUtils.dateOnly(DateTime.now())) < 0) ? overdueTasks : timelyTasks).add(task);
-    }
-
-    final List<DateTime> dates = sortByDate(getTasksMap(late: false));
-    final List<DateTime> lateDates = sortByDate(getTasksMap(late: true));
-    final List<DateTime> completedDates = sortByDate(getCompletedTasksMap());
-
-    void onExpanded({bool second = false}) {
-      if (second) {
-        if (completedDates.isNotEmpty) {
-          completedController.collapse();
-        }
+    for (final task in widget.tasks) {
+      if (task.dueDate.compareTo(DateUtils.dateOnly(DateTime.now())) < 0) {
+        overdueTasks.add(task);
       } else {
-        if (lateDates.isNotEmpty) {
-          overdueController.collapse();
-        }
+        timelyTasks.add(task);
       }
     }
 
+    dates = sortByDate(getTasksMap(late: false));
+    lateDates = sortByDate(getTasksMap(late: true));
+    completedDates = completedTaskDates;
+  }
+
+  List<DateTime> get completedTaskDates => sortByDate(getCompletedTasksMap());
+
+  void onExpanded({bool second = false}) {
+    if (second) {
+      if (completedDates.isNotEmpty) {
+        completedController.collapse();
+      }
+    } else if (lateDates.isNotEmpty) {
+      overdueController.collapse();
+    }
+  }
+
+  Widget buildOverdueList() => ExpandingTaskList(
+        dates: lateDates,
+        tasks: getTasksMap(late: true),
+        deleteCallback: deleteTask,
+        completeCallback: completeTask,
+        outlineColor: Colors.red,
+        title: 'Overdue Tasks',
+        controller: overdueController,
+        onExpanded: onExpanded,
+      );
+
+  Widget buildCompletedList() => ExpandingTaskList(
+        dates: completedDates,
+        tasks: getCompletedTasksMap(),
+        deleteCallback: deleteCompletedTask,
+        outlineColor: Colors.grey,
+        title: 'Completed Tasks',
+        controller: overdueController,
+        onExpanded: () => onExpanded(second: true),
+      );
+
+  @override
+  Widget build(BuildContext context) {
     controller.forward();
 
     return Scaffold(
@@ -224,27 +246,8 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
               ],
             ),
           ),
-          if (overdueTasks.isNotEmpty)
-            ExpandingTaskList(
-              dates: lateDates,
-              tasks: getTasksMap(late: true),
-              deleteCallback: deleteTask,
-              completeCallback: completeTask,
-              outlineColor: Colors.red,
-              title: 'Overdue Tasks',
-              controller: overdueController,
-              onExpanded: onExpanded,
-            ),
-          if (widget.completedTasks.isNotEmpty)
-            ExpandingTaskList(
-              dates: completedDates,
-              tasks: getCompletedTasksMap(),
-              deleteCallback: deleteCompletedTask,
-              outlineColor: Colors.grey,
-              title: 'Completed Tasks',
-              controller: overdueController,
-              onExpanded: () => onExpanded(second: true),
-            ),
+          if (overdueTasks.isNotEmpty) buildOverdueList(),
+          if (widget.completedTasks.isNotEmpty) buildCompletedList(),
         ],
       ),
     );

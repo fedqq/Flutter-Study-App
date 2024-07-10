@@ -3,17 +3,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
+import 'package:studyappcs/data_managers/user_data.dart' as user_data;
 import 'package:studyappcs/main.dart';
+import 'package:studyappcs/utils/page_transition.dart';
 import 'package:studyappcs/utils/utils.dart';
 
-class Loginpage extends StatefulWidget {
-  const Loginpage({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  State<Loginpage> createState() => _LoginpageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginpageState extends State<Loginpage> {
+class _LoginPageState extends State<LoginPage> {
   bool loading = false;
   bool register = false;
   String email = '';
@@ -47,7 +49,7 @@ class _LoginpageState extends State<Loginpage> {
         email: email,
         password: password,
       );
-      firestore_manager.username = username;
+      user_data.userName = username;
       return null;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
@@ -66,40 +68,18 @@ class _LoginpageState extends State<Loginpage> {
     }
   }
 
-  Future<void> close() async {
+  Future<void> proceed() async {
     await firestore_manager.loadData();
     setState(() => loading = false);
-    await Navigator.pushReplacement(
-      // ignore: use_build_context_synchronously
-      context,
-      PageRouteBuilder(
-        transitionDuration: Durations.extralong3,
-        transitionsBuilder:
-            (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-          const Offset begin = Offset(0, 1);
-          const Offset end = Offset.zero;
-
-          final Tween<Offset> tween = Tween(begin: begin, end: end);
-          final CurvedAnimation curvedAnimation = CurvedAnimation(
-            parent: animation,
-            curve: Curves.ease,
-          );
-
-          return SlideTransition(
-            position: tween.animate(curvedAnimation),
-            child: child,
-          );
-        },
-        pageBuilder: (_, __, ___) => const NavigationPage(title: 'Study Help App'),
-      ),
-    );
+    // ignore: use_build_context_synchronously
+    await pushReplacement(context, () => const NavigationPage(title: 'Study Help App'));
   }
 
   Future<void> submit() async {
     setState(() => loading = true);
-    final String? a = await (register ? _signupUser(email, password, username) : _authUser(email, password));
+    final a = await (register ? _signupUser(email, password, username) : _authUser(email, password));
     if (a == null) {
-      await close();
+      await proceed();
       return;
     } else {
       snackbar(a);
@@ -108,72 +88,80 @@ class _LoginpageState extends State<Loginpage> {
     setState(() => loading = false);
   }
 
+  Widget buildActionButtons() => Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Expanded(child: FilledButton(onPressed: submit, child: const Text('Submit'))),
+          const SizedBox(width: 20),
+          Expanded(
+            child: FilledButton.tonal(
+              onPressed: () => setState(() => register = !register),
+              child: Text(!register ? 'Sign Up' : 'Log In'),
+            ),
+          ),
+        ],
+      );
+
+  Widget buildLoader() => const Center(
+        child: CircularProgressIndicator(
+          strokeCap: StrokeCap.round,
+          strokeWidth: 7,
+        ),
+      );
+
+  Widget buildEmailField() => Padding(
+        padding: const EdgeInsets.all(8),
+        child: TextField(
+          onChanged: (String v) => email = v,
+          decoration: const InputDecoration.collapsed(hintText: 'E-Mail'),
+        ),
+      );
+
+  Widget buildPasswordField() => Padding(
+        padding: const EdgeInsets.all(8),
+        child: TextField(
+          onChanged: (String v) => password = v,
+          decoration: const InputDecoration.collapsed(hintText: 'Password'),
+          obscureText: true,
+        ),
+      );
+
+  Widget buildUsernameField() => Padding(
+        padding: const EdgeInsets.all(8),
+        child: TextField(
+          onChanged: (String v) => username = v,
+          decoration: const InputDecoration.collapsed(hintText: 'Username'),
+        ),
+      );
+
+  Widget buildAuthForm() => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(30),
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(30),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text('Log in', style: Theme.of(context).textTheme.displayMedium),
+                  buildEmailField(),
+                  const SizedBox(height: 20),
+                  buildPasswordField(),
+                  const SizedBox(height: 20),
+                  if (register) ...<Widget>[
+                    buildUsernameField(),
+                    const SizedBox(height: 20),
+                  ],
+                  buildActionButtons(),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
   @override
   Widget build(BuildContext context) => Scaffold(
-        body: Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            if (loading)
-              const Center(child: CircularProgressIndicator(strokeCap: StrokeCap.round, strokeWidth: 7))
-            else
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(30),
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(30),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Text('Log in', style: Theme.of(context).textTheme.displayMedium),
-                          const SizedBox(height: 20),
-                          Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: TextField(
-                              onChanged: (String v) => email = v,
-                              decoration: const InputDecoration.collapsed(hintText: 'E-Mail'),
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: TextField(
-                              onChanged: (String v) => password = v,
-                              decoration: const InputDecoration.collapsed(hintText: 'Password'),
-                              obscureText: true,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          if (register) ...<Widget>[
-                            Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: TextField(
-                                onChanged: (String v) => username = v,
-                                decoration: const InputDecoration.collapsed(hintText: 'Username'),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                          ],
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Expanded(child: FilledButton(onPressed: submit, child: const Text('Submit'))),
-                              const SizedBox(width: 20),
-                              Expanded(
-                                child: FilledButton.tonal(
-                                  onPressed: () => setState(() => register = !register),
-                                  child: Text(!register ? 'Sign Up' : 'Log In'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
+        body: loading ? buildLoader() : buildAuthForm(),
       );
 }

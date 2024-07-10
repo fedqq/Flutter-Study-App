@@ -39,17 +39,17 @@ class _AllTestsPageState extends State<AllTestsPage> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    List<Test> tests = [];
+    var tests = <Test>[];
 
     tests = tests_manager.testsFromArea(widget.area).reversed.toList();
 
     controller.forward();
 
     BorderRadius getRadius(int index) {
-      double top = WindowCorners.getCorners().topLeft + 16;
-      double bottom = WindowCorners.getCorners().topLeft + 16;
+      var top = WindowCorners.getCorners().topLeft + 16;
+      var bottom = WindowCorners.getCorners().topLeft + 16;
 
-      final String area = tests[index].area;
+      final area = tests[index].area;
 
       if (index != 0) {
         if (area == tests[index - 1].area) {
@@ -63,28 +63,24 @@ class _AllTestsPageState extends State<AllTestsPage> with SingleTickerProviderSt
         }
       }
 
-      final Radius t = Radius.circular(top);
-      final Radius b = Radius.circular(bottom);
+      final t = Radius.circular(top);
+      final b = Radius.circular(bottom);
 
       return BorderRadius.only(topLeft: t, topRight: t, bottomLeft: b, bottomRight: b);
     }
 
     EdgeInsets getMargin(int index) {
-      double top = 8;
-      double bottom = 8;
+      var top = 8.0;
+      var bottom = 8.0;
 
-      final String area = tests[index].area;
+      final area = tests[index].area;
 
-      if (index != 0) {
-        if (area == tests[index - 1].area) {
-          top = 2;
-        }
+      if (index != 0 && area == tests[index - 1].area) {
+        top = 2;
       }
 
-      if (index != tests.length - 1) {
-        if (area == tests[index + 1].area) {
-          bottom = 2;
-        }
+      if (index != tests.length - 1 && area == tests[index + 1].area) {
+        bottom = 2;
       }
 
       return EdgeInsets.fromLTRB(8, top, 8, bottom);

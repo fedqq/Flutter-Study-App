@@ -10,7 +10,6 @@ import 'package:studyappcs/data_managers/tests_manager.dart' as tests_manager;
 import 'package:studyappcs/pages/all_tests_page.dart';
 import 'package:studyappcs/pages/study_page.dart';
 import 'package:studyappcs/states/flashcard.dart';
-import 'package:studyappcs/states/test.dart';
 import 'package:studyappcs/states/topic.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
 import 'package:studyappcs/utils/utils.dart' as utils;
@@ -36,7 +35,7 @@ class TopicCard extends StatefulWidget {
 
 class _TopicCardState extends State<TopicCard> {
   bool checkExistingTerm(String name) {
-    for (final FlashCard card in widget.topic.cards) {
+    for (final card in widget.topic.cards) {
       if (card.name == name) {
         return false;
       }
@@ -50,11 +49,11 @@ class _TopicCardState extends State<TopicCard> {
         PageRouteBuilder(
           transitionsBuilder:
               (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-            const Offset begin = Offset(0, 1);
-            const Offset end = Offset.zero;
-            const Cubic curve = Curves.ease;
+            const begin = Offset(0, 1);
+            const end = Offset.zero;
+            const curve = Curves.ease;
 
-            final Animatable<Offset> tween = Tween<Offset>(begin: begin, end: end).chain(CurveTween(curve: curve));
+            final tween = Tween<Offset>(begin: begin, end: end).chain(CurveTween(curve: curve));
 
             return SlideTransition(
               position: animation.drive(tween),
@@ -71,29 +70,29 @@ class _TopicCardState extends State<TopicCard> {
       );
 
   Future<void> renameTopic(Topic topic) async {
-    final String oldName = topic.name;
-    final String newName = await singleInputDialog(
+    final oldName = topic.name;
+    final newName = await inputDialog(
       context,
       'Rename ${topic.name}',
       Input(name: 'Name'),
     );
     if (newName != '') {
       setState(() {
-        final String subjectName = widget.area.split('-')[0].trim();
+        final subjectName = widget.area.split('-')[0].trim();
         topic.name = newName;
-        final String newArea = '$subjectName - $newName';
-        for (final Test test in tests_manager.testsFromArea(widget.area)) {
+        final newArea = '$subjectName - $newName';
+        for (final test in tests_manager.testsFromArea(widget.area)) {
           test.area = newArea;
         }
         widget.area.replaceAll(widget.area, newArea);
       });
 
-      final QuerySnapshot<utils.StrMap> cards = await firestore_manager.cardDocs;
+      final cards = await firestore_manager.cardDocs;
       cards.docs
           .where((QueryDocumentSnapshot<utils.StrMap> a) => a['topic'] == oldName)
           .forEach((QueryDocumentSnapshot<utils.StrMap> a) => a.reference.update(<Object, Object?>{'topic': newName}));
 
-      final QuerySnapshot<utils.StrMap> tests = await firestore_manager.testDocs;
+      final tests = await firestore_manager.testDocs;
       tests.docs.where((QueryDocumentSnapshot<utils.StrMap> a) => (a['area'] as String).contains(oldName)).forEach(
             (QueryDocumentSnapshot<utils.StrMap> a) =>
                 a.reference.update(<Object, Object?>{'area': (a['area'] as String).replaceAll(oldName, newName)}),
@@ -102,18 +101,18 @@ class _TopicCardState extends State<TopicCard> {
   }
 
   Future<void> deleteTopic(Topic topic) async {
-    final String oldName = topic.name;
-    final bool confirmed = await confirmDialog(
+    final oldName = topic.name;
+    final confirmed = await confirmDialog(
       context,
       title: 'Delete $oldName',
     );
     if (confirmed) {
-      final QuerySnapshot<utils.StrMap> cards = await firestore_manager.cardDocs;
+      final cards = await firestore_manager.cardDocs;
       cards.docs
           .where((QueryDocumentSnapshot<utils.StrMap> a) => a['topic'] == oldName)
           .forEach((QueryDocumentSnapshot<utils.StrMap> a) => a.reference.delete());
 
-      final QuerySnapshot<utils.StrMap> tests = await firestore_manager.testDocs;
+      final tests = await firestore_manager.testDocs;
       tests.docs
           .where((QueryDocumentSnapshot<utils.StrMap> a) => (a['area'] as String).contains(oldName))
           .forEach((QueryDocumentSnapshot<utils.StrMap> a) => a.reference.delete());
@@ -123,7 +122,7 @@ class _TopicCardState extends State<TopicCard> {
   }
 
   Future<void> addCard(Topic topic) async {
-    final DialogResult result = await doubleInputDialog(
+    final result = await doubleInputDialog(
           context,
           'Create New Card',
           Input(name: 'Name', validate: checkExistingTerm),
@@ -131,15 +130,15 @@ class _TopicCardState extends State<TopicCard> {
         ) ??
         DialogResult.empty;
 
-    final String name = result.first;
+    final name = result.first;
     if (name == '') {
       return;
     }
-    final String meaning = result.second;
+    final meaning = result.second;
     if (meaning != '') {
       setState(() => topic.cards.add(FlashCard(name, meaning, learned: false)));
     }
-    final firestore_manager.CollectionType cardCollection = firestore_manager.cardCollection;
+    final CollectionReference cardCollection = firestore_manager.cardCollection;
     await cardCollection.doc(name).set(<String, dynamic>{
       'name': name,
       'meaning': meaning,
@@ -155,7 +154,7 @@ class _TopicCardState extends State<TopicCard> {
 
   @override
   Widget build(BuildContext context) {
-    final Topic topic = widget.topic;
+    final topic = widget.topic;
 
     return Card(
       margin: const EdgeInsets.all(14),
@@ -188,7 +187,7 @@ class _TopicCardState extends State<TopicCard> {
           controlAffinity: ListTileControlAffinity.leading,
           shape: const Border(),
           onExpansionChanged: (bool expanded) => setState(() {
-            final ExpansionTileController? controller = ExpansionTileController.maybeOf(context);
+            final controller = ExpansionTileController.maybeOf(context);
             if (expanded) {
               controller?.collapse();
             } else {

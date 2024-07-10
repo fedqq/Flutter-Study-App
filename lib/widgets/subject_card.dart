@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:studyappcs/states/subject.dart';
 
 class SubjectCard extends StatefulWidget {
-  const SubjectCard({super.key, required this.subject, required this.width});
+  const SubjectCard({super.key, required this.subject});
   final Subject subject;
-  final double width;
 
   @override
   State<SubjectCard> createState() => _SubjectCardState();
@@ -15,10 +14,10 @@ class _SubjectCardState extends State<SubjectCard> {
 
   @override
   Widget build(BuildContext context) {
-    final Subject subject = widget.subject;
+    final subject = widget.subject;
     String classroom;
     String teacher;
-    final List<String> arr = <String>[subject.teacher, subject.classroom];
+    final arr = <String>[subject.teacher, subject.classroom];
     [teacher, classroom] = arr;
 
     return Card(
@@ -42,7 +41,10 @@ class _SubjectCardState extends State<SubjectCard> {
                   children: <Widget>[
                     Hero(
                       tag: subject.name,
-                      child: Text(subject.name, style: Theme.of(context).textTheme.headlineMedium),
+                      child: Material(
+                        type: MaterialType.transparency,
+                        child: Text(widget.subject.name, style: Theme.of(context).textTheme.headlineMedium),
+                      ),
                     ),
                     if (!(teacher == '' && classroom == '')) ...<Widget>[
                       const SizedBox(height: 10),

@@ -80,9 +80,9 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
   }
 
   Future<void> loadData() async {
-    List<Subject> subjectsRes = <Subject>[];
-    List<Task> tasksRes = <Task>[];
-    List<Task> completedTasksRes = <Task>[];
+    var subjectsRes = <Subject>[];
+    var tasksRes = <Task>[];
+    var completedTasksRes = <Task>[];
 
     subjectsRes = firestore_manager.subjectsList;
     tasksRes = firestore_manager.tasksList;
@@ -146,16 +146,16 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> pages = <Widget>[
+    final pages = <Widget>[
       StatsPage(saveCallback: saveData, loadCallback: loadData, subjects: subjects),
       SubjectsPage(subjects: subjects),
       CalendarPage(tasks: tasks, completedTasks: completedTasks),
     ];
 
-    final double left = WindowCorners.getCorners().bottomLeft - 8;
-    final double right = WindowCorners.getCorners().bottomRight - 8;
+    final left = WindowCorners.getCorners().bottomLeft - 8;
+    final right = WindowCorners.getCorners().bottomRight - 8;
 
-    final Scaffold scaffold = Scaffold(
+    final scaffold = Scaffold(
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(8),
         child: ClipRRect(

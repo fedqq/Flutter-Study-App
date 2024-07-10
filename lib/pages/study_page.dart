@@ -2,7 +2,6 @@
 import 'dart:developer' as developer;
 import 'dart:ui';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/data_managers/user_data.dart' as user_data;
@@ -27,7 +26,8 @@ class _StudyPageState extends State<StudyPage> {
 
   @override
   void initState() {
-    cards = widget.cards.where((FlashCard card) => !card.learned).toList() + widget.cards.where((FlashCard card) => card.learned).toList();
+    cards = widget.cards.where((FlashCard card) => !card.learned).toList() +
+        widget.cards.where((FlashCard card) => card.learned).toList();
     super.initState();
   }
 
@@ -37,7 +37,7 @@ class _StudyPageState extends State<StudyPage> {
   }
 
   String getCurrentText() {
-    final FlashCard card = cards[currentCard];
+    final card = cards[currentCard];
 
     return showingMeaning ? card.meaning : card.name;
   }
@@ -62,9 +62,9 @@ class _StudyPageState extends State<StudyPage> {
   }
 
   Future<void> learnCard() async {
-    final FlashCard card = cards[currentCard];
+    final card = cards[currentCard];
 
-    final QueryDocumentSnapshot<StrMap> doc = await firestore_manager.cardNamed(card.name);
+    final doc = await firestore_manager.cardNamed(card.name);
 
     await doc.reference.update(<Object, Object?>{'learned': !card.learned});
 
@@ -72,10 +72,10 @@ class _StudyPageState extends State<StudyPage> {
   }
 
   Future<void> editCard() async {
-    final String oldName = cards[currentCard].name;
+    final oldName = cards[currentCard].name;
 
     if (showingMeaning) {
-      final String newMeaning = await singleInputDialog(
+      final newMeaning = await inputDialog(
         context,
         'New meaning for ${cards[currentCard].name}',
         Input(name: 'Meaning', value: cards[currentCard].meaning),
@@ -85,7 +85,7 @@ class _StudyPageState extends State<StudyPage> {
       }
       setState(() => cards[currentCard].meaning = newMeaning);
     } else {
-      final String newName = await singleInputDialog(
+      final newName = await inputDialog(
         context,
         'Rename ${cards[currentCard].name}',
         Input(name: 'Name', value: cards[currentCard].name),
@@ -98,10 +98,10 @@ class _StudyPageState extends State<StudyPage> {
       });
     }
 
-    final String newName = cards[currentCard].name;
-    final String newMeaning = cards[currentCard].meaning;
+    final newName = cards[currentCard].name;
+    final newMeaning = cards[currentCard].meaning;
 
-    final QueryDocumentSnapshot<StrMap> doc = await firestore_manager.cardNamed(oldName);
+    final doc = await firestore_manager.cardNamed(oldName);
     await doc.reference.update(<Object, Object?>{'name': newName, 'meaning': newMeaning});
   }
 
@@ -109,14 +109,14 @@ class _StudyPageState extends State<StudyPage> {
     if (cards.length == 1) {
       return;
     }
-    final bool delete = await confirmDialog(
+    final delete = await confirmDialog(
       context,
       title: 'Are you sure you would like to delete ${cards[currentCard].name}?',
     );
     if (delete) {
-      final FlashCard card = cards[currentCard];
+      final card = cards[currentCard];
 
-      final QueryDocumentSnapshot<StrMap> doc = await firestore_manager.cardNamed(card.name);
+      final doc = await firestore_manager.cardNamed(card.name);
       await doc.reference.delete();
 
       setState(() => widget.cards.removeAt(currentCard));
@@ -125,104 +125,105 @@ class _StudyPageState extends State<StudyPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-      appBar: AppBar(),
-      body: Column(
-        children: <Widget>[
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 20),
-            height: 5,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: LinearProgressIndicator(
-                value: (user_data.dailyStudied[user_data.getNowString()] ?? 0) /
-                    ((user_data.dailyGoal == 0) ? 20 : user_data.dailyGoal),
+        appBar: AppBar(),
+        body: Column(
+          children: <Widget>[
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              height: 5,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: LinearProgressIndicator(
+                  value: (user_data.dailyStudied[user_data.getNowString()] ?? 0) /
+                      ((user_data.dailyGoal == 0) ? 20 : user_data.dailyGoal),
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: InkWell(
-                onTap: () {
-                  setState(() => showingMeaning = !showingMeaning);
-                  if (showingMeaning) {
-                    if (user_data.study()) {
-                      simpleSnackBar(context, 'You reached you daily goal of ${user_data.dailyGoal} terms!');
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: InkWell(
+                  onTap: () {
+                    setState(() => showingMeaning = !showingMeaning);
+                    if (showingMeaning) {
+                      if (user_data.study()) {
+                        simpleSnackBar(context, 'You reached you daily goal of ${user_data.dailyGoal} terms!');
+                      }
                     }
-                  }
-                },
-                child: SizedBox(
-                  width: double.infinity,
-                  child: Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(
-                        color: cards[currentCard].learned ? const Color.fromARGB(80, 30, 253, 0) : Colors.transparent,
-                        width: 2,
-                      ),
-                    ),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: <Widget>[
-                        Positioned(
-                          right: 8,
-                          top: 8,
-                          child: IconButton(
-                            icon: const Icon(Icons.edit_rounded),
-                            onPressed: editCard,
-                          ),
+                  },
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: BorderSide(
+                          color: cards[currentCard].learned ? const Color.fromARGB(80, 30, 253, 0) : Colors.transparent,
+                          width: 2,
                         ),
-                        Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: Text(cards[currentCard].name, style: Theme.of(context).textTheme.headlineLarge),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: ImageFiltered(
-                                  imageFilter:
-                                      showingMeaning ? ImageFilter.dilate() : ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                                  child: Text(
-                                    cards[currentCard].meaning,
-                                    style: Theme.of(context).textTheme.headlineLarge,
+                      ),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: <Widget>[
+                          Positioned(
+                            right: 8,
+                            top: 8,
+                            child: IconButton(
+                              icon: const Icon(Icons.edit_rounded),
+                              onPressed: editCard,
+                            ),
+                          ),
+                          Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child:
+                                      Text(cards[currentCard].name, style: Theme.of(context).textTheme.headlineLarge),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: ImageFiltered(
+                                    imageFilter:
+                                        showingMeaning ? ImageFilter.dilate() : ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                                    child: Text(
+                                      cards[currentCard].meaning,
+                                      style: Theme.of(context).textTheme.headlineLarge,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                IconButton.filledTonal(
-                  onPressed: goBackward,
-                  icon: const Icon(Icons.arrow_back_rounded),
-                ),
-                FilledButton(
-                  onPressed: learnCard,
-                  child: Text(cards[currentCard].learned ? 'Mark as unlearned' : 'Mark as learned'),
-                ),
-                IconButton.filledTonal(
-                  onPressed: goForward,
-                  icon: const Icon(Icons.arrow_forward_rounded),
-                ),
-              ],
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  IconButton.filledTonal(
+                    onPressed: goBackward,
+                    icon: const Icon(Icons.arrow_back_rounded),
+                  ),
+                  FilledButton(
+                    onPressed: learnCard,
+                    child: Text(cards[currentCard].learned ? 'Mark as unlearned' : 'Mark as learned'),
+                  ),
+                  IconButton.filledTonal(
+                    onPressed: goForward,
+                    icon: const Icon(Icons.arrow_forward_rounded),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
 }

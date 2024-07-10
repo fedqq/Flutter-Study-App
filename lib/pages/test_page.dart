@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 import 'package:intl/intl.dart';
@@ -8,7 +7,6 @@ import 'package:studyappcs/pages/results_page.dart';
 import 'package:studyappcs/states/subject.dart';
 import 'package:studyappcs/states/test.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
-import 'package:studyappcs/utils/utils.dart';
 import 'package:studyappcs/widgets/test_input.dart';
 
 class TestPage extends StatefulWidget {
@@ -32,7 +30,7 @@ class _TestPageState extends State<TestPage> {
       DateFormat.yMd().format(DateTime.now()),
       widget.testArea,
       answers,
-      tests_manager.id,
+      tests_manager.nextID,
     );
     answers = <String>[for (final TestCard _ in widget.cards) ''];
     super.initState();
@@ -48,8 +46,8 @@ class _TestPageState extends State<TestPage> {
       }
     }
 
-    int i = 0;
-    for (final TestCard card in widget.cards) {
+    var i = 0;
+    for (final card in widget.cards) {
       if (ratio(answers[i], card.meaning) > 80) {
         test.scored[card] = true;
       }
@@ -68,16 +66,16 @@ class _TestPageState extends State<TestPage> {
     );
     tests_manager.addTest(test..answers = answers);
 
-    final firestore_manager.CollectionType testDocs = firestore_manager.testCollection;
-    final DocumentReference<StrMap> doc = testDocs.doc();
+    final testDocs = firestore_manager.testCollection;
+    final doc = testDocs.doc();
     await doc.set(<String, dynamic>{
       'area': test.area,
       'date': test.date,
       'id': tests_manager.nextID,
     });
-    final CollectionReference<Map<String, dynamic>> collection = doc.collection('testcards');
+    final collection = doc.collection('testcards');
     i = 0;
-    for (final TestCard card in test.scored.keys) {
+    for (final card in test.scored.keys) {
       await collection.doc().set(
         <String, dynamic>{
           'name': card.name,
@@ -93,9 +91,9 @@ class _TestPageState extends State<TestPage> {
   Widget build(BuildContext context) {
     BorderRadius getRadius(int index) {
       if (index == 0) {}
-      final Radius top =
+      final top =
           Radius.circular(index == 0 ? 12 : (widget.cards[index - 1].origin == widget.cards[index].origin ? 12 : 3));
-      final Radius bottom = Radius.circular(
+      final bottom = Radius.circular(
         index == widget.cards.length - 1 ? 12 : (widget.cards[index + 1].origin == widget.cards[index].origin ? 12 : 3),
       );
 
@@ -104,10 +102,10 @@ class _TestPageState extends State<TestPage> {
 
     EdgeInsets getPadding(int index) {
       if (index == 0) {}
-      final double top = index == 0 ? 12 : (widget.cards[index - 1].origin == widget.cards[index].origin ? 12 : 3);
-      final double bottom = (index == widget.cards.length - 1
-          ? 12
-          : (widget.cards[index + 1].origin == widget.cards[index].origin ? 12 : 3));
+      final top = index == 0 ? 12.0 : (widget.cards[index - 1].origin == widget.cards[index].origin ? 12.0 : 3.0);
+      final bottom = (index == widget.cards.length - 1
+          ? 12.0
+          : (widget.cards[index + 1].origin == widget.cards[index].origin ? 12.0 : 3.0));
 
       return EdgeInsets.only(top: top, bottom: bottom);
     }

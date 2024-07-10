@@ -25,7 +25,7 @@ class ResultCard extends StatefulWidget {
 class _ResultCardState extends State<ResultCard> {
   @override
   Widget build(BuildContext context) {
-    bool correct = widget.correct ?? false;
+    var correct = widget.correct ?? false;
 
     return Card(
       shape: RoundedRectangleBorder(

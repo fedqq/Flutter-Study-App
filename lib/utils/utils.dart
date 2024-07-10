@@ -1,11 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 double radius = 20;
 double padding = 3;
 
 typedef StrMap = Map<String, dynamic>;
-
-const List<Color> gradientColors = <Color>[Color.fromARGB(255, 135, 0, 193), Color.fromARGB(255, 34, 0, 253)];
+typedef SnapShot = QuerySnapshot<StrMap>;
+typedef SnapShotFuture = Future<SnapShot>;
+typedef DocSnapshot = QueryDocumentSnapshot<StrMap>;
+typedef DocSnapshotFuture = Future<DocSnapshot>;
+typedef Collection = CollectionReference<StrMap>;
 
 void simpleSnackBar(BuildContext context, String s) => ScaffoldMessenger.of(context)
   ..clearSnackBars()

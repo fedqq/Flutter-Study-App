@@ -5,7 +5,5 @@ class Topic {
   String name = '';
   List<FlashCard> cards = <FlashCard>[];
 
-  void addCard(FlashCard card) {
-    cards.add(card);
-  }
+  void addCard(FlashCard card) => cards.add(card);
 }

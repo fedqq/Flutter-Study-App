@@ -16,7 +16,7 @@ class TaskPopup extends StatefulWidget {
 
 class _TaskPopupState extends State<TaskPopup> {
   Future<void> edit() async {
-    final DialogResult result = await doubleInputDialog(
+    final result = await doubleInputDialog(
           context,
           'Edit Task',
           Input(name: 'Name', value: widget.task.name),
@@ -28,7 +28,7 @@ class _TaskPopupState extends State<TaskPopup> {
       return;
     }
 
-    final QuerySnapshot<StrMap> taskDocs = await firestore_manager.taskDocs;
+    final taskDocs = await firestore_manager.taskDocs;
     await taskDocs.docs.firstWhere((QueryDocumentSnapshot<StrMap> a) => a['name'] == widget.task.name && a['desc'] == widget.task.desc).reference.update(<Object, Object?>{
       'name': result.first,
       'desc': result.second,
@@ -41,12 +41,12 @@ class _TaskPopupState extends State<TaskPopup> {
   }
 
   Future<void> editColor() async {
-    final Color? color = await showColorPicker(context, widget.task.color);
+    final color = await showColorPicker(context, widget.task.color);
     if (color == null) {
       return;
     }
     setState(() => widget.task.color = color);
-    final QuerySnapshot<StrMap> taskDocs = await firestore_manager.taskDocs;
+    final taskDocs = await firestore_manager.taskDocs;
     await taskDocs.docs
         .firstWhere((QueryDocumentSnapshot<StrMap> a) => a['name'] == widget.task.name && a['desc'] == widget.task.desc)
         .reference

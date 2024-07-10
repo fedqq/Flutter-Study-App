@@ -48,18 +48,18 @@ class _DoubleInputDialogState extends State<DoubleInputDialog> {
       return true;
     }
 
-    final String value = input.value?.trim() ?? '';
-    final bool numericalPass = !(input.numerical && int.tryParse(value) == null);
-    final bool customValidatePass = input.validate == null || input.validate!(value);
-    final bool emptyPass = input.nullable || value.isNotEmpty;
+    final value = input.value?.trim() ?? '';
+    final numericalPass = !(input.numerical && int.tryParse(value) == null);
+    final customValidatePass = input.validate == null || input.validate!(value);
+    final emptyPass = input.nullable || value.isNotEmpty;
 
     return numericalPass && customValidatePass && emptyPass;
   }
 
   @override
   Widget build(BuildContext context) {
-    final Input first = widget.first;
-    final Input second = widget.second;
+    final first = widget.first;
+    final second = widget.second;
 
     return AlertDialog(
       contentPadding: const EdgeInsets.all(24),
@@ -87,8 +87,8 @@ class _DoubleInputDialogState extends State<DoubleInputDialog> {
               FilledButton(
                 child: const Text('Confirm'),
                 onPressed: () {
-                  final bool validFirst = validateInput(first);
-                  final bool validSecond = validateInput(second);
+                  final validFirst = validateInput(first);
+                  final validSecond = validateInput(second);
                   if (!(validFirst && validSecond)) {
                     simpleSnackBar(
                       context,
@@ -147,13 +147,13 @@ class DialogResult {
   static DialogResult empty = DialogResult('', '');
 }
 
-Future<String> singleInputDialog(
+Future<String> inputDialog(
   BuildContext context,
   String title,
   Input input, {
   bool cancellable = true,
 }) async {
-  final DialogResult? result = await doubleInputDialog(
+  final result = await doubleInputDialog(
     context,
     title,
     input,
@@ -183,7 +183,7 @@ Future<DialogResult?> doubleInputDialog(
     );
 
 Future<Color?> showColorPicker(BuildContext context, Color color) async {
-  Color tempColor = color;
+  var tempColor = color;
 
   return showDialog<Color>(
     context: context,

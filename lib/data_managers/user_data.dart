@@ -17,7 +17,7 @@ int calculateStreak() {
     return 0;
   }
 
-  final int lastStreak = dailyStreak[format(DateTime.now().add(const Duration(days: -1)))] ?? 0;
+  final lastStreak = dailyStreak[format(DateTime.now().add(const Duration(days: -1)))] ?? 0;
 
   return lastStreak + 1;
 }
@@ -42,14 +42,14 @@ int get dailyGoal => _dailyGoal;
 set dailyGoal(int goal) => _dailyGoal = goal;
 
 int get maxStreak {
-  int highest = 0;
+  var highest = 0;
   dailyStreak.forEach((_, int value) => highest = max(highest, value));
 
   return highest;
 }
 
 bool study() {
-  final String formatted = getNowString();
+  final formatted = getNowString();
   if (!dailyStudied.containsKey(formatted)) {
     dailyStudied[formatted] = 1;
   } else {
@@ -60,13 +60,13 @@ bool study() {
 }
 
 List<int> getLastWeek() {
-  final List<String> strs = <String>[];
-  for (int i = 0; i < 7; i++) {
+  final strs = <String>[];
+  for (var i = 0; i < 7; i++) {
     strs.add(format(DateTime.now().add(Duration(days: -i))));
   }
-  final List<int> res = <int>[];
-  for (final String date in strs) {
-    final int num = dailyStudied[date] ?? 0;
+  final res = <int>[];
+  for (final date in strs) {
+    final num = dailyStudied[date] ?? 0;
     res.add(num);
   }
 
@@ -74,8 +74,8 @@ List<int> getLastWeek() {
 }
 
 double getAverage() {
-  int sum = 0;
-  for (final int i in getLastWeek()) {
+  var sum = 0;
+  for (final i in getLastWeek()) {
     sum += i;
   }
 

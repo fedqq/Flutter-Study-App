@@ -26,13 +26,13 @@ class SubjectPage extends StatefulWidget {
 
 class _SubjectPageState extends State<SubjectPage> {
   Future<void> newTopic() async {
-    final String topicName = await singleInputDialog(context, 'New Topic Name', Input(name: 'Name'));
+    final topicName = await inputDialog(context, 'New Topic Name', Input(name: 'Name'));
 
     if (topicName == '') {
       return;
     }
-    final Topic topic = Topic(topicName)..addCard(FlashCard('First Card', 'First Card Meaning', learned: false));
-    final firestore_manager.CollectionType cardCollection = firestore_manager.cardCollection;
+    final topic = Topic(topicName)..addCard(FlashCard('First Card', 'First Card Meaning', learned: false));
+    final cardCollection = firestore_manager.cardCollection;
     await cardCollection.doc('First Card').set(<String, dynamic>{
       'name': 'First Card',
       'meaning': 'First Card Meaning',
@@ -45,7 +45,7 @@ class _SubjectPageState extends State<SubjectPage> {
 
   @override
   Widget build(BuildContext context) {
-    final Expanded topicList = Expanded(
+    final topicList = Expanded(
       child: ListView.builder(
         itemCount: widget.subject.topics.length,
         itemBuilder: (BuildContext context, int index) => TopicCard(
@@ -57,11 +57,11 @@ class _SubjectPageState extends State<SubjectPage> {
             // ignore: always_specify_types
             MaterialPageRoute(
               builder: (_) {
-                final Subject subject = widget.subject;
-                final Topic topic = subject.topics[index];
+                final subject = widget.subject;
+                final topic = subject.topics[index];
 
-                final List<TestCard> cards = List<TestCard>.generate(topic.cards.length, (int i) {
-                  final FlashCard card = topic.cards[i];
+                final cards = List<TestCard>.generate(topic.cards.length, (int i) {
+                  final card = topic.cards[i];
 
                   return TestCard(card.name, card.meaning, '${widget.subject.name} - ${topic.name}');
                 });
@@ -77,7 +77,19 @@ class _SubjectPageState extends State<SubjectPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.subject.name} Topics (${widget.subject.topics.length})'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Hero(
+              tag: widget.subject.name,
+              child: Material(
+                type: MaterialType.transparency,
+                child: Text(widget.subject.name, style: Theme.of(context).textTheme.headlineSmall),
+              ),
+            ),
+            Text(' Topics (${widget.subject.topics.length})', style: Theme.of(context).textTheme.headlineSmall),
+          ],
+        ),
         centerTitle: true,
         actions: <Widget>[
           if (tests_manager.hasScore(widget.subject.asArea))

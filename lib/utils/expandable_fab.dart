@@ -35,8 +35,7 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
   late final Animation<double> animation;
   bool _open = false;
 
-  @override
-  Widget build(BuildContext context) => AnimatedBuilder(
+  Widget buildWidget() => AnimatedBuilder(
         animation: animation,
         builder: (_, __) => BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 8 * animation.value, sigmaY: 8 * animation.value),
@@ -52,10 +51,23 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
         ),
       );
 
+  @override
+  Widget build(BuildContext context) => _open
+      ? GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            toggle();
+            widget.onPress?.call();
+          },
+          child: buildWidget(),
+        )
+      : buildWidget();
+
   // ignore: avoid_positional_boolean_parameters
   void set(bool b) {
     if (b != _open) {
       toggle();
+      widget.controller?.open = b;
     }
   }
 
@@ -90,6 +102,7 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
         _controller.reverse();
       }
     });
+    widget.controller?.open = _open;
   }
 
   Widget buildButton() => FloatingActionButton(
@@ -101,15 +114,15 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
       );
 
   List<Widget> _buildExpandingActionButtons() {
-    final List<Widget> children = <Widget>[];
-    final int count = widget.children.length;
-    final double step = 90.0 / (count - 1);
-    for (double i = 0, offset = 0; i < count; i++, offset += step) {
+    final children = <Widget>[];
+    final count = widget.children.length;
+    final step = 90.0 / (count - 1);
+    for (var i = 0, offset = 0; i < count; i++, offset += step.toInt()) {
       children.add(
         ExpandingActionButton(
           index: i,
           progress: animation,
-          child: widget.children[i.toInt()],
+          child: widget.children[i],
         ),
       );
     }
@@ -147,7 +160,7 @@ class ExpandingActionButton extends StatelessWidget {
     required this.child,
   });
 
-  final double index;
+  final int index;
   final Animation<double> progress;
   final ActionButton child;
 
@@ -155,7 +168,7 @@ class ExpandingActionButton extends StatelessWidget {
   Widget build(BuildContext context) => AnimatedBuilder(
         animation: progress,
         builder: (BuildContext context, _) {
-          final Offset offset = Offset(0, ((index + 1) * 60) * progress.value);
+          final offset = Offset(0, ((index + 1) * 60) * progress.value);
 
           return Positioned(
             bottom: 10 + offset.dy,

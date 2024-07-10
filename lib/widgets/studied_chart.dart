@@ -15,8 +15,8 @@ class StudiedChart extends StatefulWidget {
 
 class _StudiedChartState extends State<StudiedChart> {
   List<String> getLastWeekNames() {
-    final List<String> strs = <String>[];
-    for (int i = 0; i < 7; i++) {
+    final strs = <String>[];
+    for (var i = 0; i < 7; i++) {
       strs.add(DateFormat('EEE', 'en-US').format(DateTime.now().add(Duration(days: 7 - i))));
     }
 
@@ -25,11 +25,11 @@ class _StudiedChartState extends State<StudiedChart> {
 
   @override
   Widget build(BuildContext context) {
-    final List<int> daysData = user_data.getLastWeek();
+    final daysData = user_data.getLastWeek();
 
     int getMaxStudied() {
-      int max = 0;
-      for (final int i in daysData) {
+      var max = 0;
+      for (final i in daysData) {
         if (i > max) {
           max = i;
         }
@@ -38,17 +38,11 @@ class _StudiedChartState extends State<StudiedChart> {
       return max;
     }
 
-    final Color col = Theme.of(context).colorScheme.inversePrimary;
-    final [int r, int g, int b] = <int>[col.red, col.green, col.blue];
+    final col = Theme.of(context).colorScheme.inversePrimary;
 
     final double value = max(widget.animValue, 0.7);
 
-    final Color res = Color.fromARGB(
-      255,
-      255 - ((255 - r) * value).toInt(),
-      255 - ((255 - g) * value).toInt(),
-      255 - ((255 - b) * value).toInt(),
-    );
+    final res = Color.lerp(Colors.white, col, value) ?? Colors.white;
 
     return LineChart(
       LineChartData(
@@ -84,7 +78,10 @@ class _StudiedChartState extends State<StudiedChart> {
             isCurved: true,
             preventCurveOverShooting: true,
             dotData: const FlDotData(show: false),
-            spots: List<FlSpot>.generate(7, (int i) => FlSpot(i.toDouble(), daysData[6 - i] * (min(widget.animValue, 0.8) + 0.2))),
+            spots: List<FlSpot>.generate(
+              7,
+              (int i) => FlSpot(i.toDouble(), daysData[6 - i] * (min(widget.animValue, 0.8) + 0.2)),
+            ),
           ),
           LineChartBarData(
             spots: <FlSpot>[FlSpot(0, user_data.getAverage()), FlSpot(6, user_data.getAverage())],

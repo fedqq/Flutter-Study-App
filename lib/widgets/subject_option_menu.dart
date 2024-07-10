@@ -37,38 +37,38 @@ class SubjectOptionMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
-      animation: animation,
-      builder: (_, __) => Opacity(
-        opacity: animation.value,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Spacer(),
-            SubjectCard(subject: firestore_manager.subjectsList[index], width: 3),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  pIconButton(icon: const Icon(Icons.color_lens_rounded), onPressed: editColor, label: 'Color'),
-                  pIconButton(icon: const Icon(Icons.edit_rounded), onPressed: editSubject, label: 'Rename'),
-                  pIconButton(icon: const Icon(Icons.question_mark_rounded), onPressed: testSubject, label: 'Test'),
-                  pIconButton(icon: const Icon(Icons.edit_location_alt_rounded), onPressed: editInfo, label: 'Info'),
-                  pIconButton(icon: const Icon(Icons.school_rounded), onPressed: editInfo, label: 'Study'),
-                ].map((Widget a) => ScaleTransition(scale: animation, child: a)).toList(),
+        animation: animation,
+        builder: (_, __) => Opacity(
+          opacity: animation.value,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Spacer(),
+              SubjectCard(subject: firestore_manager.subjectsList[index]),
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    pIconButton(icon: const Icon(Icons.color_lens_rounded), onPressed: editColor, label: 'Color'),
+                    pIconButton(icon: const Icon(Icons.edit_rounded), onPressed: editSubject, label: 'Rename'),
+                    pIconButton(icon: const Icon(Icons.question_mark_rounded), onPressed: testSubject, label: 'Test'),
+                    pIconButton(icon: const Icon(Icons.edit_location_alt_rounded), onPressed: editInfo, label: 'Info'),
+                    pIconButton(icon: const Icon(Icons.school_rounded), onPressed: editInfo, label: 'Study'),
+                  ].map((a) => ScaleTransition(scale: animation, child: a)).toList(),
+                ),
               ),
-            ),
-            const Spacer(),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: IconButton.filled(
-                onPressed: deleteSubject,
-                icon: const Icon(Icons.delete_rounded),
+              const Spacer(),
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: IconButton.filled(
+                  onPressed: deleteSubject,
+                  icon: const Icon(Icons.delete_rounded),
+                ),
               ),
-            ),
-            const Text('Delete Subject'),
-          ],
+              const Text('Delete Subject'),
+            ],
+          ),
         ),
-      ),
-    );
+      );
 }

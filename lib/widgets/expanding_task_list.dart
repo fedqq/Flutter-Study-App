@@ -33,7 +33,7 @@ class _ExpandingTaskListState extends State<ExpandingTaskList> {
       return;
     }
 
-    for (final List<Task> tasks in widget.tasks.values) {
+    for (final tasks in widget.tasks.values) {
       tasks
         ..forEach(widget.deleteCallback)
         ..clear();

@@ -31,7 +31,7 @@ class DayCard extends StatefulWidget {
 
 class _DayCardState extends State<DayCard> {
   String getDateLabel() {
-    final String formatted = DateFormat('EEEE, MMMM d, yyyy', 'en-US').format(widget.date);
+    final formatted = DateFormat('EEEE, MMMM d, yyyy', 'en-US').format(widget.date);
     if (formatted == DateFormat('EEEE, MMMM d, yyyy', 'en-US').format(DateTime.now().add(const Duration(days: 1)))) {
       return 'Tomorrow';
     } else if (formatted == DateFormat('EEEE, MMMM d, yyyy', 'en-US').format(DateTime.now())) {
@@ -79,7 +79,7 @@ class _DayCardState extends State<DayCard> {
                         return;
                       }
 
-                      final QuerySnapshot<theming.StrMap> taskDocs = await firestore_manager.taskDocs;
+                      final taskDocs = await firestore_manager.taskDocs;
                       await taskDocs.docs
                           .firstWhere(
                             (QueryDocumentSnapshot<theming.StrMap> a) =>
