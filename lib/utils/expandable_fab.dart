@@ -42,7 +42,7 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
           child: SizedBox.expand(
             child: Stack(
               alignment: Alignment.bottomRight,
-              children: <Widget>[
+              children: [
                 ..._buildExpandingActionButtons(),
                 buildButton(),
               ],
@@ -116,7 +116,10 @@ class _ExpandableFabState extends State<ExpandableFab> with SingleTickerProvider
   List<Widget> _buildExpandingActionButtons() {
     final children = <Widget>[];
     final count = widget.children.length;
-    final step = 90.0 / (count - 1);
+    var step = 90.0 / (count - 1);
+    if (step == double.infinity) {
+      step = 1;
+    }
     for (var i = 0, offset = 0; i < count; i++, offset += step.toInt()) {
       children.add(
         ExpandingActionButton(
@@ -175,7 +178,7 @@ class ExpandingActionButton extends StatelessWidget {
             child: Opacity(
               opacity: progress.value,
               child: Row(
-                children: <Widget>[
+                children: [
                   Text(child.name),
                   const SizedBox(width: 10),
                   Transform.rotate(

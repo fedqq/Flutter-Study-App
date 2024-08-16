@@ -11,7 +11,6 @@ class Task {
   late bool completed;
   late Color color;
   late String desc;
-  late int review;
 
   bool compare(QueryDocumentSnapshot<StrMap> a) => a['name'] == name && a['date'] == dueDate.millisecondsSinceEpoch;
 }

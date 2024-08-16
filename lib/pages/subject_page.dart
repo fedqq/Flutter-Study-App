@@ -31,7 +31,8 @@ class _SubjectPageState extends State<SubjectPage> {
     if (topicName == '') {
       return;
     }
-    final topic = Topic(topicName)..addCard(FlashCard('First Card', 'First Card Meaning', learned: false));
+    final topic = Topic(topicName)
+      ..addCard(FlashCard('First Card', 'First Card Meaning', learned: false));
     final cardCollection = firestore_manager.cardCollection;
     await cardCollection.doc('First Card').set(<String, dynamic>{
       'name': 'First Card',
@@ -66,7 +67,11 @@ class _SubjectPageState extends State<SubjectPage> {
                   return TestCard(card.name, card.meaning, '${widget.subject.name} - ${topic.name}');
                 });
 
-                return TestPage(cards: cards, testArea: '${subject.name} - ${topic.name}', subject: subject);
+                return TestPage(
+                  cards: cards,
+                  testArea: '${subject.name} - ${topic.name}',
+                  subject: subject,
+                );
               },
             ),
           )..then((_) => setState(() {})),
@@ -79,7 +84,7 @@ class _SubjectPageState extends State<SubjectPage> {
       appBar: AppBar(
         title: Row(
           mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
+          children: [
             Hero(
               tag: widget.subject.name,
               child: Material(
@@ -91,7 +96,7 @@ class _SubjectPageState extends State<SubjectPage> {
           ],
         ),
         centerTitle: true,
-        actions: <Widget>[
+        actions: [
           if (tests_manager.hasScore(widget.subject.asArea))
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -117,10 +122,10 @@ class _SubjectPageState extends State<SubjectPage> {
         child: const Icon(Icons.add_rounded),
       ),
       body: Stack(
-        children: <Widget>[
+        children: [
           Center(
             child: Column(
-              children: <Widget>[
+              children: [
                 if (widget.subject.topics.isNotEmpty) topicList,
               ],
             ),

@@ -27,7 +27,7 @@ class _SubjectCardState extends State<SubjectCard> {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Row(
-          children: <Widget>[
+          children: [
             SizedBox(
               height: 100,
               child: AspectRatio(
@@ -38,7 +38,7 @@ class _SubjectCardState extends State<SubjectCard> {
             Expanded(
               child: Center(
                 child: Column(
-                  children: <Widget>[
+                  children: [
                     Hero(
                       tag: subject.name,
                       child: Material(
@@ -46,7 +46,7 @@ class _SubjectCardState extends State<SubjectCard> {
                         child: Text(widget.subject.name, style: Theme.of(context).textTheme.headlineMedium),
                       ),
                     ),
-                    if (!(teacher == '' && classroom == '')) ...<Widget>[
+                    if (!(teacher == '' && classroom == '')) ...[
                       const SizedBox(height: 10),
                       Text(arr.where((String a) => a != '').join(' - '), style: Theme.of(context).textTheme.bodyLarge),
                     ],

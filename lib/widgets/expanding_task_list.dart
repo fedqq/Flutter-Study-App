@@ -51,13 +51,13 @@ class _ExpandingTaskListState extends State<ExpandingTaskList> {
             controlAffinity: ListTileControlAffinity.leading,
             shape: const Border(),
             title: Text(widget.title),
-            children: <Widget>[
+            children: [
               SizedBox(
                 height: 250,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(25),
                   child: ListView(
-                    children: <Widget>[
+                    children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                         child: FilledButton(onPressed: deleteAll, child: const Text('Delete All')),

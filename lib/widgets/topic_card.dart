@@ -165,12 +165,12 @@ class _TopicCardState extends State<TopicCard> {
         minLeadingWidth: 10,
         child: ExpansionTile(
           subtitle: Stack(
-            children: <Widget>[
+            children: [
               Container(
                 width: 450,
                 height: 5,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(utils.radius),
+                  borderRadius: BorderRadius.circular(20),
                   color: const Color.fromARGB(255, 51, 51, 51),
                 ),
               ),
@@ -178,7 +178,7 @@ class _TopicCardState extends State<TopicCard> {
                 width: learnedPercentage() * 450,
                 height: 5,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(utils.radius),
+                  borderRadius: BorderRadius.circular(20),
                   color: Theme.of(context).colorScheme.primary,
                 ),
               ),
@@ -201,7 +201,7 @@ class _TopicCardState extends State<TopicCard> {
                   onTap: () => widget.testTopic().then((_) => setState(() {})),
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
+                    children: [
                       Icon(Icons.question_mark_rounded),
                       Text('Test on topic'),
                     ],
@@ -211,7 +211,7 @@ class _TopicCardState extends State<TopicCard> {
                   onTap: () => topic.cards.isNotEmpty ? studyTopic(topic) : null,
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
+                    children: [
                       Icon(Icons.school_rounded),
                       Text('Open cards'),
                     ],
@@ -221,7 +221,7 @@ class _TopicCardState extends State<TopicCard> {
                   onTap: () => addCard(topic),
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
+                    children: [
                       Icon(Icons.add_rounded),
                       Text('New card'),
                     ],
@@ -231,7 +231,7 @@ class _TopicCardState extends State<TopicCard> {
                   onTap: () => renameTopic(topic).then((_) => setState(() {})),
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
+                    children: [
                       Icon(Icons.edit_rounded),
                       Text('Rename Topic'),
                     ],
@@ -241,7 +241,7 @@ class _TopicCardState extends State<TopicCard> {
                   onTap: () => deleteTopic(topic).then((_) => setState(() {})),
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
+                    children: [
                       Icon(Icons.delete_rounded),
                       Text('Delete Topic'),
                     ],
@@ -250,10 +250,7 @@ class _TopicCardState extends State<TopicCard> {
               ],
             ),
           ),
-          title: Text(
-            topic.name,
-            textAlign: TextAlign.center,
-          ),
+          title: Text(topic.name, textAlign: TextAlign.center),
           childrenPadding: EdgeInsets.zero,
           children: List.generate(
             topic.cards.length,

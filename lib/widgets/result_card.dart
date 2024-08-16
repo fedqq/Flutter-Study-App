@@ -35,7 +35,7 @@ class _ResultCardState extends State<ResultCard> {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Stack(
-          children: <Widget>[
+          children: [
             if ((!correct) && widget.editable)
               Center(
                 child: FilledButton.tonal(
@@ -51,10 +51,10 @@ class _ResultCardState extends State<ResultCard> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
+              children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
+                  children: [
                     Text(widget.card.name, overflow: TextOverflow.ellipsis),
                     Text(
                       widget.card.origin,
@@ -64,7 +64,7 @@ class _ResultCardState extends State<ResultCard> {
                   ],
                 ),
                 Column(
-                  children: <Widget>[
+                  children: [
                     Text(widget.card.meaning, overflow: TextOverflow.ellipsis),
                     if (!correct)
                       Text(

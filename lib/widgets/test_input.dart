@@ -22,29 +22,29 @@ class TestInput extends StatefulWidget {
 class _TestInputState extends State<TestInput> {
   @override
   Widget build(BuildContext context) => Card(
-      shape: RoundedRectangleBorder(borderRadius: widget.borderRadius),
-      margin: widget.padding,
-      elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Column(
-              children: <Widget>[
-                Text('${widget.name}: '),
-                Text(
-                  widget.area,
-                  style: Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.white.withAlpha(150)),
-                ),
-              ],
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: TextFormField(onChanged: widget.onChanged),
-            ),
-          ],
+        shape: RoundedRectangleBorder(borderRadius: widget.borderRadius),
+        margin: widget.padding,
+        elevation: 3,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                children: [
+                  Text('${widget.name}: '),
+                  Text(
+                    widget.area,
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.white.withAlpha(150)),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextFormField(onChanged: widget.onChanged),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
+      );
 }

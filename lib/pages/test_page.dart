@@ -90,22 +90,34 @@ class _TestPageState extends State<TestPage> {
   @override
   Widget build(BuildContext context) {
     BorderRadius getRadius(int index) {
-      if (index == 0) {}
-      final top =
-          Radius.circular(index == 0 ? 12 : (widget.cards[index - 1].origin == widget.cards[index].origin ? 12 : 3));
-      final bottom = Radius.circular(
-        index == widget.cards.length - 1 ? 12 : (widget.cards[index + 1].origin == widget.cards[index].origin ? 12 : 3),
-      );
+      final origin = widget.cards[index].origin;
+      var top = 12.0;
+      if (index != 0 && widget.cards[index - 1].origin != origin) {
+        top = 3;
+      }
 
-      return BorderRadius.only(topLeft: top, topRight: top, bottomLeft: bottom, bottomRight: bottom);
+      var bottom = 12.0;
+
+      if (index != 0 &&
+          index != widget.cards.length - 1 &&
+          widget.cards[index - 1].origin == origin &&
+          widget.cards[index + 1].origin != origin) {
+        bottom = 3;
+      }
+
+      return BorderRadius.only(
+        topLeft: Radius.circular(top),
+        topRight: Radius.circular(top),
+        bottomLeft: Radius.circular(bottom),
+        bottomRight: Radius.circular(bottom),
+      );
     }
 
     EdgeInsets getPadding(int index) {
       if (index == 0) {}
-      final top = index == 0 ? 12.0 : (widget.cards[index - 1].origin == widget.cards[index].origin ? 12.0 : 3.0);
-      final bottom = (index == widget.cards.length - 1
-          ? 12.0
-          : (widget.cards[index + 1].origin == widget.cards[index].origin ? 12.0 : 3.0));
+      final top = index != 0 && widget.cards[index - 1].origin != widget.cards[index].origin ? 3.0 : 12.0;
+      final bottom =
+          index != widget.cards.length - 1 && widget.cards[index + 1].origin != widget.cards[index].origin ? 3.0 : 12.0;
 
       return EdgeInsets.only(top: top, bottom: bottom);
     }
@@ -115,7 +127,7 @@ class _TestPageState extends State<TestPage> {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          children: <Widget>[
+          children: [
             ...List<TestInput>.generate(
               widget.cards.length,
               (int index) => TestInput(
@@ -127,7 +139,7 @@ class _TestPageState extends State<TestPage> {
               ),
             ),
             Row(
-              children: <Widget>[
+              children: [
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(8),

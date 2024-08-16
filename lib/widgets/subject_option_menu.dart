@@ -22,7 +22,7 @@ class SubjectOptionMenu extends StatelessWidget {
   final Animation<double> animation;
 
   Widget pIconButton({required Icon icon, required void Function() onPressed, String label = 'test'}) => Column(
-        children: <Widget>[
+        children: [
           Padding(
             padding: const EdgeInsets.all(8),
             child: IconButton.filledTonal(
@@ -42,14 +42,14 @@ class SubjectOptionMenu extends StatelessWidget {
           opacity: animation.value,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
+            children: [
               const Spacer(),
               SubjectCard(subject: firestore_manager.subjectsList[index]),
               Padding(
                 padding: const EdgeInsets.all(8),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
+                  children: [
                     pIconButton(icon: const Icon(Icons.color_lens_rounded), onPressed: editColor, label: 'Color'),
                     pIconButton(icon: const Icon(Icons.edit_rounded), onPressed: editSubject, label: 'Rename'),
                     pIconButton(icon: const Icon(Icons.question_mark_rounded), onPressed: testSubject, label: 'Test'),

@@ -52,8 +52,9 @@ class _MyAppState extends State<MyApp> {
 }
 
 class NavigationPage extends StatefulWidget {
-  const NavigationPage({super.key, required this.title});
+  const NavigationPage({super.key, required this.title, this.username});
   final String title;
+  final String? username;
 
   @override
   State<NavigationPage> createState() => _NavigationPageState();
@@ -75,8 +76,15 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
-    loadData();
+    loadData().then((_) => setFirstUsername());
     super.initState();
+  }
+
+  void setFirstUsername() {
+    if (widget.username != null) {
+      user_data.userName = widget.username ?? '';
+      user_data.dailyGoal = 20;
+    }
   }
 
   Future<void> loadData() async {
@@ -146,7 +154,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
 
   @override
   Widget build(BuildContext context) {
-    final pages = <Widget>[
+    final pages = [
       StatsPage(saveCallback: saveData, loadCallback: loadData, subjects: subjects),
       SubjectsPage(subjects: subjects),
       CalendarPage(tasks: tasks, completedTasks: completedTasks),
@@ -171,7 +179,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
               labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
               indicatorColor: Theme.of(context).colorScheme.primaryContainer,
               selectedIndex: selectedDest,
-              destinations: const <Widget>[
+              destinations: const [
                 NavigationDestination(
                   icon: Icon(Icons.bar_chart_outlined),
                   label: 'Statistics',

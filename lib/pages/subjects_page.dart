@@ -260,8 +260,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
       widget.subjects[currentFocused].classroom = res.second;
     });
 
-    final subject =
-        await firestore_manager.subjectNamed(widget.subjects[currentFocused].name);
+    final subject = await firestore_manager.subjectNamed(widget.subjects[currentFocused].name);
     await subject.reference.update(<Object, Object?>{'teacher': res.first, 'classroom': res.second});
   }
 
@@ -323,7 +322,10 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
         }
       }
     }
-    Navigator.push(context, MaterialPageRoute(builder: (_) => TestPage(cards: cards, testArea: 'All')));
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => TestPage(cards: cards, testArea: 'All')),
+    );
   }
 
   void showAllTests() {
@@ -396,7 +398,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
         builder: (BuildContext context, _) => GestureDetector(
           onTap: closeMenus,
           child: Stack(
-            children: <Widget>[
+            children: [
               ListView.builder(
                 physics: const ScrollPhysics(),
                 shrinkWrap: true,

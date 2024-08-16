@@ -66,19 +66,17 @@ class _DoubleInputDialogState extends State<DoubleInputDialog> {
       title: Text(widget.title),
       content: Column(
         mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          buildInputField(first, (String str) {
-            first.value = str;
-          }),
+        children: [
+          buildInputField(first, (String str) => first.value = str),
           buildInputField(second, (String str) => second.value = str),
         ],
       ),
-      actions: <Widget>[
+      actions: [
         Padding(
           padding: const EdgeInsets.all(8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
+            children: [
               if (widget.cancellable)
                 TextButton(
                   child: const Text('Cancel'),
@@ -97,7 +95,8 @@ class _DoubleInputDialogState extends State<DoubleInputDialog> {
 
                     return;
                   }
-                  Navigator.of(context).pop(DialogResult(first.value ?? '', second.value ?? ''));
+                  Navigator.of(context)
+                      .pop(DialogResult(first.value ?? '', second.value ?? ''));
                 },
               ),
             ],
@@ -133,7 +132,7 @@ Future<bool> confirmDialog(BuildContext context, {required String title}) async 
         title: Text(title),
         content: const Text('Are you sure you would like to continue?'),
         actionsAlignment: MainAxisAlignment.spaceBetween,
-        actions: <Widget>[
+        actions: [
           FilledButton.tonal(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
           FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Confirm')),
         ],
@@ -194,7 +193,7 @@ Future<Color?> showColorPicker(BuildContext context, Color color) async {
         onColorChange: (Color value) => tempColor = value,
         selectedColor: color,
       ),
-      actions: <Widget>[
+      actions: [
         TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
         TextButton(
           onPressed: () => Navigator.pop(context, tempColor),

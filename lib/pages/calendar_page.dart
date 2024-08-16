@@ -213,10 +213,10 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
         child: const Icon(Icons.add_rounded),
       ),
       body: Column(
-        children: <Widget>[
+        children: [
           Flexible(
             child: ListView(
-              children: <Widget>[
+              children: [
                 Padding(
                   padding: const EdgeInsets.all(8),
                   child: ListView.builder(

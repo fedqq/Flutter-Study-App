@@ -33,8 +33,7 @@ class _ResultsPageState extends State<ResultsPage> {
         .get();
 
     final docs = cardsDocs.docs;
-    final ref =
-        docs.firstWhere((QueryDocumentSnapshot<StrMap> a) => cards[index].compare(a)).reference;
+    final ref = docs.firstWhere((QueryDocumentSnapshot<StrMap> a) => cards[index].compare(a)).reference;
 
     await ref.update(<Object, Object?>{'answer': cards[index].meaning});
 
@@ -54,7 +53,7 @@ class _ResultsPageState extends State<ResultsPage> {
       appBar: AppBar(title: Text('Test on ${widget.test.area} - ${widget.test.date}'), centerTitle: true),
       body: ListView(
         padding: const EdgeInsets.all(8),
-        children: <Widget>[
+        children: [
           Center(
             child: Padding(
               padding: const EdgeInsets.all(16),

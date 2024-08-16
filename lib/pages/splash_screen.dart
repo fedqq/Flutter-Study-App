@@ -23,7 +23,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     animationController = AnimationController(vsync: this, duration: const Duration(seconds: 2));
     animation = CurvedAnimation(
       curve: Curves.easeOutCirc,
-      reverseCurve: Curves.easeOutQuad,
       parent: animationController,
     );
     super.initState();
@@ -67,10 +66,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             scale: animation,
             child: Stack(
               alignment: Alignment.center,
-              children: <Widget>[
+              children: [
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
+                  children: [
                     Opacity(
                       opacity: animation.value,
                       child: Text(

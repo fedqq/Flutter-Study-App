@@ -3,7 +3,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
-import 'package:studyappcs/data_managers/user_data.dart' as user_data;
 import 'package:studyappcs/main.dart';
 import 'package:studyappcs/utils/page_transition.dart';
 import 'package:studyappcs/utils/utils.dart';
@@ -49,7 +48,6 @@ class _LoginPageState extends State<LoginPage> {
         email: email,
         password: password,
       );
-      user_data.userName = username;
       return null;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
@@ -72,7 +70,7 @@ class _LoginPageState extends State<LoginPage> {
     await firestore_manager.loadData();
     setState(() => loading = false);
     // ignore: use_build_context_synchronously
-    await pushReplacement(context, () => const NavigationPage(title: 'Study Help App'));
+    await pushReplacement(context, () => NavigationPage(title: 'Study Help App', username: username));
   }
 
   Future<void> submit() async {
@@ -90,11 +88,11 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget buildActionButtons() => Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
+        children: [
           Expanded(child: FilledButton(onPressed: submit, child: const Text('Submit'))),
           const SizedBox(width: 20),
           Expanded(
-            child: FilledButton.tonal(
+            child: OutlinedButton(
               onPressed: () => setState(() => register = !register),
               child: Text(!register ? 'Sign Up' : 'Log In'),
             ),
@@ -134,6 +132,8 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
 
+  String currentValue() => register ? 'Sign up' : 'Log in';
+
   Widget buildAuthForm() => Center(
         child: Padding(
           padding: const EdgeInsets.all(30),
@@ -142,13 +142,21 @@ class _LoginPageState extends State<LoginPage> {
               padding: const EdgeInsets.all(30),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Text('Log in', style: Theme.of(context).textTheme.displayMedium),
+                children: [
+                  AnimatedSwitcher(
+                    transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
+                    duration: Durations.short2,
+                    child: Text(
+                      currentValue(),
+                      style: Theme.of(context).textTheme.displaySmall,
+                      key: ValueKey<String>(currentValue()),
+                    ),
+                  ),
                   buildEmailField(),
                   const SizedBox(height: 20),
                   buildPasswordField(),
                   const SizedBox(height: 20),
-                  if (register) ...<Widget>[
+                  if (register) ...[
                     buildUsernameField(),
                     const SizedBox(height: 20),
                   ],
@@ -162,6 +170,16 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        body: loading ? buildLoader() : buildAuthForm(),
+        body: Column(
+          children: [
+            const Spacer(),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Text('Study App', style: Theme.of(context).textTheme.displayLarge),
+            ),
+            if (loading) buildLoader() else buildAuthForm(),
+            const Spacer(),
+          ],
+        ),
       );
 }

@@ -32,15 +32,15 @@ List<Subject> subjectsList = <Subject>[];
 List<Task> tasksList = <Task>[];
 List<Task> compTasksList = <Task>[];
 
-void _setUsePref(StrMap v) => _user.update(v);
+void _setUserPref(StrMap v) => _user.update(v);
 
-set goal(int goal) => _setUsePref(<String, dynamic>{'goal': goal});
-set username(String name) => _setUsePref(<String, dynamic>{'username': name});
-set color(int color) => _setUsePref(<String, dynamic>{'color': color});
+set goal(int goal) => _setUserPref({'goal': goal});
+set username(String name) => _setUserPref({'username': name});
+set color(int color) => _setUserPref({'color': color});
 // ignore: avoid_positional_boolean_parameters
-set lightness(bool l) => _setUsePref(<String, dynamic>{'lightness': l});
-set streaks(StrMap s) => _user.update(<Object, Object?>{'streaks': s});
-set studied(StrMap s) => _user.update(<Object, Object?>{'studied': s});
+set lightness(bool l) => _setUserPref({'lightness': l});
+set streaks(StrMap s) => _user.update({'streaks': s});
+set studied(StrMap s) => _user.update({'studied': s});
 
 Future<List<DocSnapshot>> cardsFromSubject(String s) async =>
     (await cardCollection.where('subject', isEqualTo: s).get()).docs;
@@ -60,14 +60,14 @@ Future<void> _loadPrefs() async {
   }
   final name = prefs['username'] as String;
   final goal = prefs['goal'] as int;
-  final accentColor = prefs['color'] as int;
+  final accentColor = Color(prefs['color'] as int);
   final lightness = prefs['lightness'] as bool;
   final streaks = (prefs['streaks'] as StrMap).cast<String, int>();
   final studied = (prefs['studied'] as StrMap).cast<String, int>();
   final lastTestID = prefs['id'] as int;
 
   user_data.userName = name;
-  user_data.color = Color(accentColor);
+  user_data.color = accentColor;
   user_data.lightness = lightness;
   user_data.dailyGoal = goal;
   user_data.dailyStreak = streaks;

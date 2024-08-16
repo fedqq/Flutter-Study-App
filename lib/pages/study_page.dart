@@ -20,12 +20,13 @@ class StudyPage extends StatefulWidget {
 }
 
 class _StudyPageState extends State<StudyPage> {
-  int currentCard = 0;
+  int currentCardIndex = 0;
   bool showingMeaning = false;
   List<FlashCard> cards = <FlashCard>[];
 
   @override
   void initState() {
+    cards = widget.cards;
     cards = widget.cards.where((FlashCard card) => !card.learned).toList() +
         widget.cards.where((FlashCard card) => card.learned).toList();
     super.initState();
@@ -36,70 +37,62 @@ class _StudyPageState extends State<StudyPage> {
     super.dispose();
   }
 
-  String getCurrentText() {
-    final card = cards[currentCard];
+  FlashCard get currentCard => cards[currentCardIndex];
 
-    return showingMeaning ? card.meaning : card.name;
-  }
+  void goForward() => setState(() {
+        currentCardIndex++;
+        wrapCurrentCard();
+      });
 
-  void goForward() {
-    setState(() {
-      currentCard++;
-      wrapCurrentCard();
-    });
-  }
-
-  void goBackward() {
-    setState(() {
-      currentCard--;
-      wrapCurrentCard();
-    });
-  }
+  void goBackward() => setState(() {
+        currentCardIndex--;
+        wrapCurrentCard();
+      });
 
   void wrapCurrentCard() {
-    currentCard = currentCard % cards.length;
+    currentCardIndex = currentCardIndex % cards.length;
     showingMeaning = false;
   }
 
   Future<void> learnCard() async {
-    final card = cards[currentCard];
+    final card = currentCard;
 
     final doc = await firestore_manager.cardNamed(card.name);
 
     await doc.reference.update(<Object, Object?>{'learned': !card.learned});
 
-    setState(() => cards[currentCard].learned = !cards[currentCard].learned);
+    setState(() => currentCard.learned = !currentCard.learned);
   }
 
   Future<void> editCard() async {
-    final oldName = cards[currentCard].name;
+    final oldName = currentCard.name;
 
     if (showingMeaning) {
       final newMeaning = await inputDialog(
         context,
-        'New meaning for ${cards[currentCard].name}',
-        Input(name: 'Meaning', value: cards[currentCard].meaning),
+        'New meaning for ${currentCard.name}',
+        Input(name: 'Meaning', value: currentCard.meaning),
       );
       if (newMeaning == '') {
         return;
       }
-      setState(() => cards[currentCard].meaning = newMeaning);
+      setState(() => currentCard.meaning = newMeaning);
     } else {
       final newName = await inputDialog(
         context,
-        'Rename ${cards[currentCard].name}',
-        Input(name: 'Name', value: cards[currentCard].name),
+        'Rename ${currentCard.name}',
+        Input(name: 'Name', value: currentCard.name),
       );
       if (newName == '') {
         return;
       }
       setState(() {
-        cards[currentCard].name = newName;
+        currentCard.name = newName;
       });
     }
 
-    final newName = cards[currentCard].name;
-    final newMeaning = cards[currentCard].meaning;
+    final newName = currentCard.name;
+    final newMeaning = currentCard.meaning;
 
     final doc = await firestore_manager.cardNamed(oldName);
     await doc.reference.update(<Object, Object?>{'name': newName, 'meaning': newMeaning});
@@ -111,15 +104,109 @@ class _StudyPageState extends State<StudyPage> {
     }
     final delete = await confirmDialog(
       context,
-      title: 'Are you sure you would like to delete ${cards[currentCard].name}?',
+      title: 'Are you sure you would like to delete ${currentCard.name}?',
     );
     if (delete) {
-      final card = cards[currentCard];
+      final card = currentCard;
 
       final doc = await firestore_manager.cardNamed(card.name);
       await doc.reference.delete();
 
-      setState(() => widget.cards.removeAt(currentCard));
+      setState(() => widget.cards.removeAt(currentCardIndex));
+    }
+  }
+
+  Widget buildProgressBar() => Container(
+        margin: const EdgeInsets.symmetric(horizontal: 20),
+        height: 10,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: TweenAnimationBuilder<double>(
+            duration: Durations.short4,
+            tween: Tween(
+              begin: 0,
+              end: (user_data.dailyStudied[user_data.getNowString()] ?? 0) /
+                  ((user_data.dailyGoal == 0) ? 20 : user_data.dailyGoal),
+            ),
+            builder: (_, value, ___) => LinearProgressIndicator(
+              borderRadius: BorderRadius.circular(10),
+              value: value,
+            ),
+          ),
+        ),
+      );
+
+  Widget buildBottomButtons() => Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton.filledTonal(
+              onPressed: goBackward,
+              icon: const Icon(Icons.arrow_back_rounded),
+            ),
+            FilledButton(
+              onPressed: learnCard,
+              child: Text(currentCard.learned ? 'Mark as unlearned' : 'Mark as learned'),
+            ),
+            IconButton.filledTonal(
+              onPressed: goForward,
+              icon: const Icon(Icons.arrow_forward_rounded),
+            ),
+          ],
+        ),
+      );
+
+  Widget buildFlashcard() => Expanded(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: InkWell(
+            onTap: flipCard,
+            child: Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: BorderSide(
+                  color: currentCard.learned ? const Color.fromARGB(80, 30, 253, 0) : Colors.transparent,
+                ),
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: IconButton(
+                      icon: const Icon(Icons.edit_rounded),
+                      onPressed: editCard,
+                    ),
+                  ),
+                  Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(currentCard.name, style: Theme.of(context).textTheme.headlineLarge),
+                        ImageFiltered(
+                          imageFilter: showingMeaning ? ImageFilter.dilate() : ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                          child: Text(
+                            currentCard.meaning,
+                            style: Theme.of(context).textTheme.headlineLarge,
+                          ),
+                        ),
+                      ].map((a) => Padding(padding: const EdgeInsets.all(8), child: a)).toList(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+  void flipCard() {
+    setState(() => showingMeaning = !showingMeaning);
+    if (showingMeaning && user_data.study()) {
+      simpleSnackBar(context, 'You reached you daily goal of ${user_data.dailyGoal} terms!');
     }
   }
 
@@ -127,102 +214,10 @@ class _StudyPageState extends State<StudyPage> {
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(),
         body: Column(
-          children: <Widget>[
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              height: 5,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: LinearProgressIndicator(
-                  value: (user_data.dailyStudied[user_data.getNowString()] ?? 0) /
-                      ((user_data.dailyGoal == 0) ? 20 : user_data.dailyGoal),
-                ),
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: InkWell(
-                  onTap: () {
-                    setState(() => showingMeaning = !showingMeaning);
-                    if (showingMeaning) {
-                      if (user_data.study()) {
-                        simpleSnackBar(context, 'You reached you daily goal of ${user_data.dailyGoal} terms!');
-                      }
-                    }
-                  },
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        side: BorderSide(
-                          color: cards[currentCard].learned ? const Color.fromARGB(80, 30, 253, 0) : Colors.transparent,
-                          width: 2,
-                        ),
-                      ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: <Widget>[
-                          Positioned(
-                            right: 8,
-                            top: 8,
-                            child: IconButton(
-                              icon: const Icon(Icons.edit_rounded),
-                              onPressed: editCard,
-                            ),
-                          ),
-                          Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.all(8),
-                                  child:
-                                      Text(cards[currentCard].name, style: Theme.of(context).textTheme.headlineLarge),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8),
-                                  child: ImageFiltered(
-                                    imageFilter:
-                                        showingMeaning ? ImageFilter.dilate() : ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                                    child: Text(
-                                      cards[currentCard].meaning,
-                                      style: Theme.of(context).textTheme.headlineLarge,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  IconButton.filledTonal(
-                    onPressed: goBackward,
-                    icon: const Icon(Icons.arrow_back_rounded),
-                  ),
-                  FilledButton(
-                    onPressed: learnCard,
-                    child: Text(cards[currentCard].learned ? 'Mark as unlearned' : 'Mark as learned'),
-                  ),
-                  IconButton.filledTonal(
-                    onPressed: goForward,
-                    icon: const Icon(Icons.arrow_forward_rounded),
-                  ),
-                ],
-              ),
-            ),
+          children: [
+            buildProgressBar(),
+            buildFlashcard(),
+            buildBottomButtons(),
           ],
         ),
       );

@@ -15,18 +15,8 @@ class AllTestsPage extends StatefulWidget {
 }
 
 class _AllTestsPageState extends State<AllTestsPage> with SingleTickerProviderStateMixin {
-  late AnimationController controller;
-  late Animation<double> animation;
-
   @override
   void initState() {
-    controller = AnimationController(vsync: this, value: 0, duration: Durations.extralong4);
-
-    animation = CurvedAnimation(
-      curve: Curves.easeInOut,
-      parent: controller,
-    );
-
     super.initState();
   }
 
@@ -37,84 +27,85 @@ class _AllTestsPageState extends State<AllTestsPage> with SingleTickerProviderSt
         ),
       );
 
-  @override
-  Widget build(BuildContext context) {
-    var tests = <Test>[];
+  BorderRadius getRadius(int index) {
+    final tests = tests_manager.testsFromArea(widget.area).reversed.toList();
+    var top = WindowCorners.getCorners().topLeft + 16;
+    var bottom = WindowCorners.getCorners().topLeft + 16;
 
-    tests = tests_manager.testsFromArea(widget.area).reversed.toList();
+    final area = tests[index].area;
 
-    controller.forward();
-
-    BorderRadius getRadius(int index) {
-      var top = WindowCorners.getCorners().topLeft + 16;
-      var bottom = WindowCorners.getCorners().topLeft + 16;
-
-      final area = tests[index].area;
-
-      if (index != 0) {
-        if (area == tests[index - 1].area) {
-          top = 2;
-        }
-      }
-
-      if (index != tests.length - 1) {
-        if (area == tests[index + 1].area) {
-          bottom = 2;
-        }
-      }
-
-      final t = Radius.circular(top);
-      final b = Radius.circular(bottom);
-
-      return BorderRadius.only(topLeft: t, topRight: t, bottomLeft: b, bottomRight: b);
-    }
-
-    EdgeInsets getMargin(int index) {
-      var top = 8.0;
-      var bottom = 8.0;
-
-      final area = tests[index].area;
-
-      if (index != 0 && area == tests[index - 1].area) {
+    if (index != 0) {
+      if (area == tests[index - 1].area) {
         top = 2;
       }
-
-      if (index != tests.length - 1 && area == tests[index + 1].area) {
-        bottom = 2;
-      }
-
-      return EdgeInsets.fromLTRB(8, top, 8, bottom);
     }
 
-    return Scaffold(
-      appBar: AppBar(title: Text('Past Tests (${tests_manager.pastTests.length})'), centerTitle: true),
-      body: ListView.builder(
-        itemCount: tests.length,
-        itemBuilder: (context, index) => InkWell(
-          onTap: () => openTestPage(context, index),
-          child: AnimatedBuilder(
-            animation: animation,
-            builder: (_, __) => Card(
-              elevation: 1,
-              margin: getMargin(index),
-              shape: RoundedRectangleBorder(borderRadius: getRadius(index)),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Wrap(
-                  alignment: WrapAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      tests[index].area,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    Text(tests[index].date),
-                  ],
-                ),
+    if (index != tests.length - 1) {
+      if (area == tests[index + 1].area) {
+        bottom = 2;
+      }
+    }
+
+    final t = Radius.circular(top);
+    final b = Radius.circular(bottom);
+
+    return BorderRadius.only(topLeft: t, topRight: t, bottomLeft: b, bottomRight: b);
+  }
+
+  EdgeInsets getMargin(int index) {
+    final tests = tests_manager.testsFromArea(widget.area).reversed.toList();
+    var top = 8.0;
+    var bottom = 8.0;
+
+    final area = tests[index].area;
+
+    if (index != 0 && area == tests[index - 1].area) {
+      top = 2;
+    }
+
+    if (index != tests.length - 1 && area == tests[index + 1].area) {
+      bottom = 2;
+    }
+
+    return EdgeInsets.fromLTRB(8, top, 8, bottom);
+  }
+
+  AppBar buildAppBar() => AppBar(title: Text('Past Tests (${tests_manager.pastTests.length})'), centerTitle: true);
+
+  Widget buildTestWidget(Test test, int index) => Card(
+        elevation: 1,
+        margin: getMargin(index),
+        shape: RoundedRectangleBorder(borderRadius: getRadius(index)),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            children: [
+              Text(
+                test.area,
+                style: Theme.of(context).textTheme.titleMedium,
               ),
-            ),
+              Text(test.date),
+            ],
           ),
         ),
+      );
+
+  Widget buildBody() {
+    final tests = tests_manager.testsFromArea(widget.area).reversed.toList();
+
+    return ListView.builder(
+      itemCount: tests.length,
+      itemBuilder: (context, index) => InkWell(
+        onTap: () => openTestPage(context, index),
+        child: buildTestWidget(tests[index], index),
       ),
     );
   }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        appBar: buildAppBar(),
+        body: buildBody(),
+      );
 }

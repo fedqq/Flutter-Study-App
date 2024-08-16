@@ -7,11 +7,11 @@ import 'package:studyappcs/states/topic.dart';
 
 class Subject {
   Subject(this.name, this.color, this.teacher, this.classroom);
-  String name = 'Default';
   List<Topic> topics = <Topic>[];
-  Color color = Colors.blue;
   List<int> testScores = <int>[];
+  Color color = Colors.blue;
   String teacher;
+  String name = 'Default';
   String classroom;
 
   Topic addTopic(Topic topic) {
@@ -25,9 +25,13 @@ class Subject {
     testScores.add(score);
   }
 
-  int get learned => topics.fold(0, (int a, Topic b) => a + b.cards.where((FlashCard c) => c.learned).length);
+  int _foldLearned(int num, Topic topic) => num + topic.cards.where((FlashCard c) => c.learned).length;
 
-  int get total => topics.fold(0, (int a, Topic b) => a + b.cards.length);
+  int _fold(int num, Topic topic) => num + topic.cards.length;
+
+  int get learned => topics.fold(0, _foldLearned);
+
+  int get total => topics.fold(0, _fold);
 
   double get percentage => total == 0 ? 0 : learned / total;
 }

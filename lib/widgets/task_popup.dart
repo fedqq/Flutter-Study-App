@@ -29,7 +29,10 @@ class _TaskPopupState extends State<TaskPopup> {
     }
 
     final taskDocs = await firestore_manager.taskDocs;
-    await taskDocs.docs.firstWhere((QueryDocumentSnapshot<StrMap> a) => a['name'] == widget.task.name && a['desc'] == widget.task.desc).reference.update(<Object, Object?>{
+    await taskDocs.docs
+        .firstWhere((QueryDocumentSnapshot<StrMap> a) => a['name'] == widget.task.name && a['desc'] == widget.task.desc)
+        .reference
+        .update(<Object, Object?>{
       'name': result.first,
       'desc': result.second,
     });
@@ -60,19 +63,19 @@ class _TaskPopupState extends State<TaskPopup> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[Text(widget.task.name), IconButton(onPressed: edit, icon: const Icon(Icons.edit_rounded))],
-      ),
-      content: Text(widget.task.desc),
-      actions: <Widget>[
-        Row(
+        title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            FilledButton(onPressed: delete, child: const Text('Delete')),
-            TextButton(onPressed: editColor, child: const Text('Edit Color')),
-          ],
+          children: [Text(widget.task.name), IconButton(onPressed: edit, icon: const Icon(Icons.edit_rounded))],
         ),
-      ],
-    );
+        content: Text(widget.task.desc),
+        actions: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              FilledButton(onPressed: delete, child: const Text('Delete')),
+              TextButton(onPressed: editColor, child: const Text('Edit Color')),
+            ],
+          ),
+        ],
+      );
 }

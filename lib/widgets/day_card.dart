@@ -42,7 +42,7 @@ class _DayCardState extends State<DayCard> {
   }
 
   Widget buildTaskCard(int index) => InkWell(
-        borderRadius: BorderRadius.circular(theming.radius + theming.padding),
+        borderRadius: BorderRadius.circular(23),
         child: Card(
           surfaceTintColor: widget.color ?? widget.tasks[index].color,
           elevation: 20,
@@ -51,7 +51,7 @@ class _DayCardState extends State<DayCard> {
             padding: const EdgeInsets.all(16),
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
+              children: [
                 Text(
                   widget.tasks[index].name,
                   overflow: TextOverflow.ellipsis,
@@ -117,7 +117,7 @@ class _DayCardState extends State<DayCard> {
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
+            children: [
               Container(
                 margin: const EdgeInsets.all(8),
                 child: Text(

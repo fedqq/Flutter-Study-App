@@ -134,7 +134,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
         backgroundColor: Colors.transparent,
         shadowColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
-        actions: <Widget>[
+        actions: [
           Padding(
             padding: const EdgeInsets.all(8),
             child: IconButton(onPressed: showSettings, icon: const Icon(Icons.settings_rounded)),
@@ -145,7 +145,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
   Widget buildTopTexts() => FittedBox(
         fit: BoxFit.fitHeight,
         child: Column(
-          children: <Widget>[
+          children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               child: Text(
@@ -179,7 +179,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
   Widget buildTasksCard() => Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
+          children: [
             buildText(
               '${firestore_manager.tasksList.where((Task a) => a.dueDate == DateUtils.dateOnly(DateTime.now())).length} due today',
             ),
@@ -191,7 +191,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
       );
 
   Row buildFirstRow() => Row(
-        children: <Widget>[buildStreakCard(), buildTasksCard()]
+        children: [buildStreakCard(), buildTasksCard()]
             .map(
               (Widget a) => Expanded(
                 child: AspectRatio(
@@ -219,7 +219,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
         margin: const EdgeInsets.all(8),
         elevation: 2,
         child: Column(
-          children: <Widget>[
+          children: [
             buildText(
               '''Last 10 average test scores: ${getRecentScoresAverage()}% (${getRecentScoresAverage() - getAllScoresAverage() >= 0 ? '+' : ''}${getRecentScoresAverage() - getAllScoresAverage()}%)''',
             ),
@@ -229,7 +229,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
       );
 
   Widget buildCardsCard() => Row(
-        children: <Widget>[
+        children: [
           SizedBox.expand(
             child: Padding(
               padding: const EdgeInsets.all(20),
@@ -271,7 +271,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
           opacity: animation.value,
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 46, 16, 16),
-            children: <Widget>[
+            children: [
               buildTopTexts(),
               buildFirstRow(),
               buildChartCard(),
@@ -291,11 +291,11 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
       showDragHandle: true,
       builder: (BuildContext context) => Column(
         mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
+        children: [
           TextButton.icon(
             onPressed: editUserName,
             label: const Row(
-              children: <Widget>[Text('Edit Username')],
+              children: [Text('Edit Username')],
             ),
             icon: const Icon(Icons.arrow_forward_rounded),
             iconAlignment: IconAlignment.end,
@@ -306,7 +306,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
               SystemNavigator.pop();
             },
             label: const Row(
-              children: <Widget>[Text('Sign Out (Closes the app)')],
+              children: [Text('Sign Out (Closes the app)')],
             ),
             icon: const Icon(Icons.arrow_forward_rounded),
             iconAlignment: IconAlignment.end,
@@ -314,14 +314,14 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
           TextButton.icon(
             onPressed: editDailyGoal,
             label: const Row(
-              children: <Widget>[Text('Edit Daily Goal')],
+              children: [Text('Edit Daily Goal')],
             ),
             icon: const Icon(Icons.arrow_forward_rounded),
             iconAlignment: IconAlignment.end,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
+            children: [
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(8),
@@ -342,7 +342,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
+            children: [
               const Text('Light Mode'),
               Switch(
                 value: user_data.lightness,
