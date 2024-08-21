@@ -12,7 +12,6 @@ import 'package:studyappcs/pages/study_page.dart';
 import 'package:studyappcs/states/flashcard.dart';
 import 'package:studyappcs/states/topic.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
-import 'package:studyappcs/utils/utils.dart' as utils;
 
 class TopicCard extends StatefulWidget {
   const TopicCard({
@@ -27,7 +26,7 @@ class TopicCard extends StatefulWidget {
   final Future<void> Function() testTopic;
   final String area;
   final String subject;
-  final void Function() deleteTopic;
+  final VoidCallback deleteTopic;
 
   @override
   State<TopicCard> createState() => _TopicCardState();
@@ -48,7 +47,7 @@ class _TopicCardState extends State<TopicCard> {
         context,
         PageRouteBuilder(
           transitionsBuilder:
-              (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+              (context, animation, secondaryAnimation, child) {
             const begin = Offset(0, 1);
             const end = Offset.zero;
             const curve = Curves.ease;
@@ -89,13 +88,12 @@ class _TopicCardState extends State<TopicCard> {
 
       final cards = await firestore_manager.cardDocs;
       cards.docs
-          .where((QueryDocumentSnapshot<utils.StrMap> a) => a['topic'] == oldName)
-          .forEach((QueryDocumentSnapshot<utils.StrMap> a) => a.reference.update(<Object, Object?>{'topic': newName}));
+          .where((a) => a['topic'] == oldName)
+          .forEach((a) => a.reference.update(<Object, Object?>{'topic': newName}));
 
       final tests = await firestore_manager.testDocs;
-      tests.docs.where((QueryDocumentSnapshot<utils.StrMap> a) => (a['area'] as String).contains(oldName)).forEach(
-            (QueryDocumentSnapshot<utils.StrMap> a) =>
-                a.reference.update(<Object, Object?>{'area': (a['area'] as String).replaceAll(oldName, newName)}),
+      tests.docs.where((a) => (a['area'] as String).contains(oldName)).forEach(
+            (a) => a.reference.update({'area': (a['area'] as String).replaceAll(oldName, newName)}),
           );
     }
   }
@@ -108,14 +106,10 @@ class _TopicCardState extends State<TopicCard> {
     );
     if (confirmed) {
       final cards = await firestore_manager.cardDocs;
-      cards.docs
-          .where((QueryDocumentSnapshot<utils.StrMap> a) => a['topic'] == oldName)
-          .forEach((QueryDocumentSnapshot<utils.StrMap> a) => a.reference.delete());
+      cards.docs.where((a) => a['topic'] == oldName).forEach((a) => a.reference.delete());
 
       final tests = await firestore_manager.testDocs;
-      tests.docs
-          .where((QueryDocumentSnapshot<utils.StrMap> a) => (a['area'] as String).contains(oldName))
-          .forEach((QueryDocumentSnapshot<utils.StrMap> a) => a.reference.delete());
+      tests.docs.where((a) => (a['area'] as String).contains(oldName)).forEach((a) => a.reference.delete());
 
       widget.deleteTopic();
     }
@@ -139,7 +133,7 @@ class _TopicCardState extends State<TopicCard> {
       setState(() => topic.cards.add(FlashCard(name, meaning, learned: false)));
     }
     final CollectionReference cardCollection = firestore_manager.cardCollection;
-    await cardCollection.doc(name).set(<String, dynamic>{
+    await cardCollection.doc().set(<String, dynamic>{
       'name': name,
       'meaning': meaning,
       'subject': widget.subject,
@@ -148,8 +142,19 @@ class _TopicCardState extends State<TopicCard> {
     });
   }
 
+  PopupMenuItem menuItem({required VoidCallback onTap, required IconData icon, required String text}) => PopupMenuItem(
+        onTap: onTap,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Icon(icon),
+            Text(text),
+          ],
+        ),
+      );
+
   double learnedPercentage() => widget.topic.cards.isNotEmpty
-      ? widget.topic.cards.where((FlashCard element) => element.learned).length / widget.topic.cards.length
+      ? widget.topic.cards.where((element) => element.learned).length / widget.topic.cards.length
       : 0;
 
   @override
@@ -164,29 +169,15 @@ class _TopicCardState extends State<TopicCard> {
         contentPadding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
         minLeadingWidth: 10,
         child: ExpansionTile(
-          subtitle: Stack(
-            children: [
-              Container(
-                width: 450,
-                height: 5,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: const Color.fromARGB(255, 51, 51, 51),
-                ),
-              ),
-              Container(
-                width: learnedPercentage() * 450,
-                height: 5,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            ],
+          visualDensity: VisualDensity.comfortable,
+          subtitle: LinearProgressIndicator(
+            borderRadius: BorderRadius.circular(10),
+            minHeight: 8,
+            value: learnedPercentage(),
           ),
           controlAffinity: ListTileControlAffinity.leading,
           shape: const Border(),
-          onExpansionChanged: (bool expanded) => setState(() {
+          onExpansionChanged: (expanded) => setState(() {
             final controller = ExpansionTileController.maybeOf(context);
             if (expanded) {
               controller?.collapse();
@@ -196,56 +187,31 @@ class _TopicCardState extends State<TopicCard> {
           }),
           trailing: SizedBox(
             child: PopupMenuButton(
-              itemBuilder: (BuildContext context) => <PopupMenuItem>[
-                PopupMenuItem(
+              itemBuilder: (context) => <PopupMenuItem>[
+                menuItem(
                   onTap: () => widget.testTopic().then((_) => setState(() {})),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Icon(Icons.question_mark_rounded),
-                      Text('Test on topic'),
-                    ],
-                  ),
+                  icon: Icons.question_mark_rounded,
+                  text: 'Test on topic',
                 ),
-                PopupMenuItem(
+                menuItem(
                   onTap: () => topic.cards.isNotEmpty ? studyTopic(topic) : null,
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Icon(Icons.school_rounded),
-                      Text('Open cards'),
-                    ],
-                  ),
+                  icon: Icons.school_rounded,
+                  text: 'Open cards',
                 ),
-                PopupMenuItem(
+                menuItem(
                   onTap: () => addCard(topic),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Icon(Icons.add_rounded),
-                      Text('New card'),
-                    ],
-                  ),
+                  icon: Icons.add_rounded,
+                  text: 'New cards',
                 ),
-                PopupMenuItem(
+                menuItem(
                   onTap: () => renameTopic(topic).then((_) => setState(() {})),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Icon(Icons.edit_rounded),
-                      Text('Rename Topic'),
-                    ],
-                  ),
+                  icon: Icons.edit_rounded,
+                  text: 'Rename Topic',
                 ),
-                PopupMenuItem(
+                menuItem(
                   onTap: () => deleteTopic(topic).then((_) => setState(() {})),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Icon(Icons.delete_rounded),
-                      Text('Delete Topic'),
-                    ],
-                  ),
+                  icon: Icons.edit_rounded,
+                  text: 'Delete Topic',
                 ),
               ],
             ),
@@ -254,7 +220,7 @@ class _TopicCardState extends State<TopicCard> {
           childrenPadding: EdgeInsets.zero,
           children: List.generate(
             topic.cards.length,
-            (int cardIndex) => ListTile(
+            (cardIndex) => ListTile(
               minVerticalPadding: 0,
               contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 18),
               title: Text(topic.cards[cardIndex].name),

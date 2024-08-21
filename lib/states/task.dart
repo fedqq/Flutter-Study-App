@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:studyappcs/utils/utils.dart';
 
 enum TaskType { homework, test, quiz, coursework, personal }
 
@@ -12,5 +11,5 @@ class Task {
   late Color color;
   late String desc;
 
-  bool compare(QueryDocumentSnapshot<StrMap> a) => a['name'] == name && a['date'] == dueDate.millisecondsSinceEpoch;
+  bool compare(QueryDocumentSnapshot a) => a['name'] == name && a['date'] == dueDate.millisecondsSinceEpoch;
 }

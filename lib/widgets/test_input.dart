@@ -40,9 +40,7 @@ class _TestInputState extends State<TestInput> {
                 ],
               ),
               const SizedBox(width: 16),
-              Expanded(
-                child: TextFormField(onChanged: widget.onChanged),
-              ),
+              Expanded(child: TextFormField(onChanged: widget.onChanged)),
             ],
           ),
         ),

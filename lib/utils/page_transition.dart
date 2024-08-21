@@ -5,7 +5,7 @@ Future<void> pushReplacement(BuildContext context, Widget Function() newPage) =>
       PageRouteBuilder<Object?>(
         transitionDuration: Durations.extralong3,
         transitionsBuilder:
-            (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+            (context, animation, secondaryAnimation, child) {
           const begin = Offset(0, 1);
           const end = Offset.zero;
 

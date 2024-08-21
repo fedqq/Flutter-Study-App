@@ -69,8 +69,11 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> proceed() async {
     await firestore_manager.loadData();
     setState(() => loading = false);
-    // ignore: use_build_context_synchronously
-    await pushReplacement(context, () => NavigationPage(title: 'Study Help App', username: username));
+    await pushReplacement(
+      // ignore: use_build_context_synchronously
+      context,
+      () => NavigationPage(title: 'Study Help App', username: username, firstLogin: register),
+    );
   }
 
   Future<void> submit() async {
@@ -110,7 +113,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget buildEmailField() => Padding(
         padding: const EdgeInsets.all(8),
         child: TextField(
-          onChanged: (String v) => email = v,
+          onChanged: (v) => email = v,
           decoration: const InputDecoration.collapsed(hintText: 'E-Mail'),
         ),
       );
@@ -118,7 +121,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget buildPasswordField() => Padding(
         padding: const EdgeInsets.all(8),
         child: TextField(
-          onChanged: (String v) => password = v,
+          onChanged: (v) => password = v,
           decoration: const InputDecoration.collapsed(hintText: 'Password'),
           obscureText: true,
         ),
@@ -127,7 +130,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget buildUsernameField() => Padding(
         padding: const EdgeInsets.all(8),
         child: TextField(
-          onChanged: (String v) => username = v,
+          onChanged: (v) => username = v,
           decoration: const InputDecoration.collapsed(hintText: 'Username'),
         ),
       );

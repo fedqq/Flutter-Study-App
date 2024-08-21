@@ -2,7 +2,6 @@
 // ignore: unused_import
 import 'dart:developer' as developer;
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/states/task.dart';
@@ -78,11 +77,20 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
     return ret;
   }
 
+  bool checkExistingTaskName(String s) {
+    for (final task in widget.tasks) {
+      if (task.name == s) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   Future<void> createTask(BuildContext context) async {
     final result = await doubleInputDialog(
           context,
           'New task',
-          Input(name: 'Name'),
+          Input(name: 'Name', validate: checkExistingTaskName),
           Input(name: 'Description', nullable: true),
         ) ??
         DialogResult.empty;
@@ -106,13 +114,14 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
 
     final newColor = await showColorPicker(context, Colors.blue);
     if (newColor == null) {
+      developer.log('failede');
       return;
     }
 
     setState(() => widget.tasks.add(Task(name, date, newColor, desc, completed: false)));
 
     final tasksCollection = firestore_manager.taskCollection;
-    await tasksCollection.doc(name).set(<String, dynamic>{
+    await tasksCollection.doc().set(<String, dynamic>{
       'name': name,
       'desc': desc,
       'date': date.millisecondsSinceEpoch,
@@ -124,7 +133,7 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
   Future<void> deleteTask(Task task) async {
     final taskDocs = await firestore_manager.taskDocs;
     try {
-      await taskDocs.docs.firstWhere((QueryDocumentSnapshot<StrMap> a) => task.compare(a)).reference.delete();
+      await taskDocs.docs.firstWhere((a) => task.compare(a)).reference.delete();
     } catch (e) {
       simpleSnackBar(context, 'An unexpected error occured: $e');
     }
@@ -133,19 +142,16 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
 
   Future<void> deleteCompletedTask(Task task) async {
     final taskDocs = await firestore_manager.taskDocs;
-    await taskDocs.docs.firstWhere((QueryDocumentSnapshot<StrMap> a) => task.compare(a)).reference.delete();
+    await taskDocs.docs.firstWhere((a) => task.compare(a)).reference.delete();
     setState(() => widget.completedTasks.remove(task));
   }
 
   List<DateTime> sortByDate(Map<DateTime, List<Task>> list) =>
-      list.keys.toList()..sort((DateTime first, DateTime second) => first.compareTo(second));
+      list.keys.toList()..sort((first, second) => first.compareTo(second));
 
   Future<void> completeTask(Task task) async {
     final taskDocs = await firestore_manager.taskDocs;
-    await taskDocs.docs
-        .firstWhere((QueryDocumentSnapshot<StrMap> a) => task.compare(a))
-        .reference
-        .update(<Object, Object?>{'completed': true});
+    await taskDocs.docs.firstWhere((a) => task.compare(a)).reference.update(<Object, Object?>{'completed': true});
     setState(() {
       widget.tasks.remove(task);
       widget.completedTasks.add(task);
@@ -204,6 +210,8 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     controller.forward();
+    updateDates();
+    developer.log(dates.length.toString());
 
     return Scaffold(
       appBar: AppBar(title: const Text('Tasks'), centerTitle: true),
@@ -223,7 +231,7 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
                     physics: const ScrollPhysics(),
                     shrinkWrap: true,
                     itemCount: dates.length,
-                    itemBuilder: (BuildContext context, int index) => AnimatedBuilder(
+                    itemBuilder: (context, index) => AnimatedBuilder(
                       animation: controller,
                       builder: (_, __) => Padding(
                         padding: EdgeInsets.symmetric(vertical: (1 - animation.value) * 30),

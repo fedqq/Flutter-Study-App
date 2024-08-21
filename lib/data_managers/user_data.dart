@@ -10,7 +10,7 @@ int _dailyGoal = 0;
 int streak = 0;
 bool _light = false;
 Color _accentColor = Colors.blue;
-late void Function(void Function()) updateTheme;
+late void Function(VoidCallback) updateTheme;
 
 int calculateStreak() {
   if ((dailyStudied[getNowString()] ?? 0) < _dailyGoal) {
@@ -43,7 +43,7 @@ set dailyGoal(int goal) => _dailyGoal = goal;
 
 int get maxStreak {
   var highest = 0;
-  dailyStreak.forEach((_, int value) => highest = max(highest, value));
+  dailyStreak.forEach((_, value) => highest = max(highest, value));
 
   return highest;
 }

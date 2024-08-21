@@ -1,8 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/states/test.dart';
-import 'package:studyappcs/utils/utils.dart';
 import 'package:studyappcs/widgets/result_card.dart';
 
 class ResultsPage extends StatefulWidget {
@@ -26,14 +24,11 @@ class _ResultsPageState extends State<ResultsPage> {
   Future<void> overrideAsCorrect(int index) async {
     final testDocs = await firestore_manager.testDocs;
 
-    final cardsDocs = await testDocs.docs
-        .firstWhere((QueryDocumentSnapshot<StrMap> a) => a['id'] == widget.test.id)
-        .reference
-        .collection('testcards')
-        .get();
+    final cardsDocs =
+        await testDocs.docs.firstWhere((a) => a['id'] == widget.test.id).reference.collection('testcards').get();
 
     final docs = cardsDocs.docs;
-    final ref = docs.firstWhere((QueryDocumentSnapshot<StrMap> a) => cards[index].compare(a)).reference;
+    final ref = docs.firstWhere((a) => cards[index].compare(a)).reference;
 
     await ref.update(<Object, Object?>{'answer': cards[index].meaning});
 
@@ -68,7 +63,7 @@ class _ResultsPageState extends State<ResultsPage> {
             physics: const ScrollPhysics(),
             shrinkWrap: true,
             itemCount: cards.length,
-            itemBuilder: (BuildContext context, int index) => ResultCard(
+            itemBuilder: (context, index) => ResultCard(
               correct: widget.test.scored[cards[index]],
               card: cards[index],
               answer: widget.test.answers[index],

@@ -37,7 +37,7 @@ class _TestPageState extends State<TestPage> {
   }
 
   Future<void> submitAnswers() async {
-    if (answers.where((String a) => a == '').isNotEmpty) {
+    if (answers.where((a) => a == '').isNotEmpty) {
       if (!await confirmDialog(
         context,
         title: 'Some answers are empty. ',
@@ -114,10 +114,11 @@ class _TestPageState extends State<TestPage> {
     }
 
     EdgeInsets getPadding(int index) {
-      if (index == 0) {}
-      final top = index != 0 && widget.cards[index - 1].origin != widget.cards[index].origin ? 3.0 : 12.0;
-      final bottom =
-          index != widget.cards.length - 1 && widget.cards[index + 1].origin != widget.cards[index].origin ? 3.0 : 12.0;
+      final first = index == 0;
+      final last = index == widget.cards.length - 1;
+      final origin = widget.cards[index].origin;
+      final top = !first && widget.cards[index - 1].origin != origin ? 3.0 : 12.0;
+      final bottom = !last && widget.cards[index + 1].origin != origin ? 3.0 : 12.0;
 
       return EdgeInsets.only(top: top, bottom: bottom);
     }
@@ -130,10 +131,10 @@ class _TestPageState extends State<TestPage> {
           children: [
             ...List<TestInput>.generate(
               widget.cards.length,
-              (int index) => TestInput(
+              (index) => TestInput(
                 name: widget.cards[index].name,
                 area: widget.cards[index].origin,
-                onChanged: (String str) => answers[index] = str,
+                onChanged: (str) => answers[index] = str,
                 borderRadius: getRadius(index),
                 padding: getPadding(index),
               ),

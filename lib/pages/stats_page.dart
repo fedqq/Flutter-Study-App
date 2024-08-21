@@ -8,15 +8,13 @@ import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_ma
 import 'package:studyappcs/data_managers/tests_manager.dart' as tests_manager;
 import 'package:studyappcs/data_managers/user_data.dart' as user_data;
 import 'package:studyappcs/states/subject.dart';
-import 'package:studyappcs/states/task.dart';
-import 'package:studyappcs/states/test.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
 import 'package:studyappcs/widgets/studied_chart.dart';
 
 class StatsPage extends StatefulWidget {
   const StatsPage({super.key, required this.saveCallback, required this.loadCallback, required this.subjects});
-  final void Function() saveCallback;
-  final void Function() loadCallback;
+  final VoidCallback saveCallback;
+  final VoidCallback loadCallback;
   final List<Subject> subjects;
 
   @override
@@ -49,7 +47,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
     final result = await inputDialog(
       context,
       'Choose Daily Goal',
-      Input(name: 'Goal', numerical: true, validate: (String str) => (int.tryParse(str) ?? 0) > 0),
+      Input(name: 'Goal', numerical: true, validate: (str) => (int.tryParse(str) ?? 0) > 0),
     );
     if (result == '') {
       return;
@@ -113,10 +111,9 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
       return DateTime(int.parse(year), int.parse(month), int.parse(day));
     }
 
-    final pastTests = tests_manager.pastTests
-      ..sort((Test a, Test b) => fromString(a.date).compareTo(fromString(b.date)));
+    final pastTests = tests_manager.pastTests..sort((a, b) => fromString(a.date).compareTo(fromString(b.date)));
     var sum = 0;
-    pastTests.sublist(0, min(10, pastTests.length)).forEach((Test element) => sum += element.percentage);
+    pastTests.sublist(0, min(10, pastTests.length)).forEach((element) => sum += element.percentage);
     return sum / 10;
   }
 
@@ -181,10 +178,10 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
           mainAxisSize: MainAxisSize.min,
           children: [
             buildText(
-              '${firestore_manager.tasksList.where((Task a) => a.dueDate == DateUtils.dateOnly(DateTime.now())).length} due today',
+              '${firestore_manager.tasksList.where((a) => a.dueDate == DateUtils.dateOnly(DateTime.now())).length} due today',
             ),
             buildText(
-              '${firestore_manager.tasksList.where((Task a) => a.dueDate.compareTo(DateUtils.dateOnly(DateTime.now())) > 0).length} overdue',
+              '${firestore_manager.tasksList.where((a) => a.dueDate.compareTo(DateUtils.dateOnly(DateTime.now())) > 0).length} overdue',
             ),
           ],
         ),
@@ -193,7 +190,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
   Row buildFirstRow() => Row(
         children: [buildStreakCard(), buildTasksCard()]
             .map(
-              (Widget a) => Expanded(
+              (a) => Expanded(
                 child: AspectRatio(
                   aspectRatio: 1,
                   child: Card(elevation: 2, margin: const EdgeInsets.all(8), child: a),
@@ -242,13 +239,13 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
             ),
           ),
           Text(
-            'You have\nlearned ${totalAndLearned()[1]}\nout of \n${totalAndLearned()[0]} cards',
+            '${totalAndLearned()[1]}/${totalAndLearned()[0]} cards',
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
             textAlign: TextAlign.center,
           ),
         ]
             .map(
-              (Widget a) => Expanded(
+              (a) => Expanded(
                 child: AspectRatio(
                   aspectRatio: 1,
                   child: Card(margin: const EdgeInsets.all(8), child: Center(child: a)),
@@ -264,7 +261,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
 
     return AnimatedBuilder(
       animation: animation,
-      builder: (BuildContext context, __) => Scaffold(
+      builder: (context, __) => Scaffold(
         appBar: buildAppBar(),
         extendBodyBehindAppBar: true,
         body: Opacity(
@@ -277,7 +274,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
               buildChartCard(),
               if (tests_manager.pastTests.isNotEmpty) buildTestsCard(),
               buildCardsCard(),
-            ].map((Widget a) => ScaleTransition(scale: animation, child: a)).toList(),
+            ].map((a) => ScaleTransition(scale: animation, child: a)).toList(),
           ),
         ),
       ),
@@ -289,7 +286,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
-      builder: (BuildContext context) => Column(
+      builder: (context) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextButton.icon(
@@ -346,14 +343,14 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
               const Text('Light Mode'),
               Switch(
                 value: user_data.lightness,
-                onChanged: (bool b) {
+                onChanged: (b) {
                   user_data.lightness = b;
                   firestore_manager.lightness = b;
                 },
               ),
             ],
           ),
-        ].map((Widget a) => Padding(padding: const EdgeInsets.all(8), child: a)).toList(),
+        ].map((a) => Padding(padding: const EdgeInsets.all(8), child: a)).toList(),
       ),
     );
   }

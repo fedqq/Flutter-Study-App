@@ -145,10 +145,10 @@ Future<void> _loadCards(List<Subject> subjects) async {
     final learned = data['learned'] as bool;
     final card = FlashCard(name, meaning, learned: learned);
 
-    final realSubject = subjects.firstWhere((Subject s) => s.name == subjectName);
+    final realSubject = subjects.firstWhere((s) => s.name == subjectName);
 
     realSubject.topics
-        .firstWhere((Topic t) => t.name == topicName, orElse: () => realSubject.addTopic(Topic(topicName)))
+        .firstWhere((t) => t.name == topicName, orElse: () => realSubject.addTopic(Topic(topicName)))
         .addCard(card);
   }
 }

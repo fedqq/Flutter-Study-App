@@ -1,7 +1,6 @@
 // ignore: unused_import
 import 'dart:developer' as developer;
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
@@ -46,15 +45,16 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
       initialRoute: '/splash',
-      routes: <String, WidgetBuilder>{'/splash': (BuildContext context) => const SplashScreen()},
+      routes: <String, WidgetBuilder>{'/splash': (context) => const SplashScreen()},
     );
   }
 }
 
 class NavigationPage extends StatefulWidget {
-  const NavigationPage({super.key, required this.title, this.username});
+  const NavigationPage({super.key, required this.title, this.username, required this.firstLogin});
   final String title;
   final String? username;
+  final bool firstLogin;
 
   @override
   State<NavigationPage> createState() => _NavigationPageState();
@@ -81,6 +81,9 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
   }
 
   void setFirstUsername() {
+    if (!widget.firstLogin) {
+      return;
+    }
     if (widget.username != null) {
       user_data.userName = widget.username ?? '';
       user_data.dailyGoal = 20;
@@ -129,29 +132,6 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
     });
   }
 
-  Future<void> authlogin({
-    required String email,
-    required String password,
-  }) async {
-    try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      snackbar('Succesfully logged in. ');
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        snackbar('No user found for that email.');
-      } else if (e.code == 'wrong-password') {
-        snackbar('Wrong password provided for that user.');
-      } else {
-        snackbar(e.message ?? '');
-      }
-    } catch (e) {
-      snackbar(e.toString());
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final pages = [
@@ -163,7 +143,9 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
     final left = WindowCorners.getCorners().bottomLeft - 8;
     final right = WindowCorners.getCorners().bottomRight - 8;
 
-    final scaffold = Scaffold(
+    final todayTasksCount = tasks.where((a) => user_data.format(a.dueDate) == user_data.format(DateTime.now())).length;
+
+    return Scaffold(
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(8),
         child: ClipRRect(
@@ -179,21 +161,24 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
               labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
               indicatorColor: Theme.of(context).colorScheme.primaryContainer,
               selectedIndex: selectedDest,
-              destinations: const [
-                NavigationDestination(
+              destinations: [
+                const NavigationDestination(
                   icon: Icon(Icons.bar_chart_outlined),
                   label: 'Statistics',
                   selectedIcon: Icon(Icons.bar_chart_rounded),
                 ),
-                NavigationDestination(
+                const NavigationDestination(
                   icon: Icon(Icons.school),
                   label: 'Study',
                   selectedIcon: Icon(Icons.school_rounded),
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.calendar_today_outlined),
+                  icon: Badge.count(
+                    isLabelVisible: todayTasksCount != 0,
+                    count: todayTasksCount,
+                    child: const Icon(Icons.calendar_today_outlined),
+                  ),
                   label: 'Calendar',
-                  selectedIcon: Icon(Icons.calendar_today_rounded),
                 ),
               ],
               onDestinationSelected: selectDestination,
@@ -203,7 +188,5 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
       ),
       body: PageView(controller: pageController, onPageChanged: pageChanged, padEnds: false, children: pages),
     );
-
-    return scaffold;
   }
 }

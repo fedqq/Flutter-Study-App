@@ -1,9 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/states/task.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
-import 'package:studyappcs/utils/utils.dart';
 
 class TaskPopup extends StatefulWidget {
   const TaskPopup({super.key, required this.task, required this.deleteCallback});
@@ -30,7 +28,7 @@ class _TaskPopupState extends State<TaskPopup> {
 
     final taskDocs = await firestore_manager.taskDocs;
     await taskDocs.docs
-        .firstWhere((QueryDocumentSnapshot<StrMap> a) => a['name'] == widget.task.name && a['desc'] == widget.task.desc)
+        .firstWhere((a) => a['name'] == widget.task.name && a['desc'] == widget.task.desc)
         .reference
         .update(<Object, Object?>{
       'name': result.first,
@@ -51,7 +49,7 @@ class _TaskPopupState extends State<TaskPopup> {
     setState(() => widget.task.color = color);
     final taskDocs = await firestore_manager.taskDocs;
     await taskDocs.docs
-        .firstWhere((QueryDocumentSnapshot<StrMap> a) => a['name'] == widget.task.name && a['desc'] == widget.task.desc)
+        .firstWhere((a) => a['name'] == widget.task.name && a['desc'] == widget.task.desc)
         .reference
         .update(<Object, Object?>{'color': color.value});
   }

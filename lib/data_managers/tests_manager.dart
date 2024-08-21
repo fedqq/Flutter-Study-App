@@ -17,6 +17,6 @@ List<Test> testsFromArea(String area) {
   }
 
   return area.contains('-')
-      ? pastTests.where((Test element) => element.area == area).toList()
-      : pastTests.where((Test element) => element.area.split('-')[0].trim() == area).toList();
+      ? pastTests.where((element) => element.area == area).toList()
+      : pastTests.where((element) => element.area.split('-')[0].trim() == area).toList();
 }

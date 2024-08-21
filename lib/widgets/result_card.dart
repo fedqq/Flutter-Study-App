@@ -15,7 +15,7 @@ class ResultCard extends StatefulWidget {
   final TestCard card;
   final bool editable;
   final String answer;
-  final void Function() markCorrect;
+  final VoidCallback markCorrect;
   final BorderRadius borderRadius;
 
   @override

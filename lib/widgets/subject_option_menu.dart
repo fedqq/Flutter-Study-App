@@ -21,7 +21,7 @@ class SubjectOptionMenu extends StatelessWidget {
   final int index;
   final Animation<double> animation;
 
-  Widget pIconButton({required Icon icon, required void Function() onPressed, String label = 'test'}) => Column(
+  Widget pIconButton({required Icon icon, required VoidCallback onPressed, String label = 'test'}) => Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(8),

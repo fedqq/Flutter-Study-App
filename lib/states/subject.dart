@@ -25,6 +25,7 @@ class Subject {
     testScores.add(score);
   }
 
+  // ignore: avoid_types_on_closure_parameters
   int _foldLearned(int num, Topic topic) => num + topic.cards.where((FlashCard c) => c.learned).length;
 
   int _fold(int num, Topic topic) => num + topic.cards.length;

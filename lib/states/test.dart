@@ -6,7 +6,7 @@ class TestCard {
   String name;
   String origin;
 
-  bool compare(QueryDocumentSnapshot<Map<String, dynamic>> a) => a['name'] == name && a['meaning'] == meaning;
+  bool compare(QueryDocumentSnapshot a) => a['name'] == name && a['meaning'] == meaning;
 }
 
 class Test {
@@ -19,7 +19,7 @@ class Test {
 
   int get percentage => 100 * correct ~/ totalAmount;
 
-  int get correct => scored.values.where((bool element) => element).length;
+  int get correct => scored.values.where((element) => element).length;
 
   int get totalAmount => scored.length;
 }

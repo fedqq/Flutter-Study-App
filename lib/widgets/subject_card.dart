@@ -48,7 +48,7 @@ class _SubjectCardState extends State<SubjectCard> {
                     ),
                     if (!(teacher == '' && classroom == '')) ...[
                       const SizedBox(height: 10),
-                      Text(arr.where((String a) => a != '').join(' - '), style: Theme.of(context).textTheme.bodyLarge),
+                      Text(arr.where((a) => a != '').join(' - '), style: Theme.of(context).textTheme.bodyLarge),
                     ],
                   ],
                 ),

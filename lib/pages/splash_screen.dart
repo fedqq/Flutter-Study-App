@@ -31,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   void pushMain(BuildContext context) {
     Future.delayed(
       Durations.long1,
-      () => pushReplacement(context, () => const NavigationPage(title: 'Study Help App')),
+      () => pushReplacement(context, () => const NavigationPage(title: 'Study Help App', firstLogin: false)),
     );
   }
 
@@ -86,11 +86,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 ),
                 ShaderMask(
                   blendMode: BlendMode.srcIn,
-                  shaderCallback: (Rect bounds) => const LinearGradient(
+                  shaderCallback: (bounds) => LinearGradient(
                     begin: Alignment.topRight,
                     end: Alignment.bottomLeft,
                     tileMode: TileMode.repeated,
-                    colors: [Colors.blue, Colors.purple],
+                    colors: [Colors.deepPurple, Colors.blue[900] ?? Colors.blue],
                   ).createShader(
                     Rect.fromCenter(
                       center: bounds.center,

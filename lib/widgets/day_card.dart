@@ -1,9 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/states/task.dart';
-import 'package:studyappcs/utils/utils.dart' as theming;
 import 'package:studyappcs/widgets/task_popup.dart';
 
 class DayCard extends StatefulWidget {
@@ -63,11 +61,7 @@ class _DayCardState extends State<DayCard> {
                     context: context,
                     builder: (_) => TaskPopup(
                       task: widget.tasks[index],
-                      deleteCallback: (Task task) => setState(
-                        () {
-                          widget.removeCallback(task);
-                        },
-                      ),
+                      deleteCallback: (task) => setState(() => widget.removeCallback(task)),
                     ),
                   ).then((_) => setState(() {})),
                 ),
@@ -82,7 +76,7 @@ class _DayCardState extends State<DayCard> {
                       final taskDocs = await firestore_manager.taskDocs;
                       await taskDocs.docs
                           .firstWhere(
-                            (QueryDocumentSnapshot<theming.StrMap> a) =>
+                            (a) =>
                                 (a['name'] == widget.tasks[index].name) &&
                                 (a['date'] == widget.tasks[index].dueDate.millisecondsSinceEpoch),
                           )

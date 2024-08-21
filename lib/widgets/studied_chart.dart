@@ -57,7 +57,7 @@ class _StudiedChartState extends State<StudiedChart> {
               interval: 1,
               showTitles: true,
               reservedSize: 20,
-              getTitlesWidget: (double value, TitleMeta meta) => Text(getLastWeekNames()[value.toInt()]),
+              getTitlesWidget: (value, meta) => Text(getLastWeekNames()[value.toInt()]),
             ),
           ),
         ),
@@ -80,7 +80,7 @@ class _StudiedChartState extends State<StudiedChart> {
             dotData: const FlDotData(show: false),
             spots: List<FlSpot>.generate(
               7,
-              (int i) => FlSpot(i.toDouble(), daysData[6 - i] * (min(widget.animValue, 0.8) + 0.2)),
+              (i) => FlSpot(i.toDouble(), daysData[6 - i] * (min(widget.animValue, 0.8) + 0.2)),
             ),
           ),
           LineChartBarData(

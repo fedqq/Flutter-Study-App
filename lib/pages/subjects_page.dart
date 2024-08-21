@@ -4,7 +4,6 @@
 import 'dart:developer' as developer;
 import 'dart:ui';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/data_managers/tests_manager.dart' as tests_manager;
@@ -132,7 +131,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
 
     final subject = Subject(name, newColor, res.first, res.second);
 
-    await firestore_manager.subjectCollection.doc(subject.name).set(<String, dynamic>{
+    await firestore_manager.subjectCollection.doc().set(<String, dynamic>{
       'name': subject.name,
       'scores': <int>[],
       'color': newColor.value,
@@ -150,7 +149,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
 
     final area = widget.subjects[currentFocused].asArea.trim();
     setState(() => widget.subjects.removeAt(currentFocused));
-    tests_manager.pastTests.removeWhere((Test element) => element.area.trim() == area);
+    tests_manager.pastTests.removeWhere((element) => element.area.trim() == area);
 
     final subject = await firestore_manager.subjectNamed(area);
     await subject.reference.delete();
@@ -161,9 +160,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     }
 
     final tests = await firestore_manager.testDocs;
-    tests.docs
-        .where((QueryDocumentSnapshot<StrMap> a) => (a['area'] as String).contains(area))
-        .forEach((QueryDocumentSnapshot<StrMap> a) => a.reference.delete());
+    tests.docs.where((a) => (a['area'] as String).contains(area)).forEach((a) => a.reference.delete());
 
     await closeMenus();
   }
@@ -209,7 +206,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
   }
 
   List<String> getSubjectNames() =>
-      List<String>.generate(widget.subjects.length, (int index) => widget.subjects[index].name);
+      List<String>.generate(widget.subjects.length, (index) => widget.subjects[index].name);
 
   Future<void> editSubject() async {
     final newName = await inputDialog(
@@ -395,7 +392,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
 
   Widget buildSubjectsList() => AnimatedBuilder(
         animation: enterController,
-        builder: (BuildContext context, _) => GestureDetector(
+        builder: (context, _) => GestureDetector(
           onTap: closeMenus,
           child: Stack(
             children: [
@@ -405,7 +402,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
                 clipBehavior: Clip.none,
                 padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
                 itemCount: widget.subjects.length,
-                itemBuilder: (BuildContext context, int index) => InkWell(
+                itemBuilder: (context, index) => InkWell(
                   onTap: () async {
                     final wasOpen = controller.open;
                     await closeMenus();

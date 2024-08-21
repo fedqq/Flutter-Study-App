@@ -27,8 +27,8 @@ class _StudyPageState extends State<StudyPage> {
   @override
   void initState() {
     cards = widget.cards;
-    cards = widget.cards.where((FlashCard card) => !card.learned).toList() +
-        widget.cards.where((FlashCard card) => card.learned).toList();
+    cards = widget.cards.where((card) => !card.learned).toList() +
+        widget.cards.where((card) => card.learned).toList();
     super.initState();
   }
 
@@ -64,42 +64,51 @@ class _StudyPageState extends State<StudyPage> {
     setState(() => currentCard.learned = !currentCard.learned);
   }
 
+  Future<void> editMeaning() async {
+    final newMeaning = await inputDialog(
+      context,
+      'New meaning for ${currentCard.name}',
+      Input(name: 'Meaning', value: currentCard.meaning),
+    );
+    if (newMeaning == '') {
+      return;
+    }
+    setState(() => currentCard.meaning = newMeaning);
+  }
+
+  Future<void> editName() async {
+    final newName = await inputDialog(
+      context,
+      'Rename ${currentCard.name}',
+      Input(name: 'Name', value: currentCard.name),
+    );
+    if (newName == '') {
+      return;
+    }
+    setState(() {
+      currentCard.name = newName;
+    });
+  }
+
   Future<void> editCard() async {
     final oldName = currentCard.name;
 
     if (showingMeaning) {
-      final newMeaning = await inputDialog(
-        context,
-        'New meaning for ${currentCard.name}',
-        Input(name: 'Meaning', value: currentCard.meaning),
-      );
-      if (newMeaning == '') {
-        return;
-      }
-      setState(() => currentCard.meaning = newMeaning);
+      await editMeaning();
     } else {
-      final newName = await inputDialog(
-        context,
-        'Rename ${currentCard.name}',
-        Input(name: 'Name', value: currentCard.name),
-      );
-      if (newName == '') {
-        return;
-      }
-      setState(() {
-        currentCard.name = newName;
-      });
+      await editName();
     }
 
     final newName = currentCard.name;
     final newMeaning = currentCard.meaning;
 
     final doc = await firestore_manager.cardNamed(oldName);
-    await doc.reference.update(<Object, Object?>{'name': newName, 'meaning': newMeaning});
+    await doc.reference.update({'name': newName, 'meaning': newMeaning});
   }
 
   Future<void> deleteCard() async {
     if (cards.length == 1) {
+      simpleSnackBar(context, 'Unable to delete card. Topics cannot have 0 cards');
       return;
     }
     final delete = await confirmDialog(
@@ -107,16 +116,14 @@ class _StudyPageState extends State<StudyPage> {
       title: 'Are you sure you would like to delete ${currentCard.name}?',
     );
     if (delete) {
-      final card = currentCard;
-
-      final doc = await firestore_manager.cardNamed(card.name);
+      final doc = await firestore_manager.cardNamed(currentCard.name);
       await doc.reference.delete();
 
       setState(() => widget.cards.removeAt(currentCardIndex));
     }
   }
 
-  Widget buildProgressBar() => Container(
+  Widget buildBar() => Container(
         margin: const EdgeInsets.symmetric(horizontal: 20),
         height: 10,
         child: ClipRRect(
@@ -136,7 +143,7 @@ class _StudyPageState extends State<StudyPage> {
         ),
       );
 
-  Widget buildBottomButtons() => Padding(
+  Widget buildButtons() => Padding(
         padding: const EdgeInsets.all(12),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -157,46 +164,60 @@ class _StudyPageState extends State<StudyPage> {
         ),
       );
 
-  Widget buildFlashcard() => Expanded(
+  Widget buildCard() => Expanded(
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: InkWell(
             onTap: flipCard,
-            child: Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-                side: BorderSide(
-                  color: currentCard.learned ? const Color.fromARGB(80, 30, 253, 0) : Colors.transparent,
-                ),
-              ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Positioned(
-                    right: 8,
-                    top: 8,
-                    child: IconButton(
-                      icon: const Icon(Icons.edit_rounded),
-                      onPressed: editCard,
-                    ),
-                  ),
-                  Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(currentCard.name, style: Theme.of(context).textTheme.headlineLarge),
-                        ImageFiltered(
-                          imageFilter: showingMeaning ? ImageFilter.dilate() : ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                          child: Text(
-                            currentCard.meaning,
-                            style: Theme.of(context).textTheme.headlineLarge,
-                          ),
-                        ),
-                      ].map((a) => Padding(padding: const EdgeInsets.all(8), child: a)).toList(),
-                    ),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    blurRadius: 20,
+                    spreadRadius: -5,
+                    color: currentCard.learned ? const Color.fromARGB(55, 30, 253, 0) : Colors.transparent,
                   ),
                 ],
+              ),
+              child: Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: IconButton(
+                        icon: const Icon(Icons.edit_rounded),
+                        onPressed: editCard,
+                      ),
+                    ),
+                    Positioned(
+                      left: 8,
+                      top: 8,
+                      child: IconButton(
+                        icon: const Icon(Icons.delete_rounded),
+                        onPressed: deleteCard,
+                      ),
+                    ),
+                    Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(currentCard.name, style: Theme.of(context).textTheme.headlineLarge),
+                          ImageFiltered(
+                            imageFilter: showingMeaning ? ImageFilter.dilate() : ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                            child: Text(
+                              currentCard.meaning,
+                              style: Theme.of(context).textTheme.headlineMedium,
+                            ),
+                          ),
+                        ].map((a) => Padding(padding: const EdgeInsets.all(8), child: a)).toList(),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -215,9 +236,9 @@ class _StudyPageState extends State<StudyPage> {
         appBar: AppBar(),
         body: Column(
           children: [
-            buildProgressBar(),
-            buildFlashcard(),
-            buildBottomButtons(),
+            buildBar(),
+            buildCard(),
+            buildButtons(),
           ],
         ),
       );

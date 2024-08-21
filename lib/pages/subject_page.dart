@@ -34,7 +34,7 @@ class _SubjectPageState extends State<SubjectPage> {
     final topic = Topic(topicName)
       ..addCard(FlashCard('First Card', 'First Card Meaning', learned: false));
     final cardCollection = firestore_manager.cardCollection;
-    await cardCollection.doc('First Card').set(<String, dynamic>{
+    await cardCollection.doc().set(<String, dynamic>{
       'name': 'First Card',
       'meaning': 'First Card Meaning',
       'learned': false,
@@ -49,7 +49,7 @@ class _SubjectPageState extends State<SubjectPage> {
     final topicList = Expanded(
       child: ListView.builder(
         itemCount: widget.subject.topics.length,
-        itemBuilder: (BuildContext context, int index) => TopicCard(
+        itemBuilder: (context, index) => TopicCard(
           topic: widget.subject.topics[index],
           area: '${widget.subject.name} - ${widget.subject.topics[index].name}',
           deleteTopic: () => setState(() => widget.subject.topics.removeAt(index)),
@@ -61,7 +61,7 @@ class _SubjectPageState extends State<SubjectPage> {
                 final subject = widget.subject;
                 final topic = subject.topics[index];
 
-                final cards = List<TestCard>.generate(topic.cards.length, (int i) {
+                final cards = List<TestCard>.generate(topic.cards.length, (i) {
                   final card = topic.cards[i];
 
                   return TestCard(card.name, card.meaning, '${widget.subject.name} - ${topic.name}');

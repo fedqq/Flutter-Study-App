@@ -21,7 +21,7 @@ class ExpandingTaskList extends StatefulWidget {
   final Color? outlineColor;
   final String title;
   final ExpansionTileController controller;
-  final void Function() onExpanded;
+  final VoidCallback onExpanded;
 
   @override
   State<ExpandingTaskList> createState() => _ExpandingTaskListState();
@@ -68,7 +68,7 @@ class _ExpandingTaskListState extends State<ExpandingTaskList> {
                           physics: const ScrollPhysics(),
                           shrinkWrap: true,
                           itemCount: widget.dates.length,
-                          itemBuilder: (BuildContext context, int index) => DayCard(
+                          itemBuilder: (context, index) => DayCard(
                             date: widget.dates[index],
                             tasks: widget.tasks[widget.dates[index]] ?? <Task>[],
                             color: widget.outlineColor,

@@ -24,7 +24,7 @@ class ExpandableFab extends StatefulWidget {
   const ExpandableFab({super.key, required this.children, this.controller, this.onPress});
   final List<ActionButton> children;
   final ExFabController? controller;
-  final void Function()? onPress;
+  final VoidCallback? onPress;
 
   @override
   State<ExpandableFab> createState() => _ExpandableFabState();
@@ -170,11 +170,11 @@ class ExpandingActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
         animation: progress,
-        builder: (BuildContext context, _) {
-          final offset = Offset(0, ((index + 1) * 60) * progress.value);
+        builder: (context, _) {
+          final dy = (index + 1) * 60 * progress.value;
 
           return Positioned(
-            bottom: 10 + offset.dy,
+            bottom: 10 + dy,
             child: Opacity(
               opacity: progress.value,
               child: Row(

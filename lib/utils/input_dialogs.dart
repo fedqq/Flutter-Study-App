@@ -67,8 +67,8 @@ class _DoubleInputDialogState extends State<DoubleInputDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          buildInputField(first, (String str) => first.value = str),
-          buildInputField(second, (String str) => second.value = str),
+          buildInputField(first, (str) => first.value = str),
+          buildInputField(second, (str) => second.value = str),
         ],
       ),
       actions: [
@@ -128,7 +128,7 @@ class Input {
 
 Future<bool> confirmDialog(BuildContext context, {required String title}) async => await showDialog(
       context: context,
-      builder: (BuildContext context) => AlertDialog(
+      builder: (context) => AlertDialog(
         title: Text(title),
         content: const Text('Are you sure you would like to continue?'),
         actionsAlignment: MainAxisAlignment.spaceBetween,
@@ -173,7 +173,7 @@ Future<DialogResult?> doubleInputDialog(
     showDialog<DialogResult>(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) => DoubleInputDialog(
+      builder: (context) => DoubleInputDialog(
         title: title,
         first: first,
         second: second,
@@ -190,7 +190,7 @@ Future<Color?> showColorPicker(BuildContext context, Color color) async {
       contentPadding: const EdgeInsets.all(8),
       title: const Text('Choose a color'),
       content: MaterialColorPicker(
-        onColorChange: (Color value) => tempColor = value,
+        onColorChange: (value) => tempColor = value,
         selectedColor: color,
       ),
       actions: [
