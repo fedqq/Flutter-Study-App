@@ -48,6 +48,9 @@ Future<List<DocSnapshot>> cardsFromSubject(String s) async =>
 Future<List<DocSnapshot>> cardsFromTopic(String t) async =>
     (await cardCollection.where('topic', isEqualTo: t).get()).docs;
 
+Future<List<DocSnapshot>> testsFromSubject(String s) async =>
+    (await testCollection.get()).docs.where((a) => (a.get('area') as String).contains(s)).toList();
+
 DocSnapshotFuture cardNamed(String n) async => (await cardCollection.where('name', isEqualTo: n).get()).docs.first;
 
 DocSnapshotFuture subjectNamed(String n) async =>
@@ -167,7 +170,7 @@ Future<void> _loadSubjects(List<Subject> subjects) async {
   }
 }
 
-Future<void> saveData() async => _user.set(<String, Object>{
+Future<void> saveData() async => _user.set({
       'username': user_data.userName,
       'goal': user_data.dailyGoal,
       'color': user_data.color.value,

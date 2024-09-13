@@ -31,10 +31,9 @@ class _SubjectPageState extends State<SubjectPage> {
     if (topicName == '') {
       return;
     }
-    final topic = Topic(topicName)
-      ..addCard(FlashCard('First Card', 'First Card Meaning', learned: false));
+    final topic = Topic(topicName)..addCard(FlashCard('First Card', 'First Card Meaning', learned: false));
     final cardCollection = firestore_manager.cardCollection;
-    await cardCollection.doc().set(<String, dynamic>{
+    await cardCollection.doc().set({
       'name': 'First Card',
       'meaning': 'First Card Meaning',
       'learned': false,
@@ -100,15 +99,11 @@ class _SubjectPageState extends State<SubjectPage> {
           if (tests_manager.hasScore(widget.subject.asArea))
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: FilledButton(
-                child: const Text(
-                  'Past tests',
-                  textAlign: TextAlign.center,
-                ),
+              child: IconButton.filledTonal(
+                icon: const Icon(Icons.history_rounded),
                 onPressed: () {
                   Navigator.push(
                     context,
-                    // ignore: always_specify_types
                     MaterialPageRoute(builder: (_) => AllTestsPage(area: widget.subject.name)),
                   );
                 },
@@ -125,9 +120,7 @@ class _SubjectPageState extends State<SubjectPage> {
         children: [
           Center(
             child: Column(
-              children: [
-                if (widget.subject.topics.isNotEmpty) topicList,
-              ],
+              children: [if (widget.subject.topics.isNotEmpty) topicList],
             ),
           ),
         ],

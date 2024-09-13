@@ -46,8 +46,7 @@ class _TopicCardState extends State<TopicCard> {
   void studyTopic(Topic topic) => Navigator.push(
         context,
         PageRouteBuilder(
-          transitionsBuilder:
-              (context, animation, secondaryAnimation, child) {
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
             const begin = Offset(0, 1);
             const end = Offset.zero;
             const curve = Curves.ease;
@@ -87,9 +86,7 @@ class _TopicCardState extends State<TopicCard> {
       });
 
       final cards = await firestore_manager.cardDocs;
-      cards.docs
-          .where((a) => a['topic'] == oldName)
-          .forEach((a) => a.reference.update(<Object, Object?>{'topic': newName}));
+      cards.docs.where((a) => a['topic'] == oldName).forEach((a) => a.reference.update({'topic': newName}));
 
       final tests = await firestore_manager.testDocs;
       tests.docs.where((a) => (a['area'] as String).contains(oldName)).forEach(
@@ -133,7 +130,7 @@ class _TopicCardState extends State<TopicCard> {
       setState(() => topic.cards.add(FlashCard(name, meaning, learned: false)));
     }
     final CollectionReference cardCollection = firestore_manager.cardCollection;
-    await cardCollection.doc().set(<String, dynamic>{
+    await cardCollection.doc().set({
       'name': name,
       'meaning': meaning,
       'subject': widget.subject,
@@ -191,17 +188,17 @@ class _TopicCardState extends State<TopicCard> {
                 menuItem(
                   onTap: () => widget.testTopic().then((_) => setState(() {})),
                   icon: Icons.question_mark_rounded,
-                  text: 'Test on topic',
+                  text: 'Test Topic',
                 ),
                 menuItem(
                   onTap: () => topic.cards.isNotEmpty ? studyTopic(topic) : null,
                   icon: Icons.school_rounded,
-                  text: 'Open cards',
+                  text: 'Open Cards',
                 ),
                 menuItem(
                   onTap: () => addCard(topic),
                   icon: Icons.add_rounded,
-                  text: 'New cards',
+                  text: 'New Card',
                 ),
                 menuItem(
                   onTap: () => renameTopic(topic).then((_) => setState(() {})),
@@ -210,7 +207,7 @@ class _TopicCardState extends State<TopicCard> {
                 ),
                 menuItem(
                   onTap: () => deleteTopic(topic).then((_) => setState(() {})),
-                  icon: Icons.edit_rounded,
+                  icon: Icons.delete_rounded,
                   text: 'Delete Topic',
                 ),
               ],

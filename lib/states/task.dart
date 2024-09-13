@@ -11,5 +11,5 @@ class Task {
   late Color color;
   late String desc;
 
-  bool compare(QueryDocumentSnapshot a) => a['name'] == name && a['date'] == dueDate.millisecondsSinceEpoch;
+  bool isEqualTo(QueryDocumentSnapshot a) => a['name'] == name && a['date'] == dueDate.millisecondsSinceEpoch;
 }

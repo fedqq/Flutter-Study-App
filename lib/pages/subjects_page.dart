@@ -78,7 +78,6 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
   }
 
   Future<void> closeMenus() async {
-    developer.log('closed');
     await blurController.reverse(from: 1);
     setState(() {
       currentFocused = -1;
@@ -131,7 +130,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
 
     final subject = Subject(name, newColor, res.first, res.second);
 
-    await firestore_manager.subjectCollection.doc().set(<String, dynamic>{
+    await firestore_manager.subjectCollection.doc().set({
       'name': subject.name,
       'scores': <int>[],
       'color': newColor.value,
@@ -175,7 +174,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     final name = widget.subjects[currentFocused].name;
 
     final subject = await firestore_manager.subjectNamed(name);
-    await subject.reference.update(<Object, Object?>{'color': newColor.value});
+    await subject.reference.update({'color': newColor.value});
 
     await closeMenus();
   }
@@ -209,6 +208,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
       List<String>.generate(widget.subjects.length, (index) => widget.subjects[index].name);
 
   Future<void> editSubject() async {
+    final oldName = widget.subjects[currentFocused].name;
     final newName = await inputDialog(
       context,
       'Rename ${widget.subjects[currentFocused].name}',
@@ -226,14 +226,17 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
       test.area = test.area.replaceAll(widget.subjects[currentFocused].name, newName);
     }
 
-    final oldName = widget.subjects[currentFocused].name;
+    final tests = await firestore_manager.testsFromSubject(oldName);
+    for (final test in tests) {
+      await test.reference.update({'area': (test.get('area') as String).replaceAll(oldName, newName)});
+    }
 
     final subject = await firestore_manager.subjectNamed(oldName);
-    await subject.reference.update(<Object, Object?>{'name': newName});
+    await subject.reference.update({'name': newName});
 
     final docs = await firestore_manager.cardsFromSubject(oldName);
     for (final card in docs) {
-      await card.reference.update(<Object, Object?>{'subject': newName});
+      await card.reference.update({'subject': newName});
     }
 
     setState(() => widget.subjects[currentFocused].name = newName);
@@ -258,7 +261,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     });
 
     final subject = await firestore_manager.subjectNamed(widget.subjects[currentFocused].name);
-    await subject.reference.update(<Object, Object?>{'teacher': res.first, 'classroom': res.second});
+    await subject.reference.update({'teacher': res.first, 'classroom': res.second});
   }
 
   Future<void> clearSubjects() async {

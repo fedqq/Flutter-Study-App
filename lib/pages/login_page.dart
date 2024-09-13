@@ -173,15 +173,14 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        body: Column(
+        body: Stack(
+          alignment: Alignment.center,
           children: [
-            const Spacer(),
-            Padding(
-              padding: const EdgeInsets.all(8),
+            Positioned(
+              top: 50,
               child: Text('Study App', style: Theme.of(context).textTheme.displayLarge),
             ),
-            if (loading) buildLoader() else buildAuthForm(),
-            const Spacer(),
+            Center(child: loading ? buildLoader() : buildAuthForm()),
           ],
         ),
       );

@@ -81,7 +81,7 @@ class _DayCardState extends State<DayCard> {
                                 (a['date'] == widget.tasks[index].dueDate.millisecondsSinceEpoch),
                           )
                           .reference
-                          .update(<Object, Object?>{'completed': true});
+                          .update({'completed': true});
 
                       setState(() {
                         widget.tasks[index].completed = true;

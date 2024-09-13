@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/states/task.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
-import 'package:studyappcs/utils/utils.dart';
 import 'package:studyappcs/widgets/day_card.dart';
 import 'package:studyappcs/widgets/expanding_task_list.dart';
 
@@ -114,14 +113,13 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
 
     final newColor = await showColorPicker(context, Colors.blue);
     if (newColor == null) {
-      developer.log('failede');
       return;
     }
 
     setState(() => widget.tasks.add(Task(name, date, newColor, desc, completed: false)));
 
     final tasksCollection = firestore_manager.taskCollection;
-    await tasksCollection.doc().set(<String, dynamic>{
+    await tasksCollection.doc().set({
       'name': name,
       'desc': desc,
       'date': date.millisecondsSinceEpoch,
@@ -132,17 +130,13 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
 
   Future<void> deleteTask(Task task) async {
     final taskDocs = await firestore_manager.taskDocs;
-    try {
-      await taskDocs.docs.firstWhere((a) => task.compare(a)).reference.delete();
-    } catch (e) {
-      simpleSnackBar(context, 'An unexpected error occured: $e');
-    }
+    await taskDocs.docs.firstWhere((a) => task.isEqualTo(a)).reference.delete();
     setState(() => widget.tasks.remove(task));
   }
 
   Future<void> deleteCompletedTask(Task task) async {
     final taskDocs = await firestore_manager.taskDocs;
-    await taskDocs.docs.firstWhere((a) => task.compare(a)).reference.delete();
+    await taskDocs.docs.firstWhere((a) => task.isEqualTo(a)).reference.delete();
     setState(() => widget.completedTasks.remove(task));
   }
 
@@ -151,7 +145,7 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
 
   Future<void> completeTask(Task task) async {
     final taskDocs = await firestore_manager.taskDocs;
-    await taskDocs.docs.firstWhere((a) => task.compare(a)).reference.update(<Object, Object?>{'completed': true});
+    await taskDocs.docs.firstWhere((a) => task.isEqualTo(a)).reference.update({'completed': true});
     setState(() {
       widget.tasks.remove(task);
       widget.completedTasks.add(task);
@@ -211,7 +205,6 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     controller.forward();
     updateDates();
-    developer.log(dates.length.toString());
 
     return Scaffold(
       appBar: AppBar(title: const Text('Tasks'), centerTitle: true),

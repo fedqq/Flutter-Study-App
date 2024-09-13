@@ -24,11 +24,14 @@ class _StudyPageState extends State<StudyPage> {
   bool showingMeaning = false;
   List<FlashCard> cards = <FlashCard>[];
 
+  void updateCards() {
+    cards = widget.cards;
+    cards = widget.cards.where((card) => !card.learned).toList() + widget.cards.where((card) => card.learned).toList();
+  }
+
   @override
   void initState() {
-    cards = widget.cards;
-    cards = widget.cards.where((card) => !card.learned).toList() +
-        widget.cards.where((card) => card.learned).toList();
+    updateCards();
     super.initState();
   }
 
@@ -59,7 +62,7 @@ class _StudyPageState extends State<StudyPage> {
 
     final doc = await firestore_manager.cardNamed(card.name);
 
-    await doc.reference.update(<Object, Object?>{'learned': !card.learned});
+    await doc.reference.update({'learned': !card.learned});
 
     setState(() => currentCard.learned = !currentCard.learned);
   }
@@ -120,6 +123,8 @@ class _StudyPageState extends State<StudyPage> {
       await doc.reference.delete();
 
       setState(() => widget.cards.removeAt(currentCardIndex));
+      goForward();
+      updateCards();
     }
   }
 

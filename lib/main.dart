@@ -45,7 +45,7 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
       initialRoute: '/splash',
-      routes: <String, WidgetBuilder>{'/splash': (context) => const SplashScreen()},
+      routes: {'/splash': (context) => const SplashScreen()},
     );
   }
 }

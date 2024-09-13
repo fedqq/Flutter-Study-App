@@ -291,9 +291,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
         children: [
           TextButton.icon(
             onPressed: editUserName,
-            label: const Row(
-              children: [Text('Edit Username')],
-            ),
+            label: const Row(children: [Text('Edit Username')]),
             icon: const Icon(Icons.arrow_forward_rounded),
             iconAlignment: IconAlignment.end,
           ),
@@ -302,17 +300,13 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
               FirebaseAuth.instance.signOut();
               SystemNavigator.pop();
             },
-            label: const Row(
-              children: [Text('Sign Out (Closes the app)')],
-            ),
+            label: const Row(children: [Text('Sign Out (Closes the app)')]),
             icon: const Icon(Icons.arrow_forward_rounded),
             iconAlignment: IconAlignment.end,
           ),
           TextButton.icon(
             onPressed: editDailyGoal,
-            label: const Row(
-              children: [Text('Edit Daily Goal')],
-            ),
+            label: const Row(children: [Text('Edit Daily Goal')]),
             icon: const Icon(Icons.arrow_forward_rounded),
             iconAlignment: IconAlignment.end,
           ),
@@ -337,18 +331,21 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
               ),
             ],
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Light Mode'),
-              Switch(
-                value: user_data.lightness,
-                onChanged: (b) {
-                  user_data.lightness = b;
-                  firestore_manager.lightness = b;
-                },
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Light Mode'),
+                Switch(
+                  value: user_data.lightness,
+                  onChanged: (b) {
+                    user_data.lightness = b;
+                    firestore_manager.lightness = b;
+                  },
+                ),
+              ],
+            ),
           ),
         ].map((a) => Padding(padding: const EdgeInsets.all(8), child: a)).toList(),
       ),

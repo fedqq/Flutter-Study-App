@@ -30,7 +30,7 @@ class _ResultsPageState extends State<ResultsPage> {
     final docs = cardsDocs.docs;
     final ref = docs.firstWhere((a) => cards[index].compare(a)).reference;
 
-    await ref.update(<Object, Object?>{'answer': cards[index].meaning});
+    await ref.update({'answer': cards[index].meaning});
 
     setState(() => widget.test.scored[cards[index]] = true);
   }

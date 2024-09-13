@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 import 'package:intl/intl.dart';
 import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/data_managers/tests_manager.dart' as tests_manager;
@@ -26,7 +25,7 @@ class _TestPageState extends State<TestPage> {
   @override
   void initState() {
     test = Test(
-      <TestCard, bool>{for (final TestCard card in widget.cards) card: false},
+      {for (final TestCard card in widget.cards) card: false},
       DateFormat.yMd().format(DateTime.now()),
       widget.testArea,
       answers,
@@ -48,7 +47,7 @@ class _TestPageState extends State<TestPage> {
 
     var i = 0;
     for (final card in widget.cards) {
-      if (ratio(answers[i], card.meaning) > 80) {
+      if (answers[i] == card.meaning) {
         test.scored[card] = true;
       }
       i++;
@@ -68,7 +67,7 @@ class _TestPageState extends State<TestPage> {
 
     final testDocs = firestore_manager.testCollection;
     final doc = testDocs.doc();
-    await doc.set(<String, dynamic>{
+    await doc.set({
       'area': test.area,
       'date': test.date,
       'id': tests_manager.nextID,
@@ -77,7 +76,7 @@ class _TestPageState extends State<TestPage> {
     i = 0;
     for (final card in test.scored.keys) {
       await collection.doc().set(
-        <String, dynamic>{
+        {
           'name': card.name,
           'meaning': card.meaning,
           'given': answers[i],

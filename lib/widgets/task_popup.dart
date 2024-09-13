@@ -30,7 +30,7 @@ class _TaskPopupState extends State<TaskPopup> {
     await taskDocs.docs
         .firstWhere((a) => a['name'] == widget.task.name && a['desc'] == widget.task.desc)
         .reference
-        .update(<Object, Object?>{
+        .update({
       'name': result.first,
       'desc': result.second,
     });
@@ -51,7 +51,7 @@ class _TaskPopupState extends State<TaskPopup> {
     await taskDocs.docs
         .firstWhere((a) => a['name'] == widget.task.name && a['desc'] == widget.task.desc)
         .reference
-        .update(<Object, Object?>{'color': color.value});
+        .update({'color': color.value});
   }
 
   void delete() {
