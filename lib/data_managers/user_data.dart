@@ -13,7 +13,7 @@ Color _accentColor = Colors.blue;
 late void Function(VoidCallback) updateTheme;
 
 int calculateStreak() {
-  if ((dailyStudied[getNowString()] ?? 0) < _dailyGoal) {
+  if ((dailyStudied[getTodayString()] ?? 0) < _dailyGoal) {
     return 0;
   }
 
@@ -48,8 +48,10 @@ int get maxStreak {
   return highest;
 }
 
+//Called whenever a card is flipped. Increments the daily value.
+//Returns whether the goal is reached.
 bool study() {
-  final formatted = getNowString();
+  final formatted = getTodayString();
   if (!dailyStudied.containsKey(formatted)) {
     dailyStudied[formatted] = 1;
   } else {
@@ -59,6 +61,7 @@ bool study() {
   return ((dailyStudied[formatted] ?? 0) == _dailyGoal);
 }
 
+//Returns the last week of daily cards studied.
 List<int> getLastWeek() {
   final strs = <String>[];
   for (var i = 0; i < 7; i++) {
@@ -73,7 +76,7 @@ List<int> getLastWeek() {
   return res;
 }
 
-double getAverage() {
+double getWeeklyAverage() {
   var sum = 0;
   for (final i in getLastWeek()) {
     sum += i;
@@ -84,6 +87,6 @@ double getAverage() {
 
 String format(DateTime date) => DateFormat.yMd().format(date);
 
-int getTodayStudied() => dailyStudied[getNowString()] ?? 0;
+int studiedTodayCount() => dailyStudied[getTodayString()] ?? 0;
 
-String getNowString() => format(DateTime.now());
+String getTodayString() => format(DateTime.now());

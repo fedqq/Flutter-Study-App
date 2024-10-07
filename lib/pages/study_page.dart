@@ -6,14 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/data_managers/user_data.dart' as user_data;
 import 'package:studyappcs/states/flashcard.dart';
-import 'package:studyappcs/states/topic.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
 import 'package:studyappcs/utils/utils.dart';
 
 class StudyPage extends StatefulWidget {
-  const StudyPage({super.key, required this.cards, required this.topic});
+  const StudyPage({super.key, required this.cards});
   final List<FlashCard> cards;
-  final Topic topic;
 
   @override
   State<StudyPage> createState() => _StudyPageState();
@@ -137,7 +135,7 @@ class _StudyPageState extends State<StudyPage> {
             duration: Durations.short4,
             tween: Tween(
               begin: 0,
-              end: (user_data.dailyStudied[user_data.getNowString()] ?? 0) /
+              end: (user_data.dailyStudied[user_data.getTodayString()] ?? 0) /
                   ((user_data.dailyGoal == 0) ? 20 : user_data.dailyGoal),
             ),
             builder: (_, value, ___) => LinearProgressIndicator(

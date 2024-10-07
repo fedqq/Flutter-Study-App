@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 import 'package:intl/intl.dart';
 import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
 import 'package:studyappcs/data_managers/tests_manager.dart' as tests_manager;
@@ -47,7 +48,7 @@ class _TestPageState extends State<TestPage> {
 
     var i = 0;
     for (final card in widget.cards) {
-      if (answers[i] == card.meaning) {
+      if (ratio(answers[i], card.meaning) > 80) {
         test.scored[card] = true;
       }
       i++;
@@ -126,7 +127,7 @@ class _TestPageState extends State<TestPage> {
       appBar: AppBar(title: Text('Test on ${widget.testArea}'), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
+        child: ListView(
           children: [
             ...List<TestInput>.generate(
               widget.cards.length,

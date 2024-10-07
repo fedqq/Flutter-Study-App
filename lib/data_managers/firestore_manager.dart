@@ -10,6 +10,8 @@ import 'package:studyappcs/states/test.dart';
 import 'package:studyappcs/states/topic.dart';
 import 'package:studyappcs/utils/utils.dart';
 
+//Private function for returning the user document reference.
+//Only used in this file.
 DocumentReference<StrMap> get _user {
   final user = FirebaseAuth.instance.currentUser;
   final db = FirebaseFirestore.instance;
@@ -18,30 +20,35 @@ DocumentReference<StrMap> get _user {
   return currentUser;
 }
 
+//Collections for different objects used. Used for making new docs.
 Collection get subjectCollection => _user.collection('subjects');
 Collection get cardCollection => _user.collection('cards');
 Collection get taskCollection => _user.collection('tasks');
 Collection get testCollection => _user.collection('tests');
 
+//List of documents for different objects. Used for updating and getting objects.
 SnapShotFuture get subjectDocs async => subjectCollection.get();
 SnapShotFuture get cardDocs async => cardCollection.get();
 SnapShotFuture get taskDocs async => taskCollection.get();
 SnapShotFuture get testDocs async => testCollection.get();
 
+//Stores all the data during program runtime.
 List<Subject> subjectsList = <Subject>[];
 List<Task> tasksList = <Task>[];
 List<Task> compTasksList = <Task>[];
 
+//Private function to set a user preference.
 void _setUserPref(StrMap v) => _user.update(v);
 
+//These are used by the
 set goal(int goal) => _setUserPref({'goal': goal});
 set username(String name) => _setUserPref({'username': name});
 set color(int color) => _setUserPref({'color': color});
-// ignore: avoid_positional_boolean_parameters
 set lightness(bool l) => _setUserPref({'lightness': l});
 set streaks(StrMap s) => _user.update({'streaks': s});
 set studied(StrMap s) => _user.update({'studied': s});
 
+//These functions are used for accessing specific cards or tests based on parameters. 
 Future<List<DocSnapshot>> cardsFromSubject(String s) async =>
     (await cardCollection.where('subject', isEqualTo: s).get()).docs;
 
@@ -55,6 +62,18 @@ DocSnapshotFuture cardNamed(String n) async => (await cardCollection.where('name
 
 DocSnapshotFuture subjectNamed(String n) async =>
     (await subjectCollection.where('name', isEqualTo: n).get()).docs.first;
+
+Future<void> loadData() async {
+  final subjects = <Subject>[];
+
+  await _loadPrefs();
+  await _loadSubjects(subjects);
+  await _loadCards(subjects);
+  await _loadTasks();
+  await _loadTests();
+
+  subjectsList = subjects;
+}
 
 Future<void> _loadPrefs() async {
   final prefs = (await _user.get()).data();
@@ -76,18 +95,6 @@ Future<void> _loadPrefs() async {
   user_data.dailyStreak = streaks;
   user_data.dailyStudied = studied;
   tests_manager.id = lastTestID;
-}
-
-Future<void> loadData() async {
-  final subjects = <Subject>[];
-
-  await _loadPrefs();
-  await _loadSubjects(subjects);
-  await _loadCards(subjects);
-  await _loadTasks();
-  await _loadTests();
-
-  subjectsList = subjects;
 }
 
 Future<void> _loadTests() async {

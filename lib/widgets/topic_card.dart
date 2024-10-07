@@ -58,10 +58,7 @@ class _TopicCardState extends State<TopicCard> {
               child: child,
             );
           },
-          pageBuilder: (_, __, ___) => StudyPage(
-            cards: topic.cards,
-            topic: topic,
-          ),
+          pageBuilder: (_, __, ___) => StudyPage(cards: topic.cards),
         ),
       ).then(
         (_) => setState(() {}),

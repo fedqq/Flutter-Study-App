@@ -20,6 +20,7 @@ class _AllTestsPageState extends State<AllTestsPage> with SingleTickerProviderSt
     super.initState();
   }
 
+  //Open the results page of the test found at index. 
   void openTestPage(BuildContext context, int index) => Navigator.push(
         context,
         MaterialPageRoute(

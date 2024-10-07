@@ -84,7 +84,7 @@ class _StudiedChartState extends State<StudiedChart> {
             ),
           ),
           LineChartBarData(
-            spots: <FlSpot>[FlSpot(0, user_data.getAverage()), FlSpot(6, user_data.getAverage())],
+            spots: <FlSpot>[FlSpot(0, user_data.getWeeklyAverage()), FlSpot(6, user_data.getWeeklyAverage())],
             color: Colors.grey,
             dashArray: <int>[10],
             dotData: const FlDotData(show: false),

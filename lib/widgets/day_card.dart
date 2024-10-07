@@ -61,9 +61,11 @@ class _DayCardState extends State<DayCard> {
                     context: context,
                     builder: (_) => TaskPopup(
                       task: widget.tasks[index],
-                      deleteCallback: (task) => setState(() => widget.removeCallback(task)),
+                      deleteCallback: (task) {
+                        widget.removeCallback(task);
+                      },
                     ),
-                  ).then((_) => setState(() {})),
+                  ),
                 ),
                 if (!widget.tasks[index].completed)
                   IconButton(

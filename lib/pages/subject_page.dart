@@ -26,7 +26,9 @@ class SubjectPage extends StatefulWidget {
 
 class _SubjectPageState extends State<SubjectPage> {
   Future<void> newTopic() async {
-    final topicName = await inputDialog(context, 'New Topic Name', Input(name: 'Name'));
+    bool validate(String name) => !widget.subject.topics.map((e) => e.name).contains(name);
+
+    final topicName = await inputDialog(context, 'New Topic Name', Input(name: 'Name', validate: validate));
 
     if (topicName == '') {
       return;

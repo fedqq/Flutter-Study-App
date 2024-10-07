@@ -2,7 +2,6 @@
 import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
-import 'package:studyappcs/states/flashcard.dart';
 import 'package:studyappcs/states/topic.dart';
 
 class Subject {
@@ -25,9 +24,10 @@ class Subject {
     testScores.add(score);
   }
 
-  // ignore: avoid_types_on_closure_parameters
-  int _foldLearned(int num, Topic topic) => num + topic.cards.where((FlashCard c) => c.learned).length;
+  //Sums the amoutn of learned cards from each topic using a fold
+  int _foldLearned(int num, Topic topic) => num + topic.cards.where((c) => c.learned).length;
 
+  //Sums the amount of cards in each topic. 
   int _fold(int num, Topic topic) => num + topic.cards.length;
 
   int get learned => topics.fold(0, _foldLearned);

@@ -154,7 +154,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
               child: Text(
-                'Today you have studied ${user_data.getTodayStudied()} cards out of ${user_data.dailyGoal}',
+                'Today you have studied ${user_data.studiedTodayCount()} cards out of ${user_data.dailyGoal}',
                 style: Theme.of(context).textTheme.bodyLarge,
                 textAlign: TextAlign.center,
               ),

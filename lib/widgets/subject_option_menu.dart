@@ -12,12 +12,14 @@ class SubjectOptionMenu extends StatelessWidget {
     required this.editInfo,
     required this.animation,
     required this.index,
+    required this.studyCards,
   });
   final Function() editSubject;
   final Function() editColor;
   final Function() deleteSubject;
   final Function() testSubject;
   final Function() editInfo;
+  final Function() studyCards;
   final int index;
   final Animation<double> animation;
 
@@ -54,7 +56,7 @@ class SubjectOptionMenu extends StatelessWidget {
                     pIconButton(icon: const Icon(Icons.edit_rounded), onPressed: editSubject, label: 'Rename'),
                     pIconButton(icon: const Icon(Icons.question_mark_rounded), onPressed: testSubject, label: 'Test'),
                     pIconButton(icon: const Icon(Icons.edit_location_alt_rounded), onPressed: editInfo, label: 'Info'),
-                    pIconButton(icon: const Icon(Icons.school_rounded), onPressed: editInfo, label: 'Study'),
+                    pIconButton(icon: const Icon(Icons.school_rounded), onPressed: studyCards, label: 'Study'),
                   ].map((a) => ScaleTransition(scale: animation, child: a)).toList(),
                 ),
               ),

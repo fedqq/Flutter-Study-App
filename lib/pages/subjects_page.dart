@@ -14,7 +14,6 @@ import 'package:studyappcs/pages/test_page.dart';
 import 'package:studyappcs/states/flashcard.dart';
 import 'package:studyappcs/states/subject.dart';
 import 'package:studyappcs/states/test.dart';
-import 'package:studyappcs/states/topic.dart';
 import 'package:studyappcs/utils/expandable_fab.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
 import 'package:studyappcs/utils/utils.dart';
@@ -204,6 +203,16 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     await closeMenus();
   }
 
+  Future<void> studyCards() async {
+    final cards = <FlashCard>[];
+    final subject = widget.subjects[currentFocused];
+    for (final topic in subject.topics) {
+      topic.cards.forEach(cards.add);
+    }
+    await closeMenus();
+    await Navigator.push(context, MaterialPageRoute(builder: (context) => StudyPage(cards: cards)));
+  }
+
   List<String> getSubjectNames() =>
       List<String>.generate(widget.subjects.length, (index) => widget.subjects[index].name);
 
@@ -243,7 +252,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     await closeMenus();
   }
 
-  Future<void> editSubjectInfo() async {
+  Future<void> editClassroomInfo() async {
     final res = await doubleInputDialog(
       context,
       'Choose teacher and classroom',
@@ -309,7 +318,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
 
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => StudyPage(cards: cards, topic: Topic('All Subjects'))),
+      MaterialPageRoute(builder: (_) => StudyPage(cards: cards)),
     );
   }
 
@@ -375,7 +384,8 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
         testSubject: testSubject,
         animation: blurAnimation,
         index: currentFocused,
-        editInfo: editSubjectInfo,
+        editInfo: editClassroomInfo,
+        studyCards: studyCards,
       );
 
   ImageFilter calculateBlur() {
