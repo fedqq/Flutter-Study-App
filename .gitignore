@@ -41,3 +41,16 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+.VSCodeCounter/2024-10-20_22-57-39/details.md
+.VSCodeCounter/2024-10-20_22-57-39/diff-details.md
+.VSCodeCounter/2024-10-20_22-57-39/diff.csv
+.VSCodeCounter/2024-10-20_22-57-39/diff.md
+.VSCodeCounter/2024-10-20_22-57-39/diff.txt
+.VSCodeCounter/2024-10-20_22-57-39/results.csv
+.VSCodeCounter/2024-10-20_22-57-39/results.json
+.VSCodeCounter/2024-10-20_22-57-39/results.md
+.VSCodeCounter/2024-10-20_22-57-39/results.txt
+code_uml
+out/uml/csia.png
+out/uml/uml.png
+out/uml/csia.svg

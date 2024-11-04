@@ -34,20 +34,8 @@ class _ResultCardState extends State<ResultCard> {
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Stack(
+        child: Column(
           children: [
-            if ((!correct) && widget.editable)
-              Center(
-                child: FilledButton.tonal(
-                  onPressed: () => setState(
-                    () {
-                      widget.markCorrect();
-                      correct = true;
-                    },
-                  ),
-                  child: const Text('Override'),
-                ),
-              ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -76,6 +64,16 @@ class _ResultCardState extends State<ResultCard> {
                 ),
               ],
             ),
+            if ((!correct) && widget.editable)
+              FilledButton.tonal(
+                onPressed: () => setState(
+                  () {
+                    widget.markCorrect();
+                    correct = true;
+                  },
+                ),
+                child: const Text('Override'),
+              ),
           ],
         ),
       ),

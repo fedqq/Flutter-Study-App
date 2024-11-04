@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 import 'package:intl/intl.dart';
@@ -25,6 +28,9 @@ class _TestPageState extends State<TestPage> {
 
   @override
   void initState() {
+    var cards = List.from(widget.cards)..shuffle();
+    cards = cards.sublist(0, min(cards.length, 15));
+
     test = Test(
       {for (final TestCard card in widget.cards) card: false},
       DateFormat.yMd().format(DateTime.now()),
@@ -40,7 +46,7 @@ class _TestPageState extends State<TestPage> {
     if (answers.where((a) => a == '').isNotEmpty) {
       if (!await confirmDialog(
         context,
-        title: 'Some answers are empty. ',
+        title: 'Some answers are empty',
       )) {
         return;
       }
@@ -56,12 +62,14 @@ class _TestPageState extends State<TestPage> {
 
     widget.subject?.addScore(test.percentage);
 
-    await Navigator.pushReplacement(
-      // ignore: use_build_context_synchronously
-      context,
-      // ignore: always_specify_types
-      MaterialPageRoute(
-        builder: (_) => ResultsPage(test: test..answers = answers),
+    unawaited(
+      Navigator.pushReplacement(
+        // ignore: use_build_context_synchronously
+        context,
+        // ignore: always_specify_types
+        MaterialPageRoute(
+          builder: (_) => ResultsPage(test: test..answers = answers),
+        ),
       ),
     );
     tests_manager.addTest(test..answers = answers);
@@ -71,7 +79,7 @@ class _TestPageState extends State<TestPage> {
     await doc.set({
       'area': test.area,
       'date': test.date,
-      'id': tests_manager.nextID,
+      'id': test.id,
     });
     final collection = doc.collection('testcards');
     i = 0;
@@ -80,7 +88,7 @@ class _TestPageState extends State<TestPage> {
         {
           'name': card.name,
           'meaning': card.meaning,
-          'given': answers[i],
+          'given': test.scored[card] ?? false ? card.meaning : answers[i],
           'origin': card.origin,
         },
       );
@@ -150,7 +158,7 @@ class _TestPageState extends State<TestPage> {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(8),
-                    child: FilledButton(onPressed: submitAnswers, child: const Text('Submit Answers')),
+                    child: FilledButton(onPressed: submitAnswers, child: const Text('Submit')),
                   ),
                 ),
               ],

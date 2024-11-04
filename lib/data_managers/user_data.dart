@@ -51,14 +51,15 @@ int get maxStreak {
 //Called whenever a card is flipped. Increments the daily value.
 //Returns whether the goal is reached.
 bool study() {
-  final formatted = getTodayString();
+  final formatted = format(DateTime.now());
   if (!dailyStudied.containsKey(formatted)) {
     dailyStudied[formatted] = 1;
   } else {
     dailyStudied[formatted] = dailyStudied[formatted]! + 1;
   }
-
-  return ((dailyStudied[formatted] ?? 0) == _dailyGoal);
+  final reached = ((dailyStudied[formatted] ?? 0) == _dailyGoal);
+  dailyStreak[format(DateTime.now())] = calculateStreak();
+  return reached;
 }
 
 //Returns the last week of daily cards studied.

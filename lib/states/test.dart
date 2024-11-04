@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TestCard {
@@ -17,7 +19,10 @@ class Test {
   List<String> answers;
   final int id;
 
-  int get percentage => 100 * correct ~/ totalAmount;
+  int get percentage {
+    log(scored.values.toString());
+    return 100 * correct ~/ totalAmount;
+  }
 
   int get correct => scored.values.where((element) => element).length;
 

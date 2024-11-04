@@ -39,12 +39,9 @@ class _SubjectCardState extends State<SubjectCard> {
               child: Center(
                 child: Column(
                   children: [
-                    Hero(
-                      tag: subject.name,
-                      child: Material(
-                        type: MaterialType.transparency,
-                        child: Text(widget.subject.name, style: Theme.of(context).textTheme.headlineMedium),
-                      ),
+                    Material(
+                      type: MaterialType.transparency,
+                      child: Text(widget.subject.name, style: Theme.of(context).textTheme.headlineMedium),
                     ),
                     if (!(teacher == '' && classroom == '')) ...[
                       const SizedBox(height: 10),

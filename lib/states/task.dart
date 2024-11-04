@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-enum TaskType { homework, test, quiz, coursework, personal }
-
 class Task {
   Task(this.name, this.dueDate, this.color, this.desc, {required this.completed});
   late String name;

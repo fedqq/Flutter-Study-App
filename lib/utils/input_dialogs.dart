@@ -88,15 +88,10 @@ class _DoubleInputDialogState extends State<DoubleInputDialog> {
                   final validFirst = validateInput(first);
                   final validSecond = validateInput(second);
                   if (!(validFirst && validSecond)) {
-                    simpleSnackBar(
-                      context,
-                      'Invalid ${!validFirst ? first.name : second.name}. Please remove any special characters and do not leave it empty. Make sure that any name inputted does not already exist',
-                    );
-
-                    return;
+                    simpleSnackBar(context, 'Invalid Input');
+                  } else {
+                    Navigator.of(context).pop(DialogResult(first.value ?? '', second.value ?? ''));
                   }
-                  Navigator.of(context)
-                      .pop(DialogResult(first.value ?? '', second.value ?? ''));
                 },
               ),
             ],
@@ -126,18 +121,20 @@ class Input {
   static Input notExists = Input(exists: false);
 }
 
-Future<bool> confirmDialog(BuildContext context, {required String title}) async => await showDialog(
+Future<bool> confirmDialog(BuildContext context, {required String title}) async =>
+    await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(title),
         content: const Text('Are you sure you would like to continue?'),
         actionsAlignment: MainAxisAlignment.spaceBetween,
         actions: [
-          FilledButton.tonal(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Confirm')),
+          FilledButton.tonal(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Confirm')),
         ],
       ),
-    );
+    ) ??
+    false;
 
 class DialogResult {
   DialogResult(this.first, this.second);

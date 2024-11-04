@@ -50,7 +50,7 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
     super.initState();
   }
 
-  //Returns a map of dates where tasks exist, and a list of tasks on that date. 
+  //Returns a map of dates where tasks exist, and a list of tasks on that date.
   Map<DateTime, List<Task>> getTasksMap({required bool late}) {
     final ret = <DateTime, List<Task>>{};
     for (final task in (late ? overdueTasks : timelyTasks)) {
@@ -64,7 +64,7 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
     return ret;
   }
 
-  //Same as the other function, but with completed tasks. 
+  //Same as the other function, but with completed tasks.
   Map<DateTime, List<Task>> getCompletedTasksMap() {
     final ret = <DateTime, List<Task>>{};
     for (final task in widget.completedTasks) {
@@ -78,7 +78,7 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
     return ret;
   }
 
-  //Check if a given task name already exists. 
+  //Check if a given task name already exists.
   bool checkExistingTaskName(String name) {
     for (final task in widget.tasks) {
       if (task.name == name) {
@@ -143,7 +143,7 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
     setState(() => widget.completedTasks.remove(task));
   }
 
-  //Return a sorted list of the dates used as keys in the parameter. 
+  //Return a sorted list of the dates used as keys in the parameter.
   List<DateTime> sortByDate(Map<DateTime, List<Task>> list) =>
       list.keys.toList()..sort((first, second) => first.compareTo(second));
 
@@ -156,8 +156,8 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
     });
   }
 
-  //Group the tasks based on whether they are late or on time. 
-  //Completed tasks are in another list. 
+  //Group the tasks based on whether they are late or on time.
+  //Completed tasks are in another list.
   void regroupTasks() {
     timelyTasks = <Task>[];
     overdueTasks = <Task>[];
@@ -171,13 +171,11 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
 
     dates = sortByDate(getTasksMap(late: false));
     lateDates = sortByDate(getTasksMap(late: true));
-    completedDates = completedTaskDates;
+    completedDates = sortByDate(getCompletedTasksMap());
   }
 
-  List<DateTime> get completedTaskDates => sortByDate(getCompletedTasksMap());
-
-  //Called when one of the list widgets is expanded. 
-  //The parameter determines which list was expanded. 
+  //Called when one of the list widgets is expanded.
+  //The parameter determines which list was expanded.
   void onExpanded({bool completed = false}) {
     if (completed) {
       if (completedDates.isNotEmpty) {
@@ -206,7 +204,7 @@ class _CalendarPageState extends State<CalendarPage> with SingleTickerProviderSt
         outlineColor: Colors.grey,
         title: 'Completed Tasks',
         controller: overdueController,
-        onExpanded: () => onExpanded(completed  : true),
+        onExpanded: () => onExpanded(completed: true),
       );
 
   @override

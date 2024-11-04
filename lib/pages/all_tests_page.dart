@@ -1,6 +1,8 @@
 // ignore_for_file: always_specify_types
 
 import 'package:flutter/material.dart';
+import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
+import 'package:studyappcs/data_managers/firestore_manager.dart';
 import 'package:studyappcs/data_managers/tests_manager.dart' as tests_manager;
 import 'package:studyappcs/pages/results_page.dart';
 import 'package:studyappcs/states/test.dart';
@@ -20,11 +22,11 @@ class _AllTestsPageState extends State<AllTestsPage> with SingleTickerProviderSt
     super.initState();
   }
 
-  //Open the results page of the test found at index. 
+  //Open the results page of the test found at index.
   void openTestPage(BuildContext context, int index) => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => ResultsPage(test: tests_manager.pastTests[index], editable: false),
+          builder: (_) => ResultsPage(test: pastTests[index], editable: false),
         ),
       );
 
@@ -71,7 +73,7 @@ class _AllTestsPageState extends State<AllTestsPage> with SingleTickerProviderSt
     return EdgeInsets.fromLTRB(8, top, 8, bottom);
   }
 
-  AppBar buildAppBar() => AppBar(title: Text('Past Tests (${tests_manager.pastTests.length})'), centerTitle: true);
+  AppBar buildAppBar() => AppBar(title: Text('Past Tests (${firestore_manager.pastTests.length})'), centerTitle: true);
 
   Widget buildTestWidget(Test test, int index) => Card(
         elevation: 1,
@@ -82,10 +84,7 @@ class _AllTestsPageState extends State<AllTestsPage> with SingleTickerProviderSt
           child: Wrap(
             alignment: WrapAlignment.spaceBetween,
             children: [
-              Text(
-                test.area,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
+              Text(test.area, style: Theme.of(context).textTheme.titleMedium),
               Text(test.date),
             ],
           ),
@@ -99,7 +98,7 @@ class _AllTestsPageState extends State<AllTestsPage> with SingleTickerProviderSt
       itemCount: tests.length,
       itemBuilder: (context, index) => InkWell(
         onTap: () => openTestPage(context, index),
-        child: buildTestWidget(tests[index], index),
+        child: buildTestWidget(tests[tests.length - index - 1], index),
       ),
     );
   }

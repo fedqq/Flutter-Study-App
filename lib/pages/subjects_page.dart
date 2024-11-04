@@ -1,12 +1,11 @@
 // ignore_for_file: use_build_context_synchronously, always_specify_types
 
 // ignore: unused_import
-import 'dart:developer' as developer;
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
-import 'package:studyappcs/data_managers/tests_manager.dart' as tests_manager;
 import 'package:studyappcs/pages/all_tests_page.dart';
 import 'package:studyappcs/pages/study_page.dart';
 import 'package:studyappcs/pages/subject_page.dart';
@@ -145,9 +144,9 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
       return;
     }
 
-    final area = widget.subjects[currentFocused].asArea.trim();
+    final area = widget.subjects[currentFocused].name.trim();
     setState(() => widget.subjects.removeAt(currentFocused));
-    tests_manager.pastTests.removeWhere((element) => element.area.trim() == area);
+    firestore_manager.pastTests.removeWhere((element) => element.area.contains(area));
 
     final subject = await firestore_manager.subjectNamed(area);
     await subject.reference.delete();
@@ -206,6 +205,9 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
   Future<void> studyCards() async {
     final cards = <FlashCard>[];
     final subject = widget.subjects[currentFocused];
+    if (subject.topics.isEmpty) {
+      return;
+    }
     for (final topic in subject.topics) {
       topic.cards.forEach(cards.add);
     }
@@ -231,7 +233,11 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
       return;
     }
 
-    for (final test in tests_manager.pastTests) {
+    unawaited(closeMenus());
+
+    setState(() => widget.subjects[currentFocused].name = newName);
+
+    for (final test in firestore_manager.pastTests) {
       test.area = test.area.replaceAll(widget.subjects[currentFocused].name, newName);
     }
 
@@ -247,9 +253,6 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
     for (final card in docs) {
       await card.reference.update({'subject': newName});
     }
-
-    setState(() => widget.subjects[currentFocused].name = newName);
-    await closeMenus();
   }
 
   Future<void> editClassroomInfo() async {
@@ -362,7 +365,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.history_rounded),
-          onPressed: tests_manager.pastTests.isNotEmpty ? showAllTests : null,
+          onPressed: firestore_manager.pastTests.isNotEmpty ? showAllTests : null,
         ),
         title: Text(
           widget.subjects.length == 1 ? 'Study 1 Subject' : 'Study ${widget.subjects.length} Subjects',
@@ -426,7 +429,7 @@ class _SubjectsPageState extends State<SubjectsPage> with TickerProviderStateMix
                   },
                   onLongPress: () {
                     setState(() => currentFocused = index);
-                    Future<void>.delayed(Durations.short1, () => blurController.forward(from: 0));
+                    Future.delayed(Durations.short1, () => blurController.forward(from: 0));
                     closeMenus();
                   },
                   child: AnimatedBuilder(

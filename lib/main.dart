@@ -84,6 +84,7 @@ class _NavigationPageState extends State<NavigationPage> with WidgetsBindingObse
     if (!widget.firstLogin) {
       return;
     }
+    firestore_manager.saveData();
     if (widget.username != null) {
       user_data.userName = widget.username ?? '';
       user_data.dailyGoal = 20;

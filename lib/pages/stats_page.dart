@@ -1,3 +1,4 @@
+import 'dart:developer' as dev;
 import 'dart:math';
 
 import 'package:dynamic_color/dynamic_color.dart';
@@ -5,7 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:studyappcs/data_managers/firestore_manager.dart' as firestore_manager;
-import 'package:studyappcs/data_managers/tests_manager.dart' as tests_manager;
 import 'package:studyappcs/data_managers/user_data.dart' as user_data;
 import 'package:studyappcs/states/subject.dart';
 import 'package:studyappcs/utils/input_dialogs.dart';
@@ -111,17 +111,18 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
       return DateTime(int.parse(year), int.parse(month), int.parse(day));
     }
 
-    final pastTests = tests_manager.pastTests..sort((a, b) => fromString(a.date).compareTo(fromString(b.date)));
+    final pastTests = firestore_manager.pastTests..sort((a, b) => fromString(a.date).compareTo(fromString(b.date)));
     var sum = 0;
     pastTests.sublist(0, min(10, pastTests.length)).forEach((element) => sum += element.percentage);
-    return sum / 10;
+    return sum / min(10, pastTests.length);
   }
 
   double getAllScoresAverage() {
-    final tests = tests_manager.pastTests;
+    final tests = firestore_manager.pastTests;
     var total = 0;
     final length = tests.length;
     for (final element in tests) {
+      dev.log(element.percentage.toString());
       total += element.percentage;
     }
     return total / length;
@@ -218,7 +219,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
         child: Column(
           children: [
             buildText(
-              '''Last 10 average test scores: ${getRecentScoresAverage()}% (${getRecentScoresAverage() - getAllScoresAverage() >= 0 ? '+' : ''}${getRecentScoresAverage() - getAllScoresAverage()}%)''',
+              '''Last 10 average test scores: ${getRecentScoresAverage()}%''',
             ),
             buildText('Overall average scores: ${getAllScoresAverage()}%'),
           ],
@@ -272,7 +273,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
               buildTopTexts(),
               buildFirstRow(),
               buildChartCard(),
-              if (tests_manager.pastTests.isNotEmpty) buildTestsCard(),
+              if (firestore_manager.pastTests.isNotEmpty) buildTestsCard(),
               buildCardsCard(),
             ].map((a) => ScaleTransition(scale: animation, child: a)).toList(),
           ),
@@ -297,6 +298,7 @@ class _StatsPageState extends State<StatsPage> with SingleTickerProviderStateMix
           ),
           TextButton.icon(
             onPressed: () {
+              firestore_manager.saveData();
               FirebaseAuth.instance.signOut();
               SystemNavigator.pop();
             },

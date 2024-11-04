@@ -86,19 +86,16 @@ class _SubjectPageState extends State<SubjectPage> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Hero(
-              tag: widget.subject.name,
-              child: Material(
-                type: MaterialType.transparency,
-                child: Text(widget.subject.name, style: Theme.of(context).textTheme.headlineSmall),
-              ),
+            Material(
+              type: MaterialType.transparency,
+              child: Text(widget.subject.name, style: Theme.of(context).textTheme.headlineSmall),
             ),
             Text(' Topics (${widget.subject.topics.length})', style: Theme.of(context).textTheme.headlineSmall),
           ],
         ),
         centerTitle: true,
         actions: [
-          if (tests_manager.hasScore(widget.subject.asArea))
+          if (tests_manager.hasScore(widget.subject.name))
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: IconButton.filledTonal(
